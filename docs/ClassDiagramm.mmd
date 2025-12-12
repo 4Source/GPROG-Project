@@ -1,0 +1,133 @@
+classDiagram
+    GameObject <|-- Entity
+    GameObject <|-- UIObject
+
+    Component <|-- MovementComponent
+    Component <|-- PhysicsComponent
+    Component <|-- VisualComponent
+
+    Creature <|-- Avatar
+    Creature <|-- ZombieAI
+
+    Entity <|-- Creature
+    Entity <|-- Gunshot
+    Entity <|-- Item
+    Entity <|-- Obstacle
+    Entity o-- Component
+
+    HitBox <|-- CircleHitBox
+    HitBox <|-- RectangleHitBox
+
+    Item <|-- Grenade
+
+    MovementComponent <|-- AIComponent
+    MovementComponent <|-- PlayerInputComponent
+    MovementComponent <|-- StaticMovementComponent
+
+    Obstacle <|-- Tree
+
+    PhysicsComponent <|-- DynamicPhysicsComponent 
+    PhysicsComponent <|-- StaticPhysicsComponent  
+    PhysicsComponent o-- HitBox 
+
+    TextObject <|-- GrenadeCounterText
+    TextObject <|-- HelpText
+    TextObject <|-- ZombieCounterText
+
+    UIObject <|-- TextObject
+    
+    VisualComponent <|-- CircleComponent
+    VisualComponent <|-- RectangleComponent
+    VisualComponent <|-- SpriteComponent
+
+    class Creature {
+        
+    }
+    <<Abstract>> Creature
+
+    class Entity {
+        # components : Component [*]
+        type()* : int 
+    }
+    <<Abstract>> Entity
+
+
+    class GameObject {
+        # posX : double
+        # posZ : double
+        world : World$
+        
+        + update(deltaTime : double) : void
+        + draw() : void
+    }
+    <<Abstract>> GameObject
+
+
+    class Item {
+
+    }
+    <<Abstract>> Item
+
+
+    class Obstacle {
+        
+    }
+    <<Abstract>> Obstacle
+
+
+    class UIObject {
+        
+    }
+    <<Abstract>> UIObject
+
+
+
+    class HitBox {
+
+    }
+    <<Abstract>> HitBox
+
+    class CircleHitBox {
+        # radius : int 
+    }
+
+    class RectangleHitBox {
+        # width : int 
+        # height : int 
+    }
+
+
+    class Component {
+        + update(deltaTime : double) : void
+    }
+
+    class VisualComponent {
+        graphicsSystem : GraphicsSystem$
+        + draw() : void 
+    }
+
+    class MovementComponent {
+        # alpha : double
+        # speed : double
+    }
+    <<Abstract>> MovementComponent
+
+    class PhysicsComponent {
+        # hitBox : HitBox
+        physicsSystem : PhysicsSystem$
+    }
+
+    class CircleComponent {
+        # radius : int 
+        # color : Color
+    }
+
+    class RectangleComponent {
+        # width : int 
+        # height : int 
+        # color : Color
+    }
+
+    class PlayerInputComponent {
+        inputSystem : InputSystem$
+    }
