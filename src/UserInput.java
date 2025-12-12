@@ -1,7 +1,8 @@
 
 // (c) Thorsten Hasbargen
 
-final class A_UserInput {
+// TODO: Does this make sense at all ?
+final class UserInput {
 	// everything a user can press on keyboard or mouse
 	int mousePressedX, mousePressedY, mouseMovedX, mouseMovedY, mouseButton;
 
@@ -11,12 +12,12 @@ final class A_UserInput {
 	boolean isMouseEvent, isKeyEvent, isMousePressed;
 
 	// ... is returned as a data set
-	A_UserInput() {
+	UserInput() {
 		this.clear();
 	}
 
 	final void clear() {
-		isMouseEvent = false;
-		isKeyEvent = false;
+		this.isMouseEvent = false;
+		this.isKeyEvent = false;
 	}
 }

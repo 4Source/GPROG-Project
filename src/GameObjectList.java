@@ -3,6 +3,6 @@
 
 import java.util.ArrayList;
 
-final class A_GameObjectList extends ArrayList<A_GameObject> {
+final class GameObjectList extends ArrayList<GameObject> {
 	private static final long serialVersionUID = 1L;
 }

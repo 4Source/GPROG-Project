@@ -1,7 +1,7 @@
 
 // (c) Thorsten Hasbargen
 
-final class A_Const {
+final class Constants {
 	// size of the world
 	static final int WORLD_WIDTH = 5000;
 	static final int WORLD_HEIGHT = 4000;
@@ -15,6 +15,7 @@ final class A_Const {
 	static final double SPAWN_GRENADE = 10.0;
 	static final double LIFE_GRENADE = 15.0;
 
+	// TODO: Use enum instead
 	static final int TYPE_AVATAR = 1;
 	static final int TYPE_TEXT = 2;
 	static final int TYPE_TREE = 3;
