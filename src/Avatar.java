@@ -2,8 +2,9 @@
 // (c) Thorsten Hasbargen
 
 import java.awt.Color;
+import java.util.ArrayList;
 
-class Avatar extends GameObject {
+class Avatar extends Creature {
 
 	/**
 	 * Spawns an avatar
@@ -21,24 +22,25 @@ class Avatar extends GameObject {
 		super.update(deltaTime);
 
 		// calculate all collisions with other Objects
-		GameObjectList collisions = GameObject.world.getPhysicsSystem().getCollisions(this);
+		ArrayList<Entity> collisions = PhysicsSystem.getInstance().getCollisions(this);
 		for (int i = 0; i < collisions.size(); i++) {
-			GameObject obj = collisions.get(i);
+			Entity obj = collisions.get(i);
 
 			// if Object is a tree, move back one step
-			if (obj.type() == Constants.TYPE_TREE) {
+			if (obj.getType() == Constants.TYPE_TREE) {
 				this.moveBack();
 			}
 
 			// pick up Grenades
-			else if (obj.type() == Constants.TYPE_GRENADE) {
+			else if (obj.getType() == Constants.TYPE_GRENADE) {
 				((ZombieWorld) GameObject.world).addGrenade();
 				obj.isLiving = false;
 			}
 		}
 	}
 
-	public int type() {
+	@Override
+	public int getType() {
 		return Constants.TYPE_AVATAR;
 	}
 }

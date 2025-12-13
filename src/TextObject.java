@@ -1,36 +1,29 @@
+import java.awt.*;
 
-// (c) Thorsten Hasbargen
+public abstract class TextObject extends UIObject {
+    private Font font;
 
-import java.awt.Color;
+    /**
+     * @param posX The position in x direction
+     * @param posY The position in y direction
+     * @param color The color of the ui object
+     * @param font The font to use to print the text to the screen
+     */
+    public TextObject(double posX, double posY, Color color, Font font) {
+        super(posX, posY, color);
+        this.font = font;
+    }
 
-abstract class TextObject {
-	protected static World world;
+    public void draw() {
+        super.draw();
+        GraphicSystem.getInstance().graphics.setFont(this.font);
+        GraphicSystem.getInstance().graphics.drawString(this.toString(), (int) this.posX, (int) this.posY);
+    }
 
-	protected int posX, posY;
-	protected Color color;
-
-	/**
-	 * @param posX The position in x direction
-	 * @param posY The position in y direction
-	 * @param color The color of the game object
-	 */
-	public TextObject(int posX, int posY, Color color) {
-		this.posX = posX;
-		this.posY = posY;
-		this.color = color;
-	}
-
-	/**
-	 * @return Returns the text to display
-	 */
-	public abstract String toString();
-
-	/**
-	 * Set the world where the text objects are belonging to
-	 * 
-	 * @param world The world to which it should be set
-	 */
-	protected static void setWorld(World world) {
-		TextObject.world = world;
-	}
+    /**
+     * Returns the string which should be displayed on the screen
+     * 
+     * @return The string to display
+     */
+    public abstract String toString();
 }

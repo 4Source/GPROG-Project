@@ -2,8 +2,9 @@
 // (c) Thorsten Hasbargen
 
 import java.awt.Color;
+import java.util.ArrayList;
 
-class ZombieAI extends GameObject {
+class ZombieAI extends Creature {
 	private static final int HUNTING = 1;
 	private static final int STUCK = 2;
 	private static final int CLEARING = 3;
@@ -36,7 +37,7 @@ class ZombieAI extends GameObject {
 
 	public void update(double deltaTime) {
 		// if avatar is too far away: stop
-		double dist = GameObject.world.getPhysicsSystem().distance(this.posX, this.posY, GameObject.world.avatar.posX, GameObject.world.avatar.posY);
+		double dist = PhysicsSystem.distance(this.posX, this.posY, GameObject.world.avatar.posX, GameObject.world.avatar.posY);
 
 		if (dist > 800) {
 			this.isMoving = false;
@@ -53,11 +54,11 @@ class ZombieAI extends GameObject {
 			super.update(deltaTime);
 
 			// handle collisions of the zombie
-			GameObjectList collisions = GameObject.world.getPhysicsSystem().getCollisions(this);
+			ArrayList<Entity> collisions = PhysicsSystem.getInstance().getCollisions(this);
 			for (int i = 0; i < collisions.size(); i++) {
-				GameObject obj = collisions.get(i);
+				Entity obj = collisions.get(i);
 
-				int type = obj.type();
+				int type = obj.getType();
 
 				// if object is avatar, game over
 				if (type == Constants.TYPE_AVATAR) {
@@ -73,7 +74,7 @@ class ZombieAI extends GameObject {
 				}
 
 				// if Object is a tree, move back one step
-				if (obj.type() == Constants.TYPE_TREE) {
+				if (obj.getType() == Constants.TYPE_TREE) {
 					this.moveBack();
 					this.state = STUCK;
 					return;
@@ -105,7 +106,7 @@ class ZombieAI extends GameObject {
 			super.update(deltaTime);
 
 			// check if path was unblocked
-			GameObjectList collisions = GameObject.world.getPhysicsSystem().getCollisions(this);
+			ArrayList<Entity> collisions = PhysicsSystem.getInstance().getCollisions(this);
 			if (collisions.size() > 0) {
 				this.moveBack();
 
@@ -131,7 +132,8 @@ class ZombieAI extends GameObject {
 		}
 	}
 
-	public int type() {
+	@Override
+	public int getType() {
 		return Constants.TYPE_ZOMBIE;
 	}
 }

@@ -12,12 +12,9 @@ final class Game {
 		// Create a new world
 		this.world = new ZombieWorld();
 
-		this.world.setGraphicSystem(frame.getGraphicSystem());
-		this.world.setInputSystem(frame.getInputSystem());
+		PhysicsSystem.setWorld(world);
 
 		GameObject.setWorld(this.world);
-		TextObject.setWorld(this.world);
-		frame.getGraphicSystem().setWorld(this.world);
 
 		this.world.init();
 		this.world.run();

@@ -3,7 +3,7 @@
 
 import java.awt.Color;
 
-class Grenade extends GameObject {
+class Grenade extends Item {
 	double lifetime = Constants.LIFE_GRENADE;
 
 	/**
@@ -11,7 +11,7 @@ class Grenade extends GameObject {
 	 * @param posY The initial position in y of the grenade
 	 */
 	public Grenade(double posX, double posY) {
-		super(posX, posY, 0, 0, 15, Color.ORANGE);
+		super(posX, posY, 15, Color.ORANGE);
 	}
 
 	public void update(double deltaTime) {
@@ -22,7 +22,8 @@ class Grenade extends GameObject {
 		}
 	}
 
-	public int type() {
+	@Override
+	public int getType() {
 		return Constants.TYPE_GRENADE;
 	}
 }

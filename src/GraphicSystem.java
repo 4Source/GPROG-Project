@@ -1,35 +1,59 @@
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import javax.swing.JPanel;
 
-// (c) Thorsten Hasbargen
+public class GraphicSystem extends JPanel {
+    private static GraphicSystem instance;
 
-interface GraphicSystem {
-	/**
-	 * Clear the screen before drawing on it
-	 */
-	void clear();
+    // GraphicsSystem variables
+    private GraphicsConfiguration graphicsConf = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+    private BufferedImage imageBuffer;
+    public Graphics graphics;
 
-	/**
-	 * Draw a GameObject on the Screen
-	 * 
-	 * @param gameObject The game object to draw
-	 */
-	void draw(GameObject gameObject);
+    private GraphicSystem() {
+        // TODO: Make it depend on the monitor resolution
+        this.setSize(Constants.WORLDPART_WIDTH, Constants.WORLDPART_HEIGHT);
+        this.imageBuffer = this.graphicsConf.createCompatibleImage(this.getWidth(), this.getHeight());
+        this.graphics = this.imageBuffer.getGraphics();
 
-	/**
-	 * Draw a TextObject on the Screen
-	 * 
-	 * @param textObject The text object to draw
-	 */
-	void draw(TextObject textObject);
+        // initialize Listeners
+        this.addMouseListener(InputSystem.getInstance());
+        this.addMouseMotionListener(InputSystem.getInstance());
+        this.addKeyListener(InputSystem.getInstance());
+    }
 
-	/**
-	 * Draw the objects to screen
-	 */
-	void swapBuffers();
+    /**
+     * @return The instance of the singleton or newly created if first access.
+     */
+    public static synchronized GraphicSystem getInstance() {
+        if (instance == null) {
+            instance = new GraphicSystem();
+        }
 
-	/**
-	 * Set the world which should be drawn
-	 * 
-	 * @param world The world to which it should be set
-	 */
-	void setWorld(World world);
+        return instance;
+    }
+
+    /**
+     * Clear the screen before drawing on it
+     */
+    public void clear() {
+        this.graphics.setColor(Color.LIGHT_GRAY);
+        this.graphics.fillRect(0, 0, Constants.WORLDPART_WIDTH, Constants.WORLDPART_HEIGHT);
+    }
+
+    /**
+     * Draw a GameObject on the Screen
+     * 
+     * @param gameObject The game object to draw
+     */
+    public void draw(GameObject gameObject) {
+        gameObject.draw();
+    }
+
+    /**
+     * Draw the objects to screen
+     */
+    public void swapBuffers() {
+        this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);
+    }
 }

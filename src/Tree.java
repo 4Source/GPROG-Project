@@ -3,7 +3,7 @@
 
 import java.awt.Color;
 
-class Tree extends GameObject {
+class Tree extends Obstacle {
 
 	/**
 	 * @param posX The position in x of the tree
@@ -11,11 +11,15 @@ class Tree extends GameObject {
 	 * @param radius The size of the tree
 	 */
 	public Tree(double posX, double posY, int radius) {
-		super(posX, posY, 0, 0, radius, new Color(64, 160, 64));
-		this.isMoving = false;
+		super(posX, posY, radius, new Color(64, 160, 64));
 	}
 
-	public int type() {
+	@Override
+	public int getType() {
 		return Constants.TYPE_TREE;
+	}
+
+	@Override
+	public void update(double deltaTime) {
 	}
 }

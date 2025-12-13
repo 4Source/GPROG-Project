@@ -29,16 +29,22 @@ classDiagram
     PhysicsComponent <|-- DynamicPhysicsComponent 
     PhysicsComponent <|-- StaticPhysicsComponent  
     PhysicsComponent o-- HitBox 
+    PhysicsComponent -- PhysicsSystem
+
+    PlayerInputComponent -- InputSystem
 
     TextObject <|-- GrenadeCounterText
     TextObject <|-- HelpText
     TextObject <|-- ZombieCounterText
 
     UIObject <|-- TextObject
+    UIObject -- GraphicsSystem
+    UIObject -- InputSystem
     
     VisualComponent <|-- CircleComponent
     VisualComponent <|-- RectangleComponent
     VisualComponent <|-- SpriteComponent
+    VisualComponent -- GraphicsSystem
 
     class Creature {
         
@@ -102,7 +108,6 @@ classDiagram
     }
 
     class VisualComponent {
-        graphicsSystem : GraphicsSystem$
         + draw() : void 
     }
 
@@ -129,5 +134,26 @@ classDiagram
     }
 
     class PlayerInputComponent {
-        inputSystem : InputSystem$
+        
     }
+
+    class PhysicsSystem {
+        - instance : PhysicsSystem $
+        - PhysicsSystem()
+        + getInstance() : PhysicsSystem$
+    }
+    <<Singleton>> PhysicsSystem
+
+    class GraphicsSystem {
+        - instance : GraphicsSystem $
+        - GraphicsSystem()
+        + getInstance() : GraphicsSystem$
+    }
+    <<Singleton>> GraphicsSystem
+
+    class InputSystem {
+        - instance : InputSystem $
+        - InputSystem()
+        + getInstance() : InputSystem$
+    }
+    <<Singleton>> InputSystem

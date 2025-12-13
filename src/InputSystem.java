@@ -1,11 +1,74 @@
+import java.awt.event.*;
 
-// (c) Thorsten Hasbargen
+public class InputSystem implements KeyListener, MouseListener, MouseMotionListener {
+	private static InputSystem instance;
 
-interface InputSystem {
+	// UserInput variables
+	private UserInput userInput = new UserInput();
+
+	private InputSystem() {
+	}
+
+	/**
+	 * @return The instance of the singleton or newly created if first access.
+	 */
+	public static synchronized InputSystem getInstance() {
+		if (instance == null) {
+			instance = new InputSystem();
+		}
+
+		return instance;
+	}
+
+	public void mousePressed(MouseEvent event) {
+		// an input Event occurs
+		this.userInput.isMouseEvent = true;
+		this.userInput.mousePressedX = event.getX();
+		this.userInput.mousePressedY = event.getY();
+		this.userInput.mouseButton = event.getButton();
+		this.userInput.isMousePressed = true;
+	}
+
+	public void mouseReleased(MouseEvent event) {
+		this.userInput.isMousePressed = false;
+	}
+
+	public void mouseMoved(MouseEvent event) {
+		this.userInput.mouseMovedX = event.getX();
+		this.userInput.mouseMovedY = event.getY();
+	}
+
+	public void mouseDragged(MouseEvent event) {
+		this.userInput.mouseMovedX = event.getX();
+		this.userInput.mouseMovedY = event.getY();
+	}
+
+	public void keyPressed(KeyEvent event) {
+		this.userInput.isKeyEvent = true;
+		this.userInput.keyPressed = event.getKeyChar();
+	}
+
+	public void mouseEntered(MouseEvent event) {
+	}
+
+	public void mouseExited(MouseEvent event) {
+	}
+
+	public void mouseClicked(MouseEvent event) {
+	}
+
+	public void keyReleased(KeyEvent event) {
+	}
+
+	public void keyTyped(KeyEvent event) {
+	}
+
 	/**
 	 * Get the input of the user
 	 * 
 	 * @return The input which the user has made
 	 */
-	UserInput getUserInput();
+	public UserInput getUserInput() {
+		return this.userInput;
+	}
 }

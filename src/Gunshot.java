@@ -1,7 +1,17 @@
 
 import java.awt.Color;
+import java.util.ArrayList;
 
-class Gunshot extends GameObject {
+class Gunshot extends Entity {
+	protected double alpha = 0;
+	protected double speed = 0;
+
+	protected boolean isMoving = true;
+
+	protected double destX, destY;
+	protected boolean hasDestination = false;
+	protected double oldX, oldY;
+
 	private double lifetime = 1.2;
 
 	/**
@@ -11,12 +21,23 @@ class Gunshot extends GameObject {
 	 * @param destY The target direction in y of the gunshot
 	 */
 	public Gunshot(double posX, double posY, double destX, double destY) {
-		super(posX, posY, Math.atan2(destY - posY, destX - posX), 500, 4, Color.YELLOW);
+		super(posX, posY, 4, Color.YELLOW);
+		this.alpha = Math.atan2(destY - posY, destX - posX);
+		this.speed = 500;
 		this.isMoving = true;
 	}
 
+	/**
+	 * @param posX The initial position in x of the gunshot
+	 * @param posY The initial position in y of the gunshot
+	 * @param alpha The angle of rotation in radian
+	 * @param speed The speed how fast to move
+	 * @param lifetime The lifetime of the gunshot how long before the gunshot despawns
+	 */
 	public Gunshot(double posX, double posY, double alpha, double speed, double lifetime) {
-		super(posX, posY, alpha, speed, 4, Color.YELLOW);
+		super(posX, posY, 4, Color.YELLOW);
+		this.alpha = alpha;
+		this.speed = speed;
 		this.lifetime = lifetime;
 		this.isMoving = true;
 	}
@@ -29,11 +50,11 @@ class Gunshot extends GameObject {
 		}
 
 		// handle collisions of the zombie
-		GameObjectList collisions = GameObject.world.getPhysicsSystem().getCollisions(this);
+		ArrayList<Entity> collisions = PhysicsSystem.getInstance().getCollisions(this);
 		for (int i = 0; i < collisions.size(); i++) {
-			GameObject obj = collisions.get(i);
+			Entity obj = collisions.get(i);
 
-			int type = obj.type();
+			int type = obj.getType();
 
 			// tree: shot is deleted
 			if (type == Constants.TYPE_TREE) {
@@ -47,10 +68,32 @@ class Gunshot extends GameObject {
 			}
 		}
 
-		super.update(deltaTime);
+		if (!this.isMoving) {
+			return;
+		}
+
+		// move if object has a destination
+		if (this.hasDestination) {
+			// stop if destination is reached
+			double diffX = Math.abs(this.posX - this.destX);
+			double diffY = Math.abs(this.posY - this.destY);
+			if (diffX < 3 && diffY < 3) {
+				this.isMoving = false;
+				return;
+			}
+		}
+
+		// remember old position
+		this.oldX = this.posX;
+		this.oldY = this.posY;
+
+		// move one step
+		this.posX += Math.cos(this.alpha) * this.speed * deltaTime;
+		this.posY += Math.sin(this.alpha) * this.speed * deltaTime;
 	}
 
-	public final int type() {
+	@Override
+	public int getType() {
 		return Constants.TYPE_SHOT;
 	}
 }

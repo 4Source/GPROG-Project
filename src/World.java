@@ -4,9 +4,6 @@
 import java.util.ArrayList;
 
 abstract class World {
-	private GraphicSystem graphicSystem;
-	private PhysicsSystem physicsSystem;
-	private InputSystem inputSystem;
 	private UserInput userInput; // TODO: Why not local variable
 
 	// top left corner of the displayed pane of the world
@@ -20,13 +17,11 @@ abstract class World {
 	boolean gameOver = false;
 
 	// all objects in the game, including the Avatar
-	GameObjectList gameObjects = new GameObjectList();
-	GameObject avatar;
-	ArrayList<TextObject> textObjects = new ArrayList<TextObject>();
+	ArrayList<Entity> entities = new ArrayList<Entity>();
+	Avatar avatar;
+	ArrayList<UIObject> uiElements = new ArrayList<UIObject>();
 
 	World() {
-		// TODO: Move this to main which physicsSystem is used should not be hardcoded in world creation
-		this.physicsSystem = new CirclePhysicsSystem(this);
 	}
 
 	// TODO: Why is the main game loop inside world makes no sense should be in main
@@ -55,7 +50,7 @@ abstract class World {
 			lastTick = currentTick;
 
 			// process User Input
-			this.userInput = this.inputSystem.getUserInput();
+			this.userInput = InputSystem.getInstance().getUserInput();
 			processUserInput(this.userInput, millisDiff / 1000.0);
 			this.userInput.clear();
 
@@ -65,20 +60,20 @@ abstract class World {
 			}
 
 			// move all Objects, maybe collide them etc...
-			for (int i = 0; i < this.gameObjects.size(); i++) {
-				GameObject obj = this.gameObjects.get(i);
-				if (obj.isLiving) {
+			for (int i = 0; i < this.entities.size(); i++) {
+				GameObject obj = this.entities.get(i);
+				if (obj instanceof Entity && ((Entity) obj).isLiving) {
 					obj.update(millisDiff / 1000.0);
 				}
 			}
 
 			// TODO: Iterator ?
 			// delete all Objects which are not living anymore
-			int gameSize = this.gameObjects.size();
+			int gameSize = this.entities.size();
 			int num = 0;
 			while (num < gameSize) {
-				if (this.gameObjects.get(num).isLiving == false) {
-					this.gameObjects.remove(num);
+				if (this.entities.get(num).isLiving == false) {
+					this.entities.remove(num);
 					gameSize--;
 				} else {
 					num++;
@@ -89,18 +84,18 @@ abstract class World {
 			this.adjustWorldPart();
 
 			// draw all Objects
-			this.graphicSystem.clear();
+			GraphicSystem.getInstance().clear();
 			for (int i = 0; i < gameSize; i++) {
-				this.graphicSystem.draw(this.gameObjects.get(i));
+				GraphicSystem.getInstance().draw(this.entities.get(i));
 			}
 
 			// draw all TextObjects
-			for (int i = 0; i < this.textObjects.size(); i++) {
-				this.graphicSystem.draw(this.textObjects.get(i));
+			for (int i = 0; i < this.uiElements.size(); i++) {
+				GraphicSystem.getInstance().draw(this.uiElements.get(i));
 			}
 
 			// redraw everything
-			this.graphicSystem.swapBuffers();
+			GraphicSystem.getInstance().swapBuffers();
 
 			// create new objects if needed
 			this.createNewObjects(millisDiff / 1000.0);
@@ -145,18 +140,6 @@ abstract class World {
 			}
 		}
 
-	}
-
-	protected void setGraphicSystem(GraphicSystem graphicSystem) {
-		this.graphicSystem = graphicSystem;
-	}
-
-	protected void setInputSystem(InputSystem inputSystem) {
-		this.inputSystem = inputSystem;
-	}
-
-	protected PhysicsSystem getPhysicsSystem() {
-		return this.physicsSystem;
 	}
 
 	protected abstract void init();
