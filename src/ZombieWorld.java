@@ -1,8 +1,6 @@
 
 // (c) Thorsten Hasbargen
 
-import java.util.ArrayList;
-
 class ZombieWorld extends World {
 	private double timePassed = 0;
 	private double timeSinceLastShot = 0;
@@ -19,7 +17,7 @@ class ZombieWorld extends World {
 	protected void init() {
 		// add the Avatar
 		this.avatar = new Avatar(2500, 2000);
-		this.entities.add(this.avatar);
+		this.addEntity(this.avatar);
 
 		// set WorldPart position
 		this.worldPartX = 1500;
@@ -28,17 +26,17 @@ class ZombieWorld extends World {
 		// add a little forrest
 		for (int x = 0; x < 5000; x += 1000) {
 			for (int y = 0; y < 4000; y += 800) {
-				this.entities.add(new Tree(x + 300, y + 200, 80));
-				this.entities.add(new Tree(x + 600, y + 370, 50));
-				this.entities.add(new Tree(x + 200, y + 600, 50));
-				this.entities.add(new Tree(x + 500, y + 800, 40));
-				this.entities.add(new Tree(x + 900, y + 500, 100));
-				this.entities.add(new Tree(x + 760, y + 160, 40));
+				this.addEntity(new Tree(x + 300, y + 200, 80));
+				this.addEntity(new Tree(x + 600, y + 370, 50));
+				this.addEntity(new Tree(x + 200, y + 600, 50));
+				this.addEntity(new Tree(x + 500, y + 800, 40));
+				this.addEntity(new Tree(x + 900, y + 500, 100));
+				this.addEntity(new Tree(x + 760, y + 160, 40));
 			}
 		}
 
 		// add one zombie
-		this.entities.add(new ZombieAI(100, 100));
+		this.addEntity(new Zombie(100, 100));
 
 		this.counterZ = new ZombieCounterText(20, 40);
 		this.counterG = new GrenadesCounterText(770, 40);
@@ -58,7 +56,7 @@ class ZombieWorld extends World {
 		if (userInput.isMouseEvent) {
 			// move
 			if (button == 1) {
-				this.avatar.setDestination(userInput.mousePressedX + this.worldPartX, userInput.mousePressedY + this.worldPartY);
+				((TargetMovementComponent) this.avatar.movementComponent).setDestination(userInput.mousePressedX + this.worldPartX, userInput.mousePressedY + this.worldPartY);
 			}
 		}
 
@@ -70,7 +68,7 @@ class ZombieWorld extends World {
 				this.timeSinceLastShot = 0;
 
 				Gunshot shot = new Gunshot(this.avatar.posX, this.avatar.posY, userInput.mouseMovedX + this.worldPartX, userInput.mouseMovedY + this.worldPartY);
-				this.entities.add(shot);
+				this.addEntity(shot);
 			}
 		}
 
@@ -101,7 +99,7 @@ class ZombieWorld extends World {
 			double speed = 50 + Math.random() * 200;
 			double time = 0.2 + Math.random() * 0.4;
 			Gunshot shot = new Gunshot(posX, posY, alfa, speed, time);
-			this.entities.add(shot);
+			this.addEntity(shot);
 		}
 
 		// inform counter
@@ -144,14 +142,13 @@ class ZombieWorld extends World {
 
 			// if collisions occur, cancel
 			Grenade grenade = new Grenade(x, y);
-			ArrayList<Entity> list = PhysicsSystem.getInstance().getCollisions(grenade);
-			if (list.size() != 0) {
+			if (PhysicsSystem.getInstance().hasCollision(grenade)) {
 				this.spawnGrenade = INTERVAL;
 				return;
 			}
 
 			// else add zombie to world
-			this.entities.add(grenade);
+			this.addEntity(grenade);
 			this.counterG.setNumber(this.grenades);
 		}
 
@@ -183,16 +180,15 @@ class ZombieWorld extends World {
 			}
 
 			// if collisions occur, cancel
-			ZombieAI zombie = new ZombieAI(x, y);
-			ArrayList<Entity> list = PhysicsSystem.getInstance().getCollisions(zombie);
-			if (list.size() != 0) {
+			Zombie zombie = new Zombie(x, y);
+			if (PhysicsSystem.getInstance().hasCollision(zombie)) {
 				this.timePassed = INTERVAL;
 				return;
 			}
 
 			// else add zombie to world
-			this.entities.add(zombie);
-			((Creature) zombie).setDestination(this.avatar);
+			this.addEntity(zombie);
+			((TargetMovementComponent) ((Creature) zombie).movementComponent).setDestination(this.avatar);
 			ZombieCounterText counter = (ZombieCounterText) this.uiElements.get(0);
 			counter.increment();
 		}

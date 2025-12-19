@@ -15,9 +15,7 @@ public abstract class TextObject extends UIObject {
     }
 
     public void draw() {
-        super.draw();
-        GraphicSystem.getInstance().graphics.setFont(this.font);
-        GraphicSystem.getInstance().graphics.drawString(this.toString(), (int) this.posX, (int) this.posY);
+        GraphicSystem.getInstance().drawString(this.toString(), (int) this.posX, (int) this.posY, new DrawStyle().color(this.color).font(this.font));
     }
 
     /**

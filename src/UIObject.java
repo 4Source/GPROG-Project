@@ -12,8 +12,4 @@ public abstract class UIObject extends GameObject {
         super(posX, posY);
         this.color = color;
     }
-
-    public void draw() {
-        GraphicSystem.getInstance().graphics.setColor(this.color);
-    }
 }

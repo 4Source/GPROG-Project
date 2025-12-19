@@ -1,27 +1,90 @@
 
-// (c) Thorsten Hasbargen
-
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PhysicsSystem {
 	private static PhysicsSystem instance;
 	private static World world;
+	public static boolean enableDebug = false;
+	private Map<PhysicsComponent, Map<PhysicsComponent, CollisionResponse>> collisionBuffer;
+	private Set<PhysicsComponent> invalidEntries;
 
 	private PhysicsSystem() {
+		this.collisionBuffer = new HashMap<>();
+		this.invalidEntries = new HashSet<>();
 	}
 
 	/**
 	 * @return The instance of the singleton or newly created if first access.
 	 */
 	public static synchronized PhysicsSystem getInstance() {
-		if (world == null) {
+		if (PhysicsSystem.world == null) {
 			throw new Error("PhysicsSystem needs a World to work with but no world set!");
 		}
-		if (instance == null) {
-			instance = new PhysicsSystem();
+		if (PhysicsSystem.instance == null) {
+			PhysicsSystem.instance = new PhysicsSystem();
 		}
 
-		return instance;
+		return PhysicsSystem.instance;
+	}
+
+	/**
+	 * Register a physics component for the physics calculation
+	 * 
+	 * @param component The component to register
+	 */
+	public void registerComponent(PhysicsComponent component) {
+		collisionBuffer.putIfAbsent(component, new HashMap<>());
+		invalidateBufferFor(component);
+	}
+
+	/**
+	 * Unregister a physics component from the physics calculation
+	 * 
+	 * @param component The component to unregister
+	 */
+	public void unregisterComponent(PhysicsComponent component) {
+		invalidEntries.remove(component);
+		collisionBuffer.remove(component);
+
+		for (Map<PhysicsComponent, CollisionResponse> inner : collisionBuffer.values()) {
+			inner.remove(component);
+		}
+	}
+
+	/**
+	 * Invalidate the buffered collisions of the component.
+	 * This also invalidates the collisions of the components which had a collision with the component.
+	 * 
+	 * @param component The component to invalidate the collisions for
+	 */
+	public void invalidateBufferFor(PhysicsComponent component) {
+		invalidEntries.add(component);
+
+		Map<PhysicsComponent, CollisionResponse> colliding = collisionBuffer.get(component);
+		if (colliding != null) {
+			for (Map.Entry<PhysicsComponent, CollisionResponse> entry : colliding.entrySet()) {
+				switch (entry.getValue()) {
+					case None:
+						// Do nothing
+						break;
+					case Block:
+					case Overlap:
+						invalidEntries.add(entry.getKey());
+						break;
+
+					default:
+						System.err.print("Invalid CollisionResponse.");
+						break;
+				}
+			}
+		}
 	}
 
 	/**
@@ -39,60 +102,116 @@ public class PhysicsSystem {
 		return Math.sqrt(xd * xd + yd * yd);
 	}
 
-	// TODO: There is possible a smarter way to do it
+	// TODO: Buffer Collisions result until a entity with dynamicPhysicsComponent has moved/created/deleted otherwise no different collisions could be expected. Only check the changed entity and update entities which previously collided or new collided
 	/**
-	 * Move object "back" reverse alpha until it just does not collide
-	 * 
-	 * @param entity The object to move
+	 * Update the collisions of the {@link PhysicsComponent physic components} with each other
 	 */
-	public void moveBackToUncollide(Entity entity) {
-		if (entity instanceof Creature) {
-			double dx = Math.cos(((Creature) entity).alpha);
-			double dy = Math.sin(((Creature) entity).alpha);
+	public void update() {
+		Iterator<PhysicsComponent> it = invalidEntries.iterator();
+		while (it.hasNext()) {
+			PhysicsComponent component = it.next();
 
-			while (true) {
-				entity.posX -= dx;
-				entity.posY -= dy;
+			if (component instanceof DynamicPhysicsComponent) {
+				this.collisionBuffer.keySet().forEach(otherComponent -> {
+					if (otherComponent == component) {
+						return;
+					}
 
-				ArrayList<Entity> collisions = getCollisions(entity);
-				if (collisions.size() == 0) {
-					break;
-				}
+					CollisionResponse response = component.checkCollision(otherComponent);
+					if (response != CollisionResponse.None) {
+						this.collisionBuffer.get(component).put(otherComponent, response);
+						this.collisionBuffer.get(otherComponent).put(component, response);
+
+						// Trigger collision onEnter
+						((DynamicPhysicsComponent) component).onEnter.accept(new Collision(otherComponent.entity, response));
+					} else if (response == CollisionResponse.None && this.collisionBuffer.getOrDefault(component, new HashMap<>()).getOrDefault(otherComponent, CollisionResponse.None) != CollisionResponse.None) {
+						this.collisionBuffer.get(component).remove(otherComponent);
+						this.collisionBuffer.get(otherComponent).remove(component);
+
+						// Trigger collision onExit
+						((DynamicPhysicsComponent) component).onExit.accept(new Collision(otherComponent.entity, response));
+					}
+				});
 			}
+
+			it.remove();
 		}
 	}
 
 	/**
 	 * Checks for collisions of the game object
 	 * 
-	 * @param gameObject The game object for which the collisions should be checked
-	 * @return A list of objects the game objects has collisions with
+	 * @param entity The game object for which the collisions should be checked
+	 * @return A list of {@link Collision collisions} the game objects has collisions with
 	 */
-	public ArrayList<Entity> getCollisions(Entity gameObject) {
-		ArrayList<Entity> result = new ArrayList<Entity>();
+	public ArrayList<Collision> getCollisions(Entity entity) {
+		Optional<PhysicsComponent> opt = entity.get(PhysicsComponent.class);
+		ArrayList<Collision> result = new ArrayList<>();
 
-		int length = PhysicsSystem.world.entities.size();
-		for (int i = 0; i < length; i++) {
-			if (PhysicsSystem.world.entities.get(i) instanceof Entity) {
-				Entity collisionTestObject = (Entity) PhysicsSystem.world.entities.get(i);
-
-				// an object doesn't collide with itself
-				if (collisionTestObject == gameObject) {
-					continue;
-				}
-
-				// check if they touch each other
-				double dist = gameObject.radius + collisionTestObject.radius;
-				double dx = gameObject.posX - collisionTestObject.posX;
-				double dy = gameObject.posY - collisionTestObject.posY;
-
-				if (dx * dx + dy * dy < dist * dist) {
-					result.add(collisionTestObject);
-				}
-			}
+		// No physics component for entity
+		if (opt.isEmpty()) {
+			return result;
 		}
 
+		PhysicsComponent component = opt.get();
+
+		// Physics component is not registered in the PhysicsSystem
+		if (!collisionBuffer.containsKey(component)) {
+			System.err.print("PhysicsComponent of Entity is not registered!");
+			return result;
+		}
+
+		// Physics component not up to date
+		if (invalidEntries.contains(component)) {
+			System.out.print("Unplanned update of PhysicsSystem!");
+			update();
+		}
+
+		this.collisionBuffer.get(component).forEach((otherComponent, response) -> {
+			if (response != CollisionResponse.None) {
+				result.add(new Collision(otherComponent.entity, response));
+			}
+		});
+
 		return result;
+	}
+
+	/**
+	 * Check if entity has a collision with another entity. Returns early if collision found.
+	 * 
+	 * @param entity The entity to check if it has collision
+	 */
+	public boolean hasCollision(Entity entity) {
+		Optional<PhysicsComponent> opt = entity.get(PhysicsComponent.class);
+		AtomicBoolean result = new AtomicBoolean(false);
+
+		// No physics component for entity
+		if (opt.isEmpty()) {
+			return false;
+		}
+
+		PhysicsComponent component = opt.get();
+
+		// Physics component is not registered in the PhysicsSystem
+		if (!collisionBuffer.containsKey(component)) {
+			System.err.print("PhysicsComponent of Entity is not registered!");
+			return false;
+		}
+
+		// Physics component not up to date
+		if (invalidEntries.contains(component)) {
+			System.out.print("Unplanned update of PhysicsSystem!");
+			update();
+		}
+
+		this.collisionBuffer.get(component).forEach((otherComponent, response) -> {
+			if (response != CollisionResponse.None) {
+				result.set(true);
+				return;
+			}
+		});
+
+		return result.get();
 	}
 
 	/**

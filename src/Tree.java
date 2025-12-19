@@ -12,14 +12,11 @@ class Tree extends Obstacle {
 	 */
 	public Tree(double posX, double posY, int radius) {
 		super(posX, posY, radius, new Color(64, 160, 64));
+		this.physicsComponent = this.add(new StaticPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, radius)));
 	}
 
 	@Override
-	public int getType() {
-		return Constants.TYPE_TREE;
-	}
-
-	@Override
-	public void update(double deltaTime) {
+	public EntityType getType() {
+		return EntityType.TREE;
 	}
 }

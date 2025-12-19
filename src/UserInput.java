@@ -1,7 +1,7 @@
 
 // (c) Thorsten Hasbargen
 
-// TODO: Does this make sense at all ?
+// TODO: Create a proper input System ?
 final class UserInput {
 	// everything a user can press on keyboard or mouse
 	int mousePressedX, mousePressedY, mouseMovedX, mouseMovedY, mouseButton;

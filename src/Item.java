@@ -1,6 +1,8 @@
 import java.awt.Color;
 
 public abstract class Item extends Entity {
+    protected CircleComponent circleComponent;
+    protected PhysicsComponent physicsComponent;
 
     /**
      * @param posX The position in x direction
@@ -9,6 +11,8 @@ public abstract class Item extends Entity {
      * @param color The color of the Item
      */
     public Item(double posX, double posY, int radius, Color color) {
-        super(posX, posY, radius, color);
+        super(posX, posY);
+        this.circleComponent = this.add(new CircleComponent(this, radius, color));
+        this.physicsComponent = this.add(new StaticPhysicsComponent(this, new CircleHitBox(HitBoxType.Overlap, radius)));
     }
 }

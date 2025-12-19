@@ -1,0 +1,84 @@
+enum CollisionResponse {
+    /**
+     * No collision
+     */
+    None,
+    /**
+     * There is a collision but at least one of the hit boxes has the {@link HitBoxType} Overlap
+     */
+    Overlap,
+    /**
+     * There is a collision
+     */
+    Block;
+
+    static CollisionResponse CollisionMatrix(HitBox a, HitBox b) {
+        if (a.getCollisionType() == HitBoxType.Block && b.getCollisionType() == HitBoxType.Block) {
+            return Block;
+        } else if (a.getCollisionType() == HitBoxType.Block && b.getCollisionType() == HitBoxType.Overlap) {
+            return Overlap;
+        } else if (a.getCollisionType() == HitBoxType.Overlap && b.getCollisionType() == HitBoxType.Block) {
+            return Overlap;
+        } else if (a.getCollisionType() == HitBoxType.Overlap && b.getCollisionType() == HitBoxType.Overlap) {
+            return Overlap;
+        } else {
+            System.err.print("Tried to check collision for invalid hit box type combination!");
+            return None;
+        }
+    }
+}
+
+public abstract class PhysicsComponent extends Component {
+    protected HitBox hitBox;
+
+    /**
+     * @param entity The entity to which the components belongs to
+     * @param hitBox The hit box against which the {@link PhysicsSystem physics system} checks for collisions
+     */
+    protected PhysicsComponent(Entity entity, HitBox hitBox) {
+        super(entity);
+        this.hitBox = hitBox;
+        PhysicsSystem.getInstance().registerComponent(this);
+    }
+
+    /**
+     * Checks if the HitBox collides with the HitBox of the other Physics Component.
+     * 
+     * @param other The other Physics component to check against
+     * @return Collision, overlapping or no collision
+     */
+    public CollisionResponse checkCollision(PhysicsComponent other) {
+        if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof CircleHitBox) {
+            double dist = ((CircleHitBox) this.hitBox).getRadius() + ((CircleHitBox) other.hitBox).getRadius();
+            double dx = this.entity.posX - other.entity.posX;
+            double dy = this.entity.posY - other.entity.posY;
+
+            if (dx * dx + dy * dy < dist * dist) {
+                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+            }
+            return CollisionResponse.None;
+        } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof RectangleHitBox) {
+            if (this.entity.posX < other.entity.posX + ((RectangleHitBox) other.hitBox).getWidth() &&
+                    this.entity.posX + ((RectangleHitBox) this.hitBox).getWidth() > other.entity.posX &&
+                    this.entity.posY < other.entity.posY + ((RectangleHitBox) other.hitBox).getHeight() &&
+                    this.entity.posY + ((RectangleHitBox) this.hitBox).getHeight() > other.entity.posY) {
+                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+            }
+            return CollisionResponse.None;
+        } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof CircleHitBox) {
+            // TODO Collision check: RectangleHitBox & CircleHitBox
+            System.err.print("Not implemented yet!");
+        } else if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof RectangleHitBox) {
+            // TODO Collision check: RectangleHitBox & CircleHitBox
+            System.err.print("Not implemented yet!");
+        }
+
+        System.err.print("Tried to check collision for invalid hit box combination!");
+        return CollisionResponse.None;
+    }
+
+    /**
+     * Draw the hit box in the graphics system if {@link PhysicsComponent}.enableDebug is true.
+     */
+    public abstract void draw();
+}
