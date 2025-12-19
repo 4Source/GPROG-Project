@@ -66,11 +66,43 @@ public abstract class PhysicsComponent extends Component {
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof CircleHitBox) {
-            // TODO Collision check: RectangleHitBox & CircleHitBox
-            System.err.print("Not implemented yet!");
+            double rectMinX = this.entity.posX - ((RectangleHitBox) this.hitBox).getWidth() / 2;
+            double rectMinY = this.entity.posY - ((RectangleHitBox) this.hitBox).getHeight() / 2;
+            double rectMaxX = this.entity.posX + ((RectangleHitBox) this.hitBox).getWidth() / 2;
+            double rectMaxY = this.entity.posY + ((RectangleHitBox) this.hitBox).getHeight() / 2;
+            double cx = other.entity.posX;
+            double cy = other.entity.posY;
+            double r = ((CircleHitBox) other.hitBox).getRadius();
+
+            double closestX = Math.max(rectMinX, Math.min(cx, rectMaxX));
+            double closestY = Math.max(rectMinY, Math.min(cy, rectMaxY));
+
+            double dx = cx - closestX;
+            double dy = cy - closestY;
+
+            if ((dx * dx + dy * dy) <= r * r) {
+                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+            }
+            return CollisionResponse.None;
         } else if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof RectangleHitBox) {
-            // TODO Collision check: RectangleHitBox & CircleHitBox
-            System.err.print("Not implemented yet!");
+            double rectMinX = other.entity.posX - ((RectangleHitBox) other.hitBox).getWidth() / 2;
+            double rectMinY = other.entity.posY - ((RectangleHitBox) other.hitBox).getHeight() / 2;
+            double rectMaxX = other.entity.posX + ((RectangleHitBox) other.hitBox).getWidth() / 2;
+            double rectMaxY = other.entity.posY + ((RectangleHitBox) other.hitBox).getHeight() / 2;
+            double cx = this.entity.posX;
+            double cy = this.entity.posY;
+            double r = ((CircleHitBox) this.hitBox).getRadius();
+
+            double closestX = Math.max(rectMinX, Math.min(cx, rectMaxX));
+            double closestY = Math.max(rectMinY, Math.min(cy, rectMaxY));
+
+            double dx = cx - closestX;
+            double dy = cy - closestY;
+
+            if ((dx * dx + dy * dy) <= r * r) {
+                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+            }
+            return CollisionResponse.None;
         }
 
         System.err.print("Tried to check collision for invalid hit box combination!");

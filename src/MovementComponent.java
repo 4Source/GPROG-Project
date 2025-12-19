@@ -35,6 +35,7 @@ public abstract class MovementComponent extends Component {
         this.entity.posY += Math.sin(this.alpha) * this.speed * deltaTime;
     }
 
+    // TODO: There is possible a better way
     /**
      * Move back to the position before the move Method was called
      */
@@ -43,8 +44,6 @@ public abstract class MovementComponent extends Component {
         this.entity.posY = this.oldY;
     }
 
-    // TODO: There is possible a better way, esspecially it would be nice to allow the collision (in a zone) so it could be visualized
-    // TODO: There is possible a smarter way to do it
     /**
      * Move object "back" reverse alpha until it just does not collide
      * 

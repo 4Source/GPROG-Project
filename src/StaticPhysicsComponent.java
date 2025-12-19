@@ -47,8 +47,8 @@ public class StaticPhysicsComponent extends PhysicsComponent {
             } else if (this.hitBox instanceof RectangleHitBox) {
                 int width = ((RectangleHitBox) this.hitBox).getWidth();
                 int height = ((RectangleHitBox) this.hitBox).getHeight();
-                int x = (int) (entity.posX - width - GameObject.world.worldPartX);
-                int y = (int) (entity.posY - height - GameObject.world.worldPartY);
+                int x = (int) (entity.posX - (width / 2) - GameObject.world.worldPartX);
+                int y = (int) (entity.posY - (height / 2) - GameObject.world.worldPartY);
 
                 GraphicSystem.getInstance().drawRect(x, y, width, height, style);
             } else {
