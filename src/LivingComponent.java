@@ -1,5 +1,5 @@
 public abstract class LivingComponent extends Component {
-    protected boolean isLiving;
+    private boolean isLiving;
 
     /**
      * A Component which allows a entity to die.
@@ -10,5 +10,13 @@ public abstract class LivingComponent extends Component {
     protected LivingComponent(Entity entity) {
         super(entity);
         this.isLiving = true;
+    }
+
+    public boolean isLiving() {
+        return this.isLiving;
+    }
+
+    public void kill() {
+        this.isLiving = false;
     }
 }

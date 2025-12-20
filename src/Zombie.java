@@ -11,9 +11,12 @@ class Zombie extends Creature {
 	 * @param startY The position in y of the zombie where is should be at game start
 	 */
 	public Zombie(double startX, double startY) {
-		super(startX, startY, 15, new Color(160, 80, 40));
-		this.movementComponent = this.add(new AIMovementComponent(this, 0, 60));
-		this.lifeComponent = this.add(new LifeComponent(this, 1));
+		super(startX, startY, 15, new Color(160, 80, 40), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 1));
+	}
+
+	@Override
+	public AIMovementComponent getMovementComponent() {
+		return (AIMovementComponent) super.getMovementComponent();
 	}
 
 	@Override
@@ -28,21 +31,21 @@ class Zombie extends Creature {
 
 			// if object is avatar, game over
 			if (type == EntityType.AVATAR) {
-				this.movementComponent.moveBack();
-				GameObject.world.gameOver = true;
+				this.getMovementComponent().moveBack();
+				Entity.world.gameOver = true;
 			}
 
 			// if object is zombie, step back
 			if (type == EntityType.ZOMBIE) {
-				this.movementComponent.moveBack();
-				((AIMovementComponent) this.movementComponent).state = AIState.STUCK;
+				this.getMovementComponent().moveBack();
+				this.getMovementComponent().state = AIState.STUCK;
 				return;
 			}
 
 			// if Object is a tree, move back one step
 			if (type == EntityType.TREE) {
-				this.movementComponent.moveBack();
-				((AIMovementComponent) this.movementComponent).state = AIState.STUCK;
+				this.getMovementComponent().moveBack();
+				this.getMovementComponent().state = AIState.STUCK;
 				return;
 			}
 		}

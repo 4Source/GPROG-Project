@@ -1,9 +1,9 @@
 
-// (c) Thorsten Hasbargen
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Optional;
 
 abstract class World {
 	// top left corner of the displayed pane of the world
@@ -15,32 +15,338 @@ abstract class World {
 
 	// all objects in the game, including the Avatar
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
-	Avatar avatar;
-	ArrayList<UIObject> uiElements = new ArrayList<UIObject>();
+	private ArrayList<UIElement> uiElements = new ArrayList<UIElement>();
 
 	World() {
 	}
 
+	/**
+	 * Add an entity to the world.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#addUIElement(UIElement)}
+	 * <ul>
+	 * <li><b>Register components of entity to systems:</b>
+	 * <ul>
+	 * <li>PhysicsComponent → PhysicsSystem</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param entity The entity which should be added to the world
+	 */
 	public final void addEntity(Entity entity) {
-		entities.add(entity);
+		this.entities.add(entity);
+		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().registerComponent(c));
 	}
 
+	/**
+	 * Remove an entity from the world.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#removeUIElement(UIElement)}
+	 * <ul>
+	 * <li><b>Unregister components of entity from systems:</b>
+	 * <ul>
+	 * <li>PhysicsComponent → PhysicsSystem</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param entity The entity which should be removed from the world
+	 */
 	public final void removeEntity(Entity entity) {
-		entities.remove(entity);
-		entity.get(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
+		this.entities.remove(entity);
+		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
 	}
 
+	/**
+	 * Remove an entity from the world.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#removeUIElement(int)}
+	 * <ul>
+	 * <li><b>Unregister components of entity from systems:</b>
+	 * <ul>
+	 * <li>PhysicsComponent → PhysicsSystem</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param index The index of the entity which should be removed from the world
+	 */
 	public final void removeEntity(int index) {
 		Entity entity = this.getEntity(index);
 		this.removeEntity(entity);
 	}
 
+	/**
+	 * Returns all entities.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#getUIElements()}
+	 */
 	public final Collection<Entity> getEntities() {
-		return Collections.unmodifiableCollection(entities);
+		return Collections.unmodifiableCollection(this.entities);
 	}
 
+	/**
+	 * Returns all entities matching the Class.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#getUIElements(Class)}
+	 * 
+	 * @param <T> A Class which extends the Entity Class
+	 * @param type The type of Entity which should be returned
+	 */
+	public final <T extends Entity> Collection<Entity> getEntities(Class<T> type) {
+		ArrayList<Entity> elements = new ArrayList<>();
+		for (Entity e : this.entities) {
+			if (type.isInstance(e)) {
+				elements.add(e);
+			}
+		}
+
+		return Collections.unmodifiableCollection(elements);
+	}
+
+	/**
+	 * Returns all entities having the component.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#getUIElementsWithComponent(Class)}
+	 * 
+	 * @param <T> A Class which extends the Component Class
+	 * @param type The type of Component which should be returned
+	 */
+	public final <T extends Component> Collection<Entity> getEntitiesWithComponent(Class<T> type) {
+		ArrayList<Entity> elements = new ArrayList<>();
+		for (Entity e : this.entities) {
+			if (e.getComponent(type).isPresent()) {
+				elements.add(e);
+			}
+		}
+
+		return Collections.unmodifiableCollection(elements);
+	}
+
+	/**
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#getUIElement(int)}
+	 * 
+	 * @param index The index of the entity.
+	 */
 	public final Entity getEntity(int index) {
-		return entities.get(index);
+		return this.entities.get(index);
+	}
+
+	/**
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#getUIElement(Class)}
+	 * 
+	 * @param <T> A Class which extends the Entity Class
+	 * @param type The type of Entity which should be returned
+	 */
+	public final <T extends Entity> Optional<T> getEntity(Class<T> type) {
+		for (Entity e : this.entities) {
+			if (type.isInstance(e)) {
+				return Optional.of(type.cast(e));
+			}
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Returns an iterator over the entities.
+	 * <p>
+	 * Ensure side effects.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#uiElementIterator()}
+	 */
+	public Iterator<Entity> entityIterator() {
+		return new Iterator<>() {
+			private final Iterator<Entity> it = entities.iterator();
+			private Entity last = null;
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+
+			@Override
+			public Entity next() {
+				last = it.next();
+				return last;
+			}
+
+			@Override
+			public void remove() {
+				if (last == null) {
+					throw new IllegalStateException("remove() called before next()");
+				}
+
+				it.remove();
+				last.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
+				last = null;
+			}
+		};
+	}
+
+	/**
+	 * Add an ui element to the world.
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#addEntity(Entity)}
+	 * <ul>
+	 * <li><b>Register components of ui element to systems:</b>
+	 * <ul>
+	 * <li>NONE</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param uiElement The ui element which should be added to the world
+	 */
+	public final void addUIElement(UIElement uiElement) {
+		this.uiElements.add(uiElement);
+	}
+
+	/**
+	 * Remove an ui element from the world.
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#removeEntity(Entity)}
+	 * <ul>
+	 * <li><b>Unregister components of ui element from systems:</b>
+	 * <ul>
+	 * <li>NONE</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param uiElement The ui element which should be removed from the world
+	 */
+	public final void removeUIElement(UIElement uiElement) {
+		this.uiElements.remove(uiElement);
+	}
+
+	/**
+	 * Remove an ui element from the world.
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#removeEntity(int)}
+	 * <ul>
+	 * <li><b>Unregister components of ui element from systems:</b>
+	 * <ul>
+	 * <li>NONE</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param index The index of the ui element which should be removed from the world
+	 */
+	public final void removeUIElement(int index) {
+		UIElement uiElement = this.getUIElement(index);
+		this.removeUIElement(uiElement);
+	}
+
+	/**
+	 * Returns all ui elements.
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#getEntities()}
+	 */
+	public final Collection<UIElement> getUIElements() {
+		return Collections.unmodifiableCollection(this.uiElements);
+	}
+
+	/**
+	 * Returns all ui elements matching the Class.
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#getEntities(Class)}
+	 * 
+	 * @param <T> A Class which extends the UIElement Class
+	 * @param type The type of ui element which should be returned
+	 */
+	public final <T extends UIElement> Collection<UIElement> getUIElements(Class<T> type) {
+		ArrayList<UIElement> elements = new ArrayList<>();
+		for (UIElement e : this.uiElements) {
+			if (type.isInstance(e)) {
+				elements.add(e);
+			}
+		}
+
+		return Collections.unmodifiableCollection(elements);
+	}
+
+	/**
+	 * Returns all ui elements having the component.
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#getEntitiesWithComponent(Class)}
+	 * 
+	 * @param <T> A Class which extends the Component Class
+	 * @param type The type of Component which should be returned
+	 */
+	public final <T extends Component> Collection<UIElement> getUIElementsWithComponent(Class<T> type) {
+		ArrayList<UIElement> elements = new ArrayList<>();
+		for (UIElement e : this.uiElements) {
+			if (e.getComponent(type).isPresent()) {
+				elements.add(e);
+			}
+		}
+
+		return Collections.unmodifiableCollection(elements);
+	}
+
+	/**
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#getEntity(int)}
+	 * 
+	 * @param index The index of the ui element.
+	 */
+	public final UIElement getUIElement(int index) {
+		return this.uiElements.get(index);
+	}
+
+	/**
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#getEntity(Class)}
+	 * 
+	 * @param <T> A Class which extends the UIElement Class
+	 * @param type The type of ui element which should be returned
+	 */
+	public final <T extends UIElement> Optional<T> getUIElement(Class<T> type) {
+		for (UIElement e : this.uiElements) {
+			if (type.isInstance(e)) {
+				return Optional.of(type.cast(e));
+			}
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Returns an iterator over the ui elements.
+	 * <p>
+	 * Ensure side effects.
+	 * <p>
+	 * For {@link Entity Entities} use {@link World#entityIterator()}
+	 */
+	public Iterator<UIElement> uiElementIterator() {
+		return new Iterator<>() {
+			private final Iterator<UIElement> it = uiElements.iterator();
+			private UIElement last = null;
+
+			@Override
+			public boolean hasNext() {
+				return it.hasNext();
+			}
+
+			@Override
+			public UIElement next() {
+				last = it.next();
+				return last;
+			}
+
+			@Override
+			public void remove() {
+				if (last == null) {
+					throw new IllegalStateException("remove() called before next()");
+				}
+
+				it.remove();
+				last = null;
+			}
+		};
 	}
 
 	// adjust the displayed pane of the world according to Avatar and Bounds
@@ -48,34 +354,41 @@ abstract class World {
 		final int RIGHT_END = Constants.WORLD_WIDTH - Constants.WORLDPART_WIDTH;
 		final int BOTTOM_END = Constants.WORLD_HEIGHT - Constants.WORLDPART_HEIGHT;
 
+		Optional<Avatar> opt = this.getEntity(Avatar.class);
+		if (opt.isEmpty()) {
+			System.err.println("No avatar found in world!");
+			return;
+		}
+		Avatar avatar = opt.get();
+
 		// if avatar is too much right in display ...
-		if (this.avatar.posX > this.worldPartX + Constants.WORLDPART_WIDTH - Constants.SCROLL_BOUNDS) {
+		if (avatar.posX > this.worldPartX + Constants.WORLDPART_WIDTH - Constants.SCROLL_BOUNDS) {
 			// ... adjust display
-			this.worldPartX = this.avatar.posX + Constants.SCROLL_BOUNDS - Constants.WORLDPART_WIDTH;
+			this.worldPartX = avatar.posX + Constants.SCROLL_BOUNDS - Constants.WORLDPART_WIDTH;
 			if (this.worldPartX >= RIGHT_END) {
 				this.worldPartX = RIGHT_END;
 			}
 		}
 
 		// same left
-		else if (this.avatar.posX < this.worldPartX + Constants.SCROLL_BOUNDS) {
-			this.worldPartX = this.avatar.posX - Constants.SCROLL_BOUNDS;
+		else if (avatar.posX < this.worldPartX + Constants.SCROLL_BOUNDS) {
+			this.worldPartX = avatar.posX - Constants.SCROLL_BOUNDS;
 			if (this.worldPartX <= 0) {
 				this.worldPartX = 0;
 			}
 		}
 
 		// same bottom
-		if (this.avatar.posY > this.worldPartY + Constants.WORLDPART_HEIGHT - Constants.SCROLL_BOUNDS) {
-			this.worldPartY = this.avatar.posY + Constants.SCROLL_BOUNDS - Constants.WORLDPART_HEIGHT;
+		if (avatar.posY > this.worldPartY + Constants.WORLDPART_HEIGHT - Constants.SCROLL_BOUNDS) {
+			this.worldPartY = avatar.posY + Constants.SCROLL_BOUNDS - Constants.WORLDPART_HEIGHT;
 			if (this.worldPartY >= BOTTOM_END) {
 				this.worldPartY = BOTTOM_END;
 			}
 		}
 
 		// same top
-		else if (this.avatar.posY < this.worldPartY + Constants.SCROLL_BOUNDS) {
-			this.worldPartY = this.avatar.posY - Constants.SCROLL_BOUNDS;
+		else if (avatar.posY < this.worldPartY + Constants.SCROLL_BOUNDS) {
+			this.worldPartY = avatar.posY - Constants.SCROLL_BOUNDS;
 			if (this.worldPartY <= 0) {
 				this.worldPartY = 0;
 			}

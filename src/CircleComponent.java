@@ -5,7 +5,7 @@ public class CircleComponent extends VisualComponent {
     protected Color color;
 
     /**
-     * A visual component which is represented by a circle 
+     * A visual component which is represented by a circle
      * 
      * @param entity The entity to which the components belongs to
      * @param radius The size of the entity
@@ -19,8 +19,8 @@ public class CircleComponent extends VisualComponent {
 
     @Override
     public void draw() {
-        int x = (int) (entity.posX - this.radius - GameObject.world.worldPartX);
-        int y = (int) (entity.posY - this.radius - GameObject.world.worldPartY);
+        int x = (int) (entity.posX - this.radius - Entity.world.worldPartX);
+        int y = (int) (entity.posY - this.radius - Entity.world.worldPartY);
         int d = (int) (this.radius * 2);
 
         GraphicSystem.getInstance().drawFillOval(x, y, d, d, new DrawStyle().color(this.color));

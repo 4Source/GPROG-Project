@@ -22,7 +22,7 @@ enum CollisionResponse {
         } else if (a.getCollisionType() == HitBoxType.Overlap && b.getCollisionType() == HitBoxType.Overlap) {
             return Overlap;
         } else {
-            System.err.print("Tried to check collision for invalid hit box type combination!");
+            System.err.println("Tried to check collision for invalid hit box type combination!");
             return None;
         }
     }
@@ -38,7 +38,6 @@ public abstract class PhysicsComponent extends Component {
     protected PhysicsComponent(Entity entity, HitBox hitBox) {
         super(entity);
         this.hitBox = hitBox;
-        PhysicsSystem.getInstance().registerComponent(this);
     }
 
     /**
@@ -105,7 +104,7 @@ public abstract class PhysicsComponent extends Component {
             return CollisionResponse.None;
         }
 
-        System.err.print("Tried to check collision for invalid hit box combination!");
+        System.err.println("Tried to check collision for invalid hit box combination!");
         return CollisionResponse.None;
     }
 

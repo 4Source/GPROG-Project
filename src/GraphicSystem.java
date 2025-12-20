@@ -51,12 +51,15 @@ public class GraphicSystem extends JPanel {
     }
 
     /**
-     * Draw a GameObject on the Screen
+     * Draw the visual component of the entity on the Screen
      * 
-     * @param gameObject The game object to draw
+     * @param entity The entity to draw
      */
-    public void draw(GameObject gameObject) {
-        gameObject.draw();
+    public void draw(Entity entity) {
+        entity.getComponent(VisualComponent.class).ifPresent(component -> component.draw());
+        if (PhysicsSystem.enableDebug) {
+            entity.getComponent(PhysicsComponent.class).ifPresent(component -> component.draw());
+        }
     }
 
     /**

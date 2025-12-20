@@ -20,7 +20,7 @@ public class LifeComponent extends LivingComponent {
         this.life -= damage;
 
         if (this.life <= 0) {
-            this.isLiving = false;
+            this.kill();
         }
     }
 

@@ -1,11 +1,13 @@
+import java.util.Optional;
+
 enum AIState {
     HUNTING, STUCK, CLEARING
 }
 
 public class AIMovementComponent extends TargetMovementComponent {
     protected AIState state;
-    private double alphaClear;
-    private double secondsClear;
+    protected double alphaClear;
+    protected double secondsClear;
 
     /**
      * A movement component which provides "intelligent" movement by different states.
@@ -14,7 +16,7 @@ public class AIMovementComponent extends TargetMovementComponent {
      * @param alpha The angle of rotation in radian
      * @param speed The speed how fast to move
      */
-    protected AIMovementComponent(Entity entity, double alpha, double speed) {
+    public AIMovementComponent(Entity entity, double alpha, double speed) {
         super(entity, alpha, speed);
         this.state = AIState.HUNTING;
 
@@ -27,8 +29,15 @@ public class AIMovementComponent extends TargetMovementComponent {
 
     @Override
     public void update(double deltaTime) {
+        Optional<Avatar> opt = Entity.world.getEntity(Avatar.class);
+        if (opt.isEmpty()) {
+            System.err.println("No avatar found");
+            return;
+        }
+        Avatar avatar = opt.get();
+
         // if avatar is too far away: stop
-        double dist = PhysicsSystem.distance(this.entity.posX, this.entity.posY, GameObject.world.avatar.posX, GameObject.world.avatar.posY);
+        double dist = PhysicsSystem.distance(this.entity.posX, this.entity.posY, avatar.posX, avatar.posY);
 
         if (dist > 1000) {
             this.isMoving = false;
@@ -39,7 +48,7 @@ public class AIMovementComponent extends TargetMovementComponent {
 
         switch (this.state) {
             case HUNTING:
-                this.setDestination(GameObject.world.avatar);
+                this.setDestination(avatar);
 
                 super.update(deltaTime);
                 break;
@@ -65,7 +74,7 @@ public class AIMovementComponent extends TargetMovementComponent {
                 break;
 
             default:
-                System.err.print("Unknown state: " + this.state);
+                System.err.println("Unknown state: " + this.state);
                 break;
         }
     }

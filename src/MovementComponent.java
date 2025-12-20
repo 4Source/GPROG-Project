@@ -10,12 +10,13 @@ public abstract class MovementComponent extends Component {
      * @param entity The entity to which the components belongs to
      * @param alpha The angle of rotation in radian
      * @param speed The speed how fast to move
+     * @param isMoving Specifies if the entity is initially moving
      */
-    protected MovementComponent(Entity entity, double alpha, double speed) {
+    protected MovementComponent(Entity entity, double alpha, double speed, boolean isMoving) {
         super(entity);
         this.alpha = alpha;
         this.speed = speed;
-        this.isMoving = false;
+        this.isMoving = isMoving;
     }
 
     @Override
@@ -24,7 +25,7 @@ public abstract class MovementComponent extends Component {
             return;
         }
 
-        this.entity.get(PhysicsComponent.class).ifPresent(component -> PhysicsSystem.getInstance().invalidateBufferFor(component));
+        this.entity.getComponent(PhysicsComponent.class).ifPresent(component -> PhysicsSystem.getInstance().invalidateBufferFor(component));
 
         // remember old position
         this.oldX = this.entity.posX;
