@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -59,6 +60,35 @@ public abstract class Entity {
     }
 
     /**
+     * Get a component from the entity which implements drawable interface
+     * 
+     * @return An optional which could hold the Component with the class if it existed in the entity
+     */
+    public Optional<Drawable> getDrawable() {
+        for (Component c : components.values()) {
+            if (c instanceof Drawable d) {
+                return Optional.of(d);
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Get the components from the entity which implements drawable interface
+     * 
+     * @return A List of components which implement the drawable
+     */
+    public ArrayList<Drawable> getDrawables() {
+        ArrayList<Drawable> result = new ArrayList<>();
+        for (Component c : components.values()) {
+            if (c instanceof Drawable d) {
+                result.add(d);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Returns the type of the entity
      */
     public abstract EntityType getType();
@@ -66,7 +96,7 @@ public abstract class Entity {
     /**
      * Update the game object using delta time to get constant change with varying fps
      * 
-     * @param deltaTime The time since last frame
+     * @param deltaTime The time since last frame in seconds
      */
     public final void update(double deltaTime) {
         this.components.forEach((key, component) -> {

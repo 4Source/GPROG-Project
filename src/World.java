@@ -20,6 +20,11 @@ abstract class World {
 	World() {
 	}
 
+	private final void registerEntityComponents(Entity entity) {
+		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().registerComponent(c));
+		entity.getDrawables().forEach(c -> GraphicSystem.getInstance().registerComponent(c));
+	}
+
 	/**
 	 * Add an entity to the world.
 	 * <p>
@@ -28,6 +33,7 @@ abstract class World {
 	 * <li><b>Register components of entity to systems:</b>
 	 * <ul>
 	 * <li>PhysicsComponent → PhysicsSystem</li>
+	 * <li>Drawable → GraphicSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -36,7 +42,12 @@ abstract class World {
 	 */
 	public final void addEntity(Entity entity) {
 		this.entities.add(entity);
-		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().registerComponent(c));
+		this.registerEntityComponents(entity);
+	}
+
+	private final void unregisterEntityComponents(Entity entity) {
+		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
+		entity.getDrawables().forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
 	}
 
 	/**
@@ -47,6 +58,7 @@ abstract class World {
 	 * <li><b>Unregister components of entity from systems:</b>
 	 * <ul>
 	 * <li>PhysicsComponent → PhysicsSystem</li>
+	 * <li>Drawable → GraphicSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -55,7 +67,7 @@ abstract class World {
 	 */
 	public final void removeEntity(Entity entity) {
 		this.entities.remove(entity);
-		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
+		this.unregisterEntityComponents(entity);
 	}
 
 	/**
@@ -66,6 +78,7 @@ abstract class World {
 	 * <li><b>Unregister components of entity from systems:</b>
 	 * <ul>
 	 * <li>PhysicsComponent → PhysicsSystem</li>
+	 * <li>Drawable → GraphicSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -180,10 +193,14 @@ abstract class World {
 				}
 
 				it.remove();
-				last.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
+				unregisterEntityComponents(last);
 				last = null;
 			}
 		};
+	}
+
+	private final void registerUIElementComponents(UIElement uiElement) {
+		uiElement.getDrawables().forEach(c -> GraphicSystem.getInstance().registerComponent(c));
 	}
 
 	/**
@@ -193,7 +210,7 @@ abstract class World {
 	 * <ul>
 	 * <li><b>Register components of ui element to systems:</b>
 	 * <ul>
-	 * <li>NONE</li>
+	 * <li>Drawable → GraphicSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -202,6 +219,11 @@ abstract class World {
 	 */
 	public final void addUIElement(UIElement uiElement) {
 		this.uiElements.add(uiElement);
+		this.registerUIElementComponents(uiElement);
+	}
+
+	private final void unregisterUIElementComponents(UIElement uiElement) {
+		uiElement.getDrawables().forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
 	}
 
 	/**
@@ -211,7 +233,7 @@ abstract class World {
 	 * <ul>
 	 * <li><b>Unregister components of ui element from systems:</b>
 	 * <ul>
-	 * <li>NONE</li>
+	 * <li>Drawable → GraphicSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -220,6 +242,7 @@ abstract class World {
 	 */
 	public final void removeUIElement(UIElement uiElement) {
 		this.uiElements.remove(uiElement);
+		this.unregisterUIElementComponents(uiElement);
 	}
 
 	/**
@@ -229,7 +252,7 @@ abstract class World {
 	 * <ul>
 	 * <li><b>Unregister components of ui element from systems:</b>
 	 * <ul>
-	 * <li>NONE</li>
+	 * <li>Drawable → GraphicSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -344,6 +367,7 @@ abstract class World {
 				}
 
 				it.remove();
+				unregisterUIElementComponents(last);
 				last = null;
 			}
 		};

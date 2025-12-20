@@ -28,7 +28,7 @@ enum CollisionResponse {
     }
 }
 
-public abstract class PhysicsComponent extends Component {
+public abstract class PhysicsComponent extends Component implements Drawable {
     protected HitBox hitBox;
 
     /**
@@ -112,4 +112,9 @@ public abstract class PhysicsComponent extends Component {
      * Draw the hit box in the graphics system if {@link PhysicsComponent}.enableDebug is true.
      */
     public abstract void draw();
+
+    @Override
+    public GraphicLayer getLayer() {
+        return GraphicLayer.UI;
+    }
 }

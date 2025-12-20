@@ -21,6 +21,10 @@ public abstract class TextElement extends UIElement {
             public void update(double deltaTime) {
             }
 
+            @Override
+            public GraphicLayer getLayer() {
+                return GraphicLayer.UI;
+            }
         });
     }
 

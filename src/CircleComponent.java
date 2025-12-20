@@ -30,4 +30,9 @@ public class CircleComponent extends VisualComponent {
     @Override
     public void update(double deltaTime) {
     }
+
+    @Override
+    public GraphicLayer getLayer() {
+        return GraphicLayer.GAME;
+    }
 }

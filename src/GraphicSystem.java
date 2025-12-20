@@ -1,9 +1,20 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JPanel;
+
+enum GraphicLayer {
+    BACKGROUND, GAME, EFFECTS, UI,
+}
 
 public class GraphicSystem extends JPanel {
     private static GraphicSystem instance;
+    private Map<GraphicLayer, ArrayList<Drawable>> drawables;
+
+    public static boolean showFPS = false;
+    private long lastTime;
 
     // GraphicsSystem variables
     private GraphicsConfiguration graphicsConf = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
@@ -20,6 +31,9 @@ public class GraphicSystem extends JPanel {
         this.addMouseListener(InputSystem.getInstance());
         this.addMouseMotionListener(InputSystem.getInstance());
         this.addKeyListener(InputSystem.getInstance());
+
+        this.drawables = new HashMap<>();
+        this.lastTime = System.currentTimeMillis();
     }
 
     /**
@@ -31,6 +45,30 @@ public class GraphicSystem extends JPanel {
         }
 
         return instance;
+    }
+
+    /**
+     * Register a drawable component for the visualization
+     * 
+     * @param component The component to register
+     * @param layer The Layer the component should be drawn in
+     */
+    public void registerComponent(Drawable component) {
+        drawables.putIfAbsent(component.getLayer(), new ArrayList<>());
+        drawables.get(component.getLayer()).add(component);
+    }
+
+    /**
+     * Unregister a drawable component from the visualization
+     * 
+     * @param component The component to unregister
+     */
+    public void unregisterComponent(Drawable component) {
+        drawables.forEach((l, d) -> {
+            if (d.remove(component)) {
+                return;
+            }
+        });
     }
 
     /**
@@ -51,15 +89,13 @@ public class GraphicSystem extends JPanel {
     }
 
     /**
-     * Draw the visual component of the entity on the Screen
-     * 
-     * @param entity The entity to draw
+     * Draw the entities on the Screen
      */
-    public void draw(Entity entity) {
-        entity.getComponent(VisualComponent.class).ifPresent(component -> component.draw());
-        if (PhysicsSystem.enableDebug) {
-            entity.getComponent(PhysicsComponent.class).ifPresent(component -> component.draw());
-        }
+    public void draw() {
+        drawables.getOrDefault(GraphicLayer.BACKGROUND, new ArrayList<>()).forEach(entity -> entity.draw());
+        drawables.getOrDefault(GraphicLayer.GAME, new ArrayList<>()).forEach(entity -> entity.draw());
+        drawables.getOrDefault(GraphicLayer.EFFECTS, new ArrayList<>()).forEach(entity -> entity.draw());
+        drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).forEach(entity -> entity.draw());
     }
 
     /**
@@ -145,6 +181,14 @@ public class GraphicSystem extends JPanel {
      * Draw the objects to screen
      */
     public void swapBuffers() {
+        if (showFPS) {
+            long currentTime = System.currentTimeMillis();
+            long diff = currentTime - lastTime;
+            lastTime = currentTime;
+
+            this.drawString("FPS: " + (int) Math.ceil(1000.0 / diff), 20, 40, new DrawStyle().color(Color.MAGENTA));
+        }
+
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);
     }
 }

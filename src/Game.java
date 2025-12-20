@@ -4,7 +4,7 @@ import java.util.Optional;
 final class Game {
 	private World world = null;
 	// defines maximum frame rate
-	private static final int FRAME_MINIMUM_MILLIS = 10;
+	private static final int FRAME_MINIMUM_MILLIS = 5;
 
 	public Game() {
 		// Setup the window
@@ -12,6 +12,7 @@ final class Game {
 		frame.displayOnScreen();
 		// TODO: Allow to enable debug by key
 		PhysicsSystem.enableDebug = true;
+		GraphicSystem.showFPS = true;
 
 		// Create a new world
 		this.world = new ZombieWorld();
@@ -96,22 +97,9 @@ final class Game {
 			// adjust displayed pane of the world
 			this.world.adjustWorldPart();
 
-			// draw all Objects
+			// Draw everything
 			GraphicSystem.getInstance().clear();
-			entityIt = this.world.entityIterator();
-			while (entityIt.hasNext()) {
-				Entity e = entityIt.next();
-				GraphicSystem.getInstance().draw(e);
-
-			}
-
-			// draw all TextObjects
-			uiIt = this.world.uiElementIterator();
-			while (uiIt.hasNext()) {
-				UIElement ui = uiIt.next();
-				GraphicSystem.getInstance().draw(ui);
-
-			}
+			GraphicSystem.getInstance().draw();
 
 			// redraw everything
 			GraphicSystem.getInstance().swapBuffers();
