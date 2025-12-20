@@ -1,6 +1,3 @@
-
-// (c) Thorsten Hasbargen
-
 import java.awt.Color;
 
 class Avatar extends Creature {
@@ -12,9 +9,12 @@ class Avatar extends Creature {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, 15, new Color(96, 96, 255));
-		this.movementComponent = this.add(new PlayerMovementComponent(this, 0, 200));
-		this.lifeComponent = this.add(new LifeComponent(this, 1));
+		super(startX, startY, 15, new Color(96, 96, 255), e -> new PlayerMovementComponent(e, 0, 200), e -> new LifeComponent(e, 1));
+	}
+
+	@Override
+	public PlayerMovementComponent getMovementComponent() {
+		return (PlayerMovementComponent) super.getMovementComponent();
 	}
 
 	@Override
@@ -26,14 +26,14 @@ class Avatar extends Creature {
 	protected void onCollisionStart(Collision collision) {
 		// if Object is a tree, move back one step
 		if (collision.collisionResponse() == CollisionResponse.Block) {
-			this.movementComponent.moveBack();
+			this.getMovementComponent().moveBack();
 		}
 
 		// pick up Grenades
 		else if (collision.collisionResponse() == CollisionResponse.Overlap) {
 			if (collision.entity().getType() == EntityType.GRENADE_ITEM) {
-				((ZombieWorld) GameObject.world).addGrenade();
-				collision.entity().get(LivingComponent.class).ifPresent(component -> component.isLiving = false);
+				((ZombieWorld) Entity.world).addGrenade();
+				((Grenade) collision.entity()).getLifetimeComponent().kill();
 			}
 		}
 	}

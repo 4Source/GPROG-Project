@@ -2,10 +2,10 @@
 import java.awt.Color;
 
 class Gunshot extends Entity {
-	protected CircleComponent circleComponent;
-	protected LifetimeComponent lifetimeComponent;
-	protected MovementComponent movementComponent;
-	protected PhysicsComponent physicsComponent;
+	private CircleComponent circleComponent;
+	private LifetimeComponent lifetimeComponent;
+	private MovementComponent movementComponent;
+	private PhysicsComponent physicsComponent;
 
 	/**
 	 * @param posX The initial position in x of the gunshot
@@ -36,6 +36,22 @@ class Gunshot extends Entity {
 		this.physicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, 4), c -> onCollision(c), c -> {}));
 	}
 
+	public CircleComponent getCircleComponent() {
+		return this.circleComponent;
+	}
+
+	public LifetimeComponent getLifetimeComponent() {
+		return this.lifetimeComponent;
+	}
+
+	public MovementComponent getMovementComponent() {
+		return this.movementComponent;
+	}
+
+	public PhysicsComponent getPhysicsComponent() {
+		return this.physicsComponent;
+	}
+
 	/**
 	 * The Callback function which gets executed if a collision with another entity starts
 	 * 
@@ -46,13 +62,13 @@ class Gunshot extends Entity {
 			EntityType type = collision.entity().getType();
 			// tree: shot is deleted
 			if (type == EntityType.TREE) {
-				this.lifetimeComponent.isLiving = false;
+				this.lifetimeComponent.kill();
 			}
 			// Zombie: inform Zombie it is hit
 			else if (type == EntityType.ZOMBIE) {
 				Zombie zombie = (Zombie) collision.entity();
-				zombie.lifeComponent.takeDamage(0.21);
-				this.lifetimeComponent.isLiving = false;
+				zombie.getLifeComponent().takeDamage(0.21);
+				this.lifetimeComponent.kill();
 			}
 		}
 	}

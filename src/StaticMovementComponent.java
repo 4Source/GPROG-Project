@@ -8,7 +8,6 @@ public class StaticMovementComponent extends MovementComponent {
      * @param speed The speed how fast to move
      */
     protected StaticMovementComponent(Entity entity, double alpha, double speed) {
-        super(entity, alpha, speed);
-        this.isMoving = true;
+        super(entity, alpha, speed, true);
     }
 }

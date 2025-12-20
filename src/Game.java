@@ -1,9 +1,10 @@
+import java.util.Iterator;
 import java.util.Optional;
 
 final class Game {
 	private World world = null;
 	// defines maximum frame rate
-	private static final int FRAME_MINIMUM_MILLIS = 10;
+	private static final int FRAME_MINIMUM_MILLIS = 5;
 
 	public Game() {
 		// Setup the window
@@ -11,13 +12,14 @@ final class Game {
 		frame.displayOnScreen();
 		// TODO: Allow to enable debug by key
 		PhysicsSystem.enableDebug = true;
+		GraphicSystem.showFPS = true;
 
 		// Create a new world
 		this.world = new ZombieWorld();
 
 		PhysicsSystem.setWorld(world);
 
-		GameObject.setWorld(this.world);
+		Entity.setWorld(this.world);
 
 		this.world.init();
 		// this.world.run();
@@ -33,7 +35,7 @@ final class Game {
 				try {
 					Thread.sleep(FRAME_MINIMUM_MILLIS - millisDiff);
 				} catch (Exception ex) {
-					System.err.print(ex);
+					System.err.println(ex);
 				}
 				currentTick = System.currentTimeMillis();
 				millisDiff = currentTick - lastTick;
@@ -51,40 +53,53 @@ final class Game {
 				continue;
 			}
 
-			PhysicsSystem.getInstance().update();
+			// Update all Entities
+			Iterator<Entity> entityIt = this.world.entityIterator();
+			while (entityIt.hasNext()) {
+				Entity e = entityIt.next();
 
-			// move all Objects, maybe collide them etc...
-			for (int i = 0; i < this.world.getEntities().size(); i++) {
-				GameObject entity = this.world.getEntity(i);
-				entity.update(millisDiff / 1000.0);
+				// Update entity
+				e.update(millisDiff / 1000.0);
 			}
 
-			// delete all Objects which are not living anymore
-			int gameSize = this.world.getEntities().size();
-			int num = 0;
-			while (num < gameSize) {
-				Optional<LivingComponent> component = this.world.getEntity(num).get(LivingComponent.class);
-				if (component.isPresent() && component.get().isLiving == false) {
-					this.world.removeEntity(num);
-					gameSize--;
-				} else {
-					num++;
+			// Update all UI Elements
+			Iterator<UIElement> uiIt = this.world.uiElementIterator();
+			while (uiIt.hasNext()) {
+				UIElement ui = uiIt.next();
+
+				// Update entity
+				ui.update(millisDiff / 1000.0);
+
+				// Remove entity if not alive
+				Optional<LivingComponent> c = ui.getComponent(LivingComponent.class);
+				if (c.isPresent() && c.get().isLiving() == false) {
+					uiIt.remove();
+					continue;
+				}
+			}
+
+			// Update changed collisions
+			PhysicsSystem.getInstance().update();
+
+			// Remove all dead Entities
+			entityIt = this.world.entityIterator();
+			while (entityIt.hasNext()) {
+				Entity e = entityIt.next();
+
+				// Remove entity if not alive
+				Optional<LivingComponent> c = e.getComponent(LivingComponent.class);
+				if (c.isPresent() && c.get().isLiving() == false) {
+					entityIt.remove();
+					continue;
 				}
 			}
 
 			// adjust displayed pane of the world
 			this.world.adjustWorldPart();
 
-			// draw all Objects
+			// Draw everything
 			GraphicSystem.getInstance().clear();
-			for (int i = 0; i < gameSize; i++) {
-				GraphicSystem.getInstance().draw(this.world.getEntity(i));
-			}
-
-			// draw all TextObjects
-			for (int i = 0; i < this.world.uiElements.size(); i++) {
-				GraphicSystem.getInstance().draw(this.world.uiElements.get(i));
-			}
+			GraphicSystem.getInstance().draw();
 
 			// redraw everything
 			GraphicSystem.getInstance().swapBuffers();
@@ -95,8 +110,8 @@ final class Game {
 	}
 
 	public static void main(String[] args) {
-		System.out.print("Starting game...");
+		System.out.println("Starting game...");
 		new Game();
-		System.out.print("Game stopped...");
+		System.out.println("Game stopped...");
 	}
 }

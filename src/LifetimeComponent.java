@@ -16,7 +16,7 @@ public class LifetimeComponent extends LivingComponent {
     public void update(double deltaTime) {
         this.lifetime -= deltaTime;
         if (this.lifetime < 0) {
-            this.isLiving = false;
+            this.kill();
         }
     }
 }

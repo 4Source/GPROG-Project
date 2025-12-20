@@ -80,7 +80,7 @@ public class PhysicsSystem {
 						break;
 
 					default:
-						System.err.print("Invalid CollisionResponse.");
+						System.err.println("Invalid CollisionResponse.");
 						break;
 				}
 			}
@@ -102,7 +102,6 @@ public class PhysicsSystem {
 		return Math.sqrt(xd * xd + yd * yd);
 	}
 
-	// TODO: Buffer Collisions result until a entity with dynamicPhysicsComponent has moved/created/deleted otherwise no different collisions could be expected. Only check the changed entity and update entities which previously collided or new collided
 	/**
 	 * Update the collisions of the {@link PhysicsComponent physic components} with each other
 	 */
@@ -145,7 +144,7 @@ public class PhysicsSystem {
 	 * @return A list of {@link Collision collisions} the game objects has collisions with
 	 */
 	public ArrayList<Collision> getCollisions(Entity entity) {
-		Optional<PhysicsComponent> opt = entity.get(PhysicsComponent.class);
+		Optional<PhysicsComponent> opt = entity.getComponent(PhysicsComponent.class);
 		ArrayList<Collision> result = new ArrayList<>();
 
 		// No physics component for entity
@@ -157,13 +156,13 @@ public class PhysicsSystem {
 
 		// Physics component is not registered in the PhysicsSystem
 		if (!collisionBuffer.containsKey(component)) {
-			System.err.print("PhysicsComponent of Entity is not registered!");
+			System.err.println("PhysicsComponent of Entity is not registered!");
 			return result;
 		}
 
 		// Physics component not up to date
 		if (invalidEntries.contains(component)) {
-			System.out.print("Unplanned update of PhysicsSystem!");
+			System.out.println("Unplanned update of PhysicsSystem!");
 			update();
 		}
 
@@ -180,9 +179,10 @@ public class PhysicsSystem {
 	 * Check if entity has a collision with another entity. Returns early if collision found.
 	 * 
 	 * @param entity The entity to check if it has collision
+	 * @return True when the first collision was found
 	 */
 	public boolean hasCollision(Entity entity) {
-		Optional<PhysicsComponent> opt = entity.get(PhysicsComponent.class);
+		Optional<PhysicsComponent> opt = entity.getComponent(PhysicsComponent.class);
 		AtomicBoolean result = new AtomicBoolean(false);
 
 		// No physics component for entity
@@ -194,13 +194,13 @@ public class PhysicsSystem {
 
 		// Physics component is not registered in the PhysicsSystem
 		if (!collisionBuffer.containsKey(component)) {
-			System.err.print("PhysicsComponent of Entity is not registered!");
+			System.err.println("PhysicsComponent of Entity is not registered!");
 			return false;
 		}
 
 		// Physics component not up to date
 		if (invalidEntries.contains(component)) {
-			System.out.print("Unplanned update of PhysicsSystem!");
+			System.out.println("Unplanned update of PhysicsSystem!");
 			update();
 		}
 
@@ -208,6 +208,56 @@ public class PhysicsSystem {
 			if (response != CollisionResponse.None) {
 				result.set(true);
 				return;
+			}
+		});
+
+		return result.get();
+	}
+
+	/**
+	 * Check for an entity which is not registered in the physics system if it has a collision with another entity. Returns early if collision found.
+	 * This is useful to test placement of new entities in world.
+	 * 
+	 * @param entity The entity to check if it has collision
+	 * @return True when the first collision was found
+	 */
+	public boolean testCollision(Entity entity) {
+		Optional<PhysicsComponent> opt = entity.getComponent(PhysicsComponent.class);
+		AtomicBoolean result = new AtomicBoolean(false);
+
+		// No physics component for entity
+		if (opt.isEmpty()) {
+			return false;
+		}
+
+		PhysicsComponent component = opt.get();
+
+		// Physics component is not registered in the PhysicsSystem
+		if (collisionBuffer.containsKey(component)) {
+			System.err.println("PhysicsComponent of Entity is registered, use 'hasCollision' instead if this is expected!");
+
+			// Physics component not up to date
+			if (invalidEntries.contains(component)) {
+				System.out.println("Unplanned update of PhysicsSystem!");
+				update();
+			}
+
+			this.collisionBuffer.get(component).forEach((otherComponent, response) -> {
+				if (response != CollisionResponse.None) {
+					result.set(true);
+					return;
+				}
+			});
+		}
+
+		this.collisionBuffer.keySet().forEach(otherComponent -> {
+			if (otherComponent == component) {
+				return;
+			}
+
+			CollisionResponse response = component.checkCollision(otherComponent);
+			if (response != CollisionResponse.None) {
+				result.set(true);
 			}
 		});
 

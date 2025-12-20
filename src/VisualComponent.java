@@ -1,5 +1,4 @@
-public abstract class VisualComponent extends Component {
-
+public abstract class VisualComponent extends Component implements Drawable {
     /**
      * A Component which allows the graphic system to visualize the entity.
      * 

@@ -1,23 +1,18 @@
 
 // (c) Thorsten Hasbargen
 
+import java.util.Optional;
+
 class ZombieWorld extends World {
 	private double timePassed = 0;
 	private double timeSinceLastShot = 0;
 
 	// for grenades
-	private int grenades = 5;
-	private GrenadesCounterText counterG;
-	private ZombieCounterText counterZ;
-	private HelpText helpText;
 	private double spawnGrenade = 0;
-
-	private double lifeHelpText = 10.0;
 
 	protected void init() {
 		// add the Avatar
-		this.avatar = new Avatar(2500, 2000);
-		this.addEntity(this.avatar);
+		this.addEntity(new Avatar(2500, 2000));
 
 		// set WorldPart position
 		this.worldPartX = 1500;
@@ -38,25 +33,27 @@ class ZombieWorld extends World {
 		// add one zombie
 		this.addEntity(new Zombie(100, 100));
 
-		this.counterZ = new ZombieCounterText(20, 40);
-		this.counterG = new GrenadesCounterText(770, 40);
-		this.helpText = new HelpText(100, 400, 10.0);
-
-		this.counterG.setNumber(this.grenades);
-		this.uiElements.add(this.counterZ);
-		this.uiElements.add(this.counterG);
-		this.uiElements.add(this.helpText);
+		this.addUIElement(new ZombieCounter(20, 40));
+		this.addUIElement(new GrenadesCounter(770, 40, 5));
+		this.addUIElement(new HelpText(100, 400, 10.0));
 	}
 
 	protected void processUserInput(UserInput userInput, double deltaTime) {
 		// distinguish if Avatar shall move or shoots
 		int button = userInput.mouseButton;
 
+		Optional<Avatar> opt = this.getEntity(Avatar.class);
+		if (opt.isEmpty()) {
+			System.err.println("No avatar found");
+			return;
+		}
+		Avatar avatar = opt.get();
+
 		// Mouse events
 		if (userInput.isMouseEvent) {
 			// move
 			if (button == 1) {
-				((TargetMovementComponent) this.avatar.movementComponent).setDestination(userInput.mousePressedX + this.worldPartX, userInput.mousePressedY + this.worldPartY);
+				avatar.getMovementComponent().setDestination(userInput.mousePressedX + this.worldPartX, userInput.mousePressedY + this.worldPartY);
 			}
 		}
 
@@ -67,7 +64,7 @@ class ZombieWorld extends World {
 			if (this.timeSinceLastShot > 0.2) {
 				this.timeSinceLastShot = 0;
 
-				Gunshot shot = new Gunshot(this.avatar.posX, this.avatar.posY, userInput.mouseMovedX + this.worldPartX, userInput.mouseMovedY + this.worldPartY);
+				Gunshot shot = new Gunshot(avatar.posX, avatar.posY, userInput.mouseMovedX + this.worldPartX, userInput.mouseMovedY + this.worldPartY);
 				this.addEntity(shot);
 			}
 		}
@@ -90,8 +87,16 @@ class ZombieWorld extends World {
 	 * @param posY the position in y where the grenade should be thrown to
 	 */
 	private void throwGrenade(double posX, double posY) {
-		if (this.grenades <= 0)
+		Optional<GrenadesCounter> opt = this.getUIElement(GrenadesCounter.class);
+		if (opt.isEmpty()) {
+			System.err.println("Could not find GrenadesCounterText");
 			return;
+		}
+
+		GrenadesCounter grenades = opt.get();
+		if (grenades.getNumber() <= 0) {
+			return;
+		}
 
 		// throw grenade
 		for (int i = 0; i < 2000; i++) {
@@ -103,22 +108,12 @@ class ZombieWorld extends World {
 		}
 
 		// inform counter
-		this.grenades--;
-		this.counterG.setNumber(this.grenades);
+		grenades.decrement();
 	}
 
 	protected void createNewObjects(double deltaTime) {
 		createZombie(deltaTime);
 		createGrenade(deltaTime);
-
-		// delete HelpText after ... seconds
-		if (this.helpText != null) {
-			this.lifeHelpText -= deltaTime;
-			if (this.lifeHelpText < 0) {
-				uiElements.remove(this.helpText);
-				this.helpText = null;
-			}
-		}
 	}
 
 	private void createGrenade(double deltaTime) {
@@ -132,9 +127,16 @@ class ZombieWorld extends World {
 			double x = this.worldPartX + Math.random() * Constants.WORLDPART_WIDTH;
 			double y = this.worldPartY + Math.random() * Constants.WORLDPART_HEIGHT;
 
+			Optional<Avatar> opt = this.getEntity(Avatar.class);
+			if (opt.isEmpty()) {
+				System.err.println("No avatar found");
+				return;
+			}
+			Avatar avatar = opt.get();
+
 			// if too close to Avatar, cancel
-			double dx = x - this.avatar.posX;
-			double dy = y - this.avatar.posY;
+			double dx = x - avatar.posX;
+			double dy = y - avatar.posY;
 			if (dx * dx + dy * dy < 200 * 200) {
 				this.spawnGrenade = INTERVAL;
 				return;
@@ -142,14 +144,14 @@ class ZombieWorld extends World {
 
 			// if collisions occur, cancel
 			Grenade grenade = new Grenade(x, y);
-			if (PhysicsSystem.getInstance().hasCollision(grenade)) {
+			if (PhysicsSystem.getInstance().testCollision(grenade)) {
 				this.spawnGrenade = INTERVAL;
 				return;
 			}
 
 			// else add zombie to world
 			this.addEntity(grenade);
-			this.counterG.setNumber(this.grenades);
+			// this.counterG.setNumber(this.grenades);
 		}
 
 	}
@@ -171,9 +173,16 @@ class ZombieWorld extends World {
 				y = this.worldPartY + Math.random() * Constants.WORLDPART_HEIGHT;
 			}
 
+			Optional<Avatar> optA = this.getEntity(Avatar.class);
+			if (optA.isEmpty()) {
+				System.err.println("Could not find Avatar");
+				return;
+			}
+			Avatar avatar = optA.get();
+
 			// if too close to Avatar, cancel
-			double dx = x - this.avatar.posX;
-			double dy = y - this.avatar.posY;
+			double dx = x - avatar.posX;
+			double dy = y - avatar.posY;
 			if (dx * dx + dy * dy < 400 * 400) {
 				this.timePassed = INTERVAL;
 				return;
@@ -181,24 +190,34 @@ class ZombieWorld extends World {
 
 			// if collisions occur, cancel
 			Zombie zombie = new Zombie(x, y);
-			if (PhysicsSystem.getInstance().hasCollision(zombie)) {
+			if (PhysicsSystem.getInstance().testCollision(zombie)) {
 				this.timePassed = INTERVAL;
 				return;
 			}
 
 			// else add zombie to world
 			this.addEntity(zombie);
-			((TargetMovementComponent) ((Creature) zombie).movementComponent).setDestination(this.avatar);
-			ZombieCounterText counter = (ZombieCounterText) this.uiElements.get(0);
+			zombie.getMovementComponent().setDestination(avatar);
+			Optional<ZombieCounter> optZ = this.getUIElement(ZombieCounter.class);
+			if (optZ.isEmpty()) {
+				System.err.println("Could not find ZombieCounter");
+			}
+			ZombieCounter counter = optZ.get();
 			counter.increment();
 		}
 
 	}
 
 	public void addGrenade() {
-		if (this.grenades < 999) {
-			this.grenades++;
+		Optional<GrenadesCounter> opt = this.getUIElement(GrenadesCounter.class);
+		if (opt.isEmpty()) {
+			System.err.println("Could not find GrenadesCounterText");
+			return;
 		}
-		this.counterG.setNumber(this.grenades);
+
+		GrenadesCounter grenades = opt.get();
+		if (grenades.getNumber() < 999) {
+			grenades.increment();
+		}
 	}
 }
