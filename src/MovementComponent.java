@@ -40,7 +40,7 @@ public abstract class MovementComponent extends Component {
     /**
      * Move back to the position before the move Method was called
      */
-    protected void moveBack() {
+    public void moveBack() {
         this.entity.posX = this.oldX;
         this.entity.posY = this.oldY;
     }

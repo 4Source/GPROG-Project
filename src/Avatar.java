@@ -9,7 +9,7 @@ class Avatar extends Creature {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, 15, new Color(96, 96, 255), e -> new PlayerMovementComponent(e, 0, 200), e -> new LifeComponent(e, 1));
+		super(startX, startY, 15, new Color(96, 96, 255), e -> new PlayerMovementComponent(e, 0, 200), e -> new LifeComponent(e, 100));
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 public class LifetimeComponent extends LivingComponent {
-    protected double lifetime;
+    private double lifetime;
 
     /**
      * A Component which provides a lifetime. When the lifetime falls below 0 the entity dies.

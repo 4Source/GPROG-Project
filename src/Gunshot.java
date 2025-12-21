@@ -67,7 +67,7 @@ class Gunshot extends Entity {
 			// Zombie: inform Zombie it is hit
 			else if (type == EntityType.ZOMBIE) {
 				Zombie zombie = (Zombie) collision.entity();
-				zombie.getLifeComponent().takeDamage(0.21);
+				zombie.getLifeComponent().takeDamage(21);
 				this.lifetimeComponent.kill();
 			}
 		}

@@ -2,7 +2,6 @@ import java.awt.Color;
 import java.awt.Font;
 
 public abstract class TextElement extends UIElement {
-
     /**
      * @param posX The position in x direction
      * @param posY The position in y direction
@@ -10,7 +9,7 @@ public abstract class TextElement extends UIElement {
      * @param font The font to use to print the text to the screen
      */
     public TextElement(double posX, double posY, Color color, Font font) {
-        super(posX, posY, color, font, e -> new TextComponent(e, color, font) {
+        super(posX, posY, e -> new TextComponent(e, color, font) {
 
             @Override
             public String toString() {
