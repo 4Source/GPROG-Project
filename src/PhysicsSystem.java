@@ -102,6 +102,10 @@ public class PhysicsSystem {
 	 * Update the collisions of the {@link PhysicsComponent physic components} with each other
 	 */
 	public void update() {
+		if (InputSystem.getInstance().isPressed(Action.SHOW_HIT_BOXES)) {
+			PhysicsSystem.enableDebug = !PhysicsSystem.enableDebug;
+		}
+
 		Iterator<PhysicsComponent> it = invalidEntries.iterator();
 		while (it.hasNext()) {
 			PhysicsComponent component = it.next();

@@ -9,6 +9,7 @@ public enum Action {
     THROW_GRENADE("Throw grenade"), 
     GAME_PAUSE("Game pause"), 
     PRIMARY_CLICK(null),
+    SHOW_HIT_BOXES(null),
     SHOW_FPS(null);
 
     private final String label;

@@ -10,8 +10,6 @@ final class Game {
 		// Setup the window
 		Frame frame = new Frame();
 		frame.displayOnScreen();
-		// TODO: Allow to enable debug by key
-		PhysicsSystem.enableDebug = true;
 
 		// Create a new world
 		this.world = new ZombieWorld();
@@ -79,11 +77,11 @@ final class Game {
 
 			GraphicSystem.getInstance().update();
 
-			// After handled the inputs of components clear the input system
-			InputSystem.getInstance().clear();
-
 			// Update changed collisions
 			PhysicsSystem.getInstance().update();
+
+			// After handled the inputs of components clear the input system
+			InputSystem.getInstance().clear();
 
 			// Remove all dead Entities
 			entityIt = this.world.entityIterator();
