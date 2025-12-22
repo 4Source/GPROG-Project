@@ -11,10 +11,10 @@ classDiagram
         - components : Component [*]
 
         + add(T : component) : T
-        + getComponentExactly(type : T) T [0..1]
-        + getComponent(type : T) T [0..1]
-        + getDrawable() : Drawable [0..1]
-        + getDrawables() : Drawable [*]
+        + getComponent(type : T) Component [0..1]
+        + getComponents(type : T) Component [*]
+        + getComponentByCapability(type : T) : Capability [0..1]
+        + getComponentsByCapability(type : T) : Capability [*]
         + getType() : EntityType
         + update(deltaTime : double) : void
         + setWorld(world : World) : void $
@@ -144,12 +144,18 @@ classDiagram
     }
 
     %% 
-    %% Drawable
+    %% Capabilities
     %% 
 
+    class Capability {
+
+    }
+    <<Interface>> Capability 
+    
+    Capability <|.. Drawable
     class Drawable {
         + draw() : void
-        + getLayer : GraphicLayer
+        + getLayer() : GraphicLayer
     }
     <<interface>> Drawable
 

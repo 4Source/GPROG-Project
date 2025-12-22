@@ -22,7 +22,7 @@ abstract class World {
 
 	private final void registerEntityComponents(Entity entity) {
 		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().registerComponent(c));
-		entity.getDrawables().forEach(c -> GraphicSystem.getInstance().registerComponent(c));
+		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().registerComponent(c));
 	}
 
 	/**
@@ -47,7 +47,7 @@ abstract class World {
 
 	private final void unregisterEntityComponents(Entity entity) {
 		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
-		entity.getDrawables().forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
+		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
 	}
 
 	/**
@@ -200,7 +200,7 @@ abstract class World {
 	}
 
 	private final void registerUIElementComponents(UIElement uiElement) {
-		uiElement.getDrawables().forEach(c -> GraphicSystem.getInstance().registerComponent(c));
+		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().registerComponent(c));
 	}
 
 	/**
@@ -223,7 +223,7 @@ abstract class World {
 	}
 
 	private final void unregisterUIElementComponents(UIElement uiElement) {
-		uiElement.getDrawables().forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
+		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
 	}
 
 	/**

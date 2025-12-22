@@ -36,17 +36,6 @@ public abstract class Entity {
      * Get a component from the entity
      * 
      * @param <T> The type of Component which should be returned
-     * @param type The class of Component which should be returned. The Class of the component has to match exactly
-     * @return A optional which could hold the Component with the class if it existed in the entity
-     */
-    public <T extends Component> Optional<T> getComponentExactly(Class<T> type) {
-        return Optional.ofNullable(type.cast(components.get(type)));
-    }
-
-    /**
-     * Get a component from the entity
-     * 
-     * @param <T> The type of Component which should be returned
      * @param type The class of Component which should be returned. The Class or inherited classes from it will match
      * @return A optional which could hold the Component with the class if it existed in the entity
      */
@@ -60,29 +49,51 @@ public abstract class Entity {
     }
 
     /**
-     * Get a component from the entity which implements drawable interface
+     * Get the components from the entity
      * 
+     * @param <T> The type of Component which should be returned
+     * @param type The class of Component which should be returned. The Class or inherited classes from it will match
+     * @return A List of components which extend the type of component
+     */
+    public <T extends Component> ArrayList<T> getComponents(Class<T> type) {
+        ArrayList<T> result = new ArrayList<>();
+        for (Component c : components.values()) {
+            if (type.isInstance(c)) {
+                result.add(type.cast(c));
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Get a component from the entity which implements a capability interface
+     * 
+     * @param <T> The type of the capability which should be returned
+     * @param type The interface of capability which should be returned. The interface or inherited interfaces from it will match
      * @return An optional which could hold the Component with the class if it existed in the entity
      */
-    public Optional<Drawable> getDrawable() {
+    public <T extends Capability> Optional<T> getComponentByCapability(Class<T> type) {
         for (Component c : components.values()) {
-            if (c instanceof Drawable d) {
-                return Optional.of(d);
+            if (type.isInstance(c)) {
+                return Optional.of(type.cast(c));
             }
         }
         return Optional.empty();
     }
 
     /**
-     * Get the components from the entity which implements drawable interface
+     * Get the components from the entity which implements a capability interface
      * 
-     * @return A List of components which implement the drawable
+     * @param <T> The type of the capability which should be returned
+     * @param type The interface of capability which should be returned. The interface or inherited interfaces from it will match
+     * @return A List of components which implement the capability
      */
-    public ArrayList<Drawable> getDrawables() {
-        ArrayList<Drawable> result = new ArrayList<>();
+    public <T extends Capability> ArrayList<T> getComponentsByCapability(Class<T> type) {
+
+        ArrayList<T> result = new ArrayList<>();
         for (Component c : components.values()) {
-            if (c instanceof Drawable d) {
-                result.add(d);
+            if (type.isInstance(c)) {
+                result.add(type.cast(c));
             }
         }
         return result;
