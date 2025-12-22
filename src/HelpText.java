@@ -1,5 +1,6 @@
 import java.awt.Color;
 import java.awt.Font;
+import java.util.List;
 
 public class HelpText extends TextElement {
     private LifetimeComponent lifetimeComponent;
@@ -20,6 +21,14 @@ public class HelpText extends TextElement {
 
     @Override
     public String toString() {
-        return "MOVE:Mouse left      SHOOT:Mouse right      Grenade:Space bar     END: Escape";
+        String res = "";
+        for (Action a : Action.values()) {
+            String name = a.toString();
+            List<String> keys = InputSystem.getInstance().getKeyMapping(a);
+            if (name != null && keys.size() > 0) {
+                res += String.format("%s: %s | ", name, keys);
+            }
+        }
+        return res;
     }
 }

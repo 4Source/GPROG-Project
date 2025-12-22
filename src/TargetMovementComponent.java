@@ -10,7 +10,7 @@ public class TargetMovementComponent extends MovementComponent {
      * @param speed The speed how fast to move
      */
     protected TargetMovementComponent(Entity entity, double alpha, double speed) {
-        super(entity, alpha, speed, false);
+        super(entity, alpha, speed);
         this.hasDestination = false;
     }
 
@@ -21,7 +21,7 @@ public class TargetMovementComponent extends MovementComponent {
      * @param destinationY The world position y where to move
      */
     protected TargetMovementComponent(Entity entity, double speed, double destinationX, double destinationY) {
-        super(entity, Math.atan2(destinationY - entity.posY, destinationX - entity.posX), speed, false);
+        super(entity, Math.atan2(destinationY - entity.posY, destinationX - entity.posX), speed);
         this.hasDestination = true;
     }
 
@@ -33,12 +33,12 @@ public class TargetMovementComponent extends MovementComponent {
             double diffX = Math.abs(this.entity.posX - this.destX);
             double diffY = Math.abs(this.entity.posY - this.destY);
             if (diffX < 3 && diffY < 3) {
-                this.isMoving = false;
+                this.hasDestination = false;
                 return;
             }
-        }
 
-        super.update(deltaTime);
+            super.update(deltaTime);
+        }
     }
 
     /**
@@ -48,7 +48,6 @@ public class TargetMovementComponent extends MovementComponent {
      * @param destinationY The world position y where to move
      */
     public void setDestination(double destinationX, double destinationY) {
-        this.isMoving = true;
         this.hasDestination = true;
         this.destX = destinationX;
         this.destY = destinationY;

@@ -2,7 +2,7 @@ import java.awt.Color;
 import java.awt.Font;
 
 public class LifeComponent extends LivingComponent implements Drawable {
-    protected double life;
+    private int life;
     private double damageTextTimeout;
     private String damageText;
     private static final double INITIAL_TIMEOUT = 0.15;
@@ -13,20 +13,20 @@ public class LifeComponent extends LivingComponent implements Drawable {
      * @param entity The entity to which the components belongs to
      * @param life The initial life of the component
      */
-    protected LifeComponent(Entity entity, double life) {
+    protected LifeComponent(Entity entity, int life) {
         super(entity);
         this.life = life;
-        this.damageTextTimeout = 0;
+        this.damageTextTimeout = 0.0;
     }
 
     /**
      * Reduce the life by damage
      */
-    public void takeDamage(double damage) {
+    public void takeDamage(int damage) {
         // every shot decreases life
         this.life -= damage;
         this.damageTextTimeout = LifeComponent.INITIAL_TIMEOUT;
-        this.damageText = Double.toString(damage);
+        this.damageText = Integer.toString(damage);
 
         if (this.life <= 0) {
             this.kill();
@@ -36,20 +36,20 @@ public class LifeComponent extends LivingComponent implements Drawable {
     /**
      * Increases the life by health
      */
-    public void restoreHealth(double health) {
+    public void restoreHealth(int health) {
         this.life += health;
     }
 
     @Override
     public void update(double deltaTime) {
-        if (this.damageTextTimeout > 0) {
+        if (this.damageTextTimeout > 0.0) {
             this.damageTextTimeout -= deltaTime;
         }
     }
 
     @Override
     public void draw() {
-        if (this.damageTextTimeout > 0) {
+        if (this.damageTextTimeout > 0.0) {
             GraphicSystem.getInstance().drawString(damageText, (int) (this.entity.posX - Entity.world.worldPartX), (int) (this.entity.posY - Entity.world.worldPartY), new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
         }
     }

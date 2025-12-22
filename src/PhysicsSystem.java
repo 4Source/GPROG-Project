@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PhysicsSystem {
 	private static PhysicsSystem instance;
-	private static World world;
 	public static boolean enableDebug = false;
 	private Map<PhysicsComponent, Map<PhysicsComponent, CollisionResponse>> collisionBuffer;
 	private Set<PhysicsComponent> invalidEntries;
@@ -24,9 +23,6 @@ public class PhysicsSystem {
 	 * @return The instance of the singleton or newly created if first access.
 	 */
 	public static synchronized PhysicsSystem getInstance() {
-		if (PhysicsSystem.world == null) {
-			throw new Error("PhysicsSystem needs a World to work with but no world set!");
-		}
 		if (PhysicsSystem.instance == null) {
 			PhysicsSystem.instance = new PhysicsSystem();
 		}
@@ -262,14 +258,5 @@ public class PhysicsSystem {
 		});
 
 		return result.get();
-	}
-
-	/**
-	 * Set the world where the physics system should control
-	 * 
-	 * @param world The world to which it should be set
-	 */
-	static void setWorld(World world) {
-		PhysicsSystem.world = world;
 	}
 }

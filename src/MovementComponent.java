@@ -1,7 +1,6 @@
 public abstract class MovementComponent extends Component {
     protected double alpha;
     protected double speed;
-    protected boolean isMoving;
     protected double oldX, oldY;
 
     /**
@@ -10,21 +9,15 @@ public abstract class MovementComponent extends Component {
      * @param entity The entity to which the components belongs to
      * @param alpha The angle of rotation in radian
      * @param speed The speed how fast to move
-     * @param isMoving Specifies if the entity is initially moving
      */
-    protected MovementComponent(Entity entity, double alpha, double speed, boolean isMoving) {
+    protected MovementComponent(Entity entity, double alpha, double speed) {
         super(entity);
         this.alpha = alpha;
         this.speed = speed;
-        this.isMoving = isMoving;
     }
 
     @Override
     public void update(double deltaTime) {
-        if (!this.isMoving) {
-            return;
-        }
-
         this.entity.getComponent(PhysicsComponent.class).ifPresent(component -> PhysicsSystem.getInstance().invalidateBufferFor(component));
 
         // remember old position
@@ -40,7 +33,7 @@ public abstract class MovementComponent extends Component {
     /**
      * Move back to the position before the move Method was called
      */
-    protected void moveBack() {
+    public void moveBack() {
         this.entity.posX = this.oldX;
         this.entity.posY = this.oldY;
     }

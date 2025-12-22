@@ -16,20 +16,20 @@ public abstract class Counter extends TextElement {
         this.number = number;
     }
 
-    public int getNumber() {
+    public final int getNumber() {
         return this.number;
     }
 
-    public void setNumber(int number) {
+    public final void setNumber(int number) {
         this.number = number;
     }
 
-    public int increment() {
+    public final int increment() {
         this.number++;
         return this.number;
     }
 
-    public int decrement() {
+    public final int decrement() {
         this.number--;
         return this.number;
     }

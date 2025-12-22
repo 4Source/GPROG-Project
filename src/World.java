@@ -16,13 +16,37 @@ abstract class World {
 	// all objects in the game, including the Avatar
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 	private ArrayList<UIElement> uiElements = new ArrayList<UIElement>();
+	private ArrayList<Entity> pendingAdditions = new ArrayList<>();
+	private ArrayList<Entity> pendingRemovals = new ArrayList<>();
 
 	World() {
 	}
 
+	public final void spawnEntity(Entity entity) {
+		pendingAdditions.add(entity);
+	}
+
+	public final void despawnEntity(Entity entity) {
+		pendingRemovals.add(entity);
+	}
+
+	public final void update() {
+		// Add new entities
+		for (Entity e : pendingAdditions) {
+			addEntity(e);
+		}
+		pendingAdditions.clear();
+
+		// Remove entities
+		for (Entity e : pendingRemovals) {
+			removeEntity(e);
+		}
+		pendingRemovals.clear();
+	}
+
 	private final void registerEntityComponents(Entity entity) {
 		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().registerComponent(c));
-		entity.getDrawables().forEach(c -> GraphicSystem.getInstance().registerComponent(c));
+		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().registerComponent(c));
 	}
 
 	/**
@@ -40,14 +64,14 @@ abstract class World {
 	 * 
 	 * @param entity The entity which should be added to the world
 	 */
-	public final void addEntity(Entity entity) {
+	private final void addEntity(Entity entity) {
 		this.entities.add(entity);
 		this.registerEntityComponents(entity);
 	}
 
 	private final void unregisterEntityComponents(Entity entity) {
 		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
-		entity.getDrawables().forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
+		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
 	}
 
 	/**
@@ -65,7 +89,7 @@ abstract class World {
 	 * 
 	 * @param entity The entity which should be removed from the world
 	 */
-	public final void removeEntity(Entity entity) {
+	private final void removeEntity(Entity entity) {
 		this.entities.remove(entity);
 		this.unregisterEntityComponents(entity);
 	}
@@ -85,7 +109,7 @@ abstract class World {
 	 * 
 	 * @param index The index of the entity which should be removed from the world
 	 */
-	public final void removeEntity(int index) {
+	private final void removeEntity(int index) {
 		Entity entity = this.getEntity(index);
 		this.removeEntity(entity);
 	}
@@ -200,7 +224,7 @@ abstract class World {
 	}
 
 	private final void registerUIElementComponents(UIElement uiElement) {
-		uiElement.getDrawables().forEach(c -> GraphicSystem.getInstance().registerComponent(c));
+		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().registerComponent(c));
 	}
 
 	/**
@@ -223,7 +247,7 @@ abstract class World {
 	}
 
 	private final void unregisterUIElementComponents(UIElement uiElement) {
-		uiElement.getDrawables().forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
+		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
 	}
 
 	/**
@@ -421,8 +445,6 @@ abstract class World {
 	}
 
 	protected abstract void init();
-
-	protected abstract void processUserInput(UserInput input, double deltaTime);
 
 	protected abstract void createNewObjects(double deltaTime);
 

@@ -1,4 +1,4 @@
-public interface Drawable {
+public interface Drawable extends Capability {
     /**
      * Draw the component in the graphics system.
      */

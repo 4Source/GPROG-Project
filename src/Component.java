@@ -11,7 +11,7 @@ public abstract class Component {
     /**
      * Update the component using delta time to get constant change with varying fps
      * 
-     * @param deltaTime The time since last frame
+     * @param deltaTime The time since last frame in seconds
      */
     public abstract void update(double deltaTime);
 }

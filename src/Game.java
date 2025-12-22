@@ -17,8 +17,6 @@ final class Game {
 		// Create a new world
 		this.world = new ZombieWorld();
 
-		PhysicsSystem.setWorld(world);
-
 		Entity.setWorld(this.world);
 
 		this.world.init();
@@ -26,6 +24,8 @@ final class Game {
 		long lastTick = System.currentTimeMillis();
 
 		while (true) {
+			this.world.update();
+
 			// calculate elapsed time
 			long currentTick = System.currentTimeMillis();
 			long millisDiff = currentTick - lastTick;
@@ -43,10 +43,10 @@ final class Game {
 
 			lastTick = currentTick;
 
-			// process User Input
-			UserInput userInput = InputSystem.getInstance().getUserInput();
-			world.processUserInput(userInput, millisDiff / 1000.0);
-			userInput.clear();
+			// Open Pause menu
+			if (InputSystem.getInstance().isPressed(Action.GAME_PAUSE)) {
+				System.exit(0);
+			}
 
 			// no actions if game is over
 			if (this.world.gameOver) {
@@ -78,6 +78,9 @@ final class Game {
 				}
 			}
 
+			// After handled the inputs of components clear the input system
+			InputSystem.getInstance().clear();
+
 			// Update changed collisions
 			PhysicsSystem.getInstance().update();
 
@@ -104,6 +107,7 @@ final class Game {
 			// redraw everything
 			GraphicSystem.getInstance().swapBuffers();
 
+			// TODO: Entities which can Spawn should implement spawnable
 			// create new objects if needed
 			this.world.createNewObjects(millisDiff / 1000.0);
 		}
