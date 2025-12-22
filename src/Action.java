@@ -8,7 +8,8 @@ public enum Action {
     INTERACT("Interact"), 
     THROW_GRENADE("Throw grenade"), 
     GAME_PAUSE("Game pause"), 
-    PRIMARY_CLICK(null);
+    PRIMARY_CLICK(null),
+    SHOW_FPS(null);
 
     private final String label;
 

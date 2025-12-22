@@ -12,7 +12,6 @@ final class Game {
 		frame.displayOnScreen();
 		// TODO: Allow to enable debug by key
 		PhysicsSystem.enableDebug = true;
-		GraphicSystem.showFPS = true;
 
 		// Create a new world
 		this.world = new ZombieWorld();
@@ -77,6 +76,8 @@ final class Game {
 					continue;
 				}
 			}
+
+			GraphicSystem.getInstance().update();
 
 			// After handled the inputs of components clear the input system
 			InputSystem.getInstance().clear();

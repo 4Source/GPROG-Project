@@ -363,20 +363,21 @@ classDiagram
     <<Singleton>> PhysicsSystem
     PhysicsSystem -- PhysicsComponent
 
-    class GraphicsSystem {
-        - instance : GraphicsSystem $
+    class GraphicSystem {
+        - instance : GraphicSystem $
         - drawables : GraphicLayer, Drawable [*]
-        + showFPS : boolean $
+        - showFPS : boolean $
         - lastTime : long
         - graphicsConf : GraphicsConfiguration
         - imageBuffer : BufferedImage
         - graphics : Graphics2D
-        - GraphicsSystem()
-        + getInstance() : GraphicsSystem$
+        - GraphicSystem()
+        + getInstance() : GraphicSystem$
         + registerComponent(component : Drawable) : void
         + unregisterComponent(component : Drawable) : void
         + clear() : void
         - setStyle(style : DrawStyle) : void
+        + update() : void
         + draw() : void
         + drawString(str: String, x : int, y : int, style : DrawStyle) : void
         + drawFillOval(x : int, y : int, width : int, height : int, style : DrawStyle) : void
@@ -385,8 +386,8 @@ classDiagram
         + drawRect(x : int, y : int, width : int, height : int, style : DrawStyle) : void
         + swapBuffers() : void
     }
-    <<Singleton>> GraphicsSystem
-    GraphicsSystem -- Drawable
+    <<Singleton>> GraphicSystem
+    GraphicSystem -- Drawable
 
     class InputSystem {
         - instance : InputSystem $

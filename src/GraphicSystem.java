@@ -13,7 +13,7 @@ public class GraphicSystem extends JPanel {
     private static GraphicSystem instance;
     private Map<GraphicLayer, ArrayList<Drawable>> drawables;
 
-    public static boolean showFPS = false;
+    private static boolean showFPS = false;
     private long lastTime;
 
     // GraphicsSystem variables
@@ -86,6 +86,12 @@ public class GraphicSystem extends JPanel {
         graphics.setColor(style.color());
         graphics.setStroke(style.stroke());
         graphics.setFont(style.font());
+    }
+
+    public void update() {
+        if (InputSystem.getInstance().isPressed(Action.SHOW_FPS)) {
+            GraphicSystem.showFPS = !GraphicSystem.showFPS;
+        }
     }
 
     /**
