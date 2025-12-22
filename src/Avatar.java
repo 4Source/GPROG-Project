@@ -1,6 +1,8 @@
 import java.awt.Color;
 
 class Avatar extends Creature {
+	private GunshotComponent gunshotComponent;
+	private GrenadeComponent grenadeComponent;
 
 	/**
 	 * Spawns an avatar
@@ -9,12 +11,22 @@ class Avatar extends Creature {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, 15, new Color(96, 96, 255), e -> new PlayerMovementComponent(e, 0, 200), e -> new LifeComponent(e, 100));
+		super(startX, startY, 15, new Color(96, 96, 255), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100));
+		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2));
+		this.grenadeComponent = this.add(new GrenadeComponent(this));
 	}
 
 	@Override
 	public PlayerMovementComponent getMovementComponent() {
 		return (PlayerMovementComponent) super.getMovementComponent();
+	}
+
+	public GunshotComponent getGunshotComponent() {
+		return this.gunshotComponent;
+	}
+
+	public GrenadeComponent getGrenadeComponent() {
+		return this.grenadeComponent;
 	}
 
 	@Override

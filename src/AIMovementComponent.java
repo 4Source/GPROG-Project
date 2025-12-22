@@ -40,10 +40,8 @@ public class AIMovementComponent extends TargetMovementComponent {
         double dist = PhysicsSystem.distance(this.entity.posX, this.entity.posY, avatar.posX, avatar.posY);
 
         if (dist > 1000) {
-            this.isMoving = false;
+            this.hasDestination = false;
             return;
-        } else {
-            this.isMoving = true;
         }
 
         switch (this.state) {
@@ -57,6 +55,7 @@ public class AIMovementComponent extends TargetMovementComponent {
                 this.secondsClear = 1.0 + Math.random() * 0.5;
                 // turn and hope to get clear
                 this.alpha += this.alphaClear * deltaTime;
+                this.hasDestination = true;
 
                 // try to clear
                 this.state = AIState.CLEARING;

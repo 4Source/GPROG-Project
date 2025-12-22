@@ -40,8 +40,12 @@ classDiagram
 
     Creature <|-- Avatar
     class Avatar {
+        - gunshotComponent : GunshotComponent
+        - grenadeComponent : GrenadeComponent
         /+ getType() : EntityType.AVATAR
         /+ getMovementComponent() : PlayerMovementComponent
+        + getGunshotComponent() : GunshotComponent
+        + getGrenadeComponent() : GrenadeComponent
         /# onCollisionStart(collision : Collision) : void
         /# onCollisionEnd(collision : Collision) : void
     }
@@ -159,6 +163,30 @@ classDiagram
     }
     <<interface>> Drawable
 
+    Capability <|.. MouseCapability
+    class MouseCapability {
+        + hitTest(x : double, y : double) : boolean
+    }
+    <<Interface>> MouseCapability
+
+    MouseCapability <|.. Clickable
+    class Clickable {
+        + onClick() : void
+    }
+    <<Interface>> Clickable
+
+    MouseCapability <|.. Hoverable
+    class Hoverable {
+        + onHover() : void
+    }
+    <<Interface>> Hoverable
+
+    Capability <|.. Interactable
+    class Interactable {
+        + onInteract() : void
+    }
+    <<interface>> Interactable
+
     %% 
     %% Components
     %%
@@ -169,6 +197,26 @@ classDiagram
     }
     <<Abstract>> Component
     Component o-- Entity
+
+    Component <|-- ActionComponent
+    class ActionComponent {
+        - actionHandlers : Action, ActionHandler [*]
+        /+ update(deltaTime : double) : void
+    }
+    <<Abstract>> ActionComponent
+
+    ActionComponent <|-- GrenadeComponent
+    class GrenadeComponent {
+        + onThrow(deltaTime : double) : void
+    }
+    GrenadeComponent -- GrenadesCounter
+
+    ActionComponent <|-- GunshotComponent
+    class GunshotComponent {
+        - timeSinceLastShot : double
+        - fireRate : double
+        + onShoot(deltaTime : double) : void
+    }
 
     Component <|-- LivingComponent
     class LivingComponent {
@@ -202,7 +250,6 @@ classDiagram
     class MovementComponent {
         # alpha : double
         # speed : double
-        # isMoving : boolean
         # oldX : double
         # oldY : double
         /+ update(deltaTime : double) : void
@@ -210,11 +257,15 @@ classDiagram
     }
     <<Abstract>> MovementComponent
 
+    MovementComponent <|-- PlayerMovementComponent
+    class PlayerMovementComponent {
+        /+ update(deltaTime : double) : void
+    }
+
     MovementComponent <|-- StaticMovementComponent
     class StaticMovementComponent {
 
     }
-
 
     MovementComponent <|-- TargetMovementComponent
     class TargetMovementComponent {
@@ -226,18 +277,11 @@ classDiagram
         + setDestination(destination : Entity) : void
     }
 
-
     TargetMovementComponent <|-- AIMovementComponent
     class AIMovementComponent {
         # state : AIState
         # alphaClear : double
         # secondsClear : secondsClear
-        /+ update(deltaTime : double) : void
-    }
-
-
-    TargetMovementComponent <|-- PlayerMovementComponent
-    class PlayerMovementComponent {
         /+ update(deltaTime : double) : void
     }
 
@@ -346,8 +390,31 @@ classDiagram
 
     class InputSystem {
         - instance : InputSystem $
+        - keyMapping : Action, DeviceType, int [*]
+        - actionDown : Action, boolean [*]
+        - actionPressed : Action, boolean [*]
+        - mousePositionX : int
+        - mousePositionY : int
         - InputSystem()
         + getInstance() : InputSystem$
+        - setKeyMapping(action : Action, type : DeviceType, key : int) : void
+        - getKeyMapping(action : Action, type : DeviceType) : int
+        + getKeyMapping(action : Action) : String [*]
+        + isDown(action : Action) : boolean
+        + isPressed(action : Action) : boolean
+        + getMousePositionX() : int
+        + getMousePositionY() : int
+        + clear() : void
+        /+ mousePressed(event : MouseEvent) : void
+        /+ mouseReleased(event : MouseEvent) : void
+        /+ mouseClicked(event : MouseEvent) : void
+        /+ mouseMoved(event : MouseEvent) : void
+        /+ mouseDragged(event : MouseEvent) : void
+        /+ mouseEntered(event : MouseEvent) : void
+        /+ mouseExited(event : MouseEvent) : void
+        /+ keyTyped(event : KeyEvent) : void
+        /+ keyPressed(event : KeyEvent) : void
+        /+ keyReleased(event : KeyEvent) : void
     }
     <<Singleton>> InputSystem
     InputSystem -- PlayerMovementComponent
@@ -359,11 +426,16 @@ classDiagram
     class World {
         - entities : Entity [*]
         - uiElements : UIElement [*]
+        - pendingAdditions : Entity [*]
+        - pendingRemovals : UIElement [*]
+        + spawnEntity(entity : Entity) : void
+        + despawnEntity(entity : Entity) : void
+        + update() : void
         - registerEntityComponents() : void 
-        + addEntity(entiy : Entity) : void
-        + unregisterEntityComponents(uiElement : Entity) : void
-        + removeEntity(entiy : Entity) : void
-        + removeEntity(index : int) : void
+        - addEntity(entiy : Entity) : void
+        - unregisterEntityComponents(uiElement : Entity) : void
+        - removeEntity(entiy : Entity) : void
+        - removeEntity(index : int) : void
         + getEntities() : Entity [*]
         + getEntities(type : T) : Entity [*]
         + getEntitiesWithComponent(type : T) : Entity [*]
@@ -372,7 +444,7 @@ classDiagram
         + entityIterator() : Iterator
         - registerUIElementComponents(uiElement : UIElement) : void 
         + addUIElement(uiElement : UIElement) : void
-        + unregisterUIElementComponents(uiElement : UIElement) : void
+        - unregisterUIElementComponents(uiElement : UIElement) : void
         + removeUIElement(uiElement : UIElement) : void
         + removeUIElement(index : int) : void
         + getUIElements() : UIElement [*]
@@ -381,6 +453,8 @@ classDiagram
         + getUIElement(index : int) UIElement [0..1]
         + getUIElement(type : T) UIElement [0..1]
         + uiElementIterator() : Iterator
+        # init() : void
+        # createNewObjects(deltaTime : double)
     }
     <<Abstract>> World
 
