@@ -17,8 +17,6 @@ final class Game {
 		// Create a new world
 		this.world = new ZombieWorld();
 
-		PhysicsSystem.setWorld(world);
-
 		Entity.setWorld(this.world);
 
 		this.world.init();
@@ -104,6 +102,7 @@ final class Game {
 			// redraw everything
 			GraphicSystem.getInstance().swapBuffers();
 
+			// TODO: Should happen somewhere else
 			// create new objects if needed
 			this.world.createNewObjects(millisDiff / 1000.0);
 		}

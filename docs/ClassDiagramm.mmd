@@ -302,7 +302,6 @@ classDiagram
 
     class PhysicsSystem {
         - instance : PhysicsSystem $
-        - world : World $
         + enableDebug : boolean $
         - collisionBuffer : PhysicsComponent, CollisionResponse [*]
         - invalidEntries : PhysicsComponent [*]
@@ -316,11 +315,9 @@ classDiagram
         + getCollisions(entity : Entity) :  Collision [*]
         + hasCollision(entity : Entity) : boolean
         + testCollision(entity : Entity) : boolean
-        + setWorld(world : World) : void $
     }
     <<Singleton>> PhysicsSystem
     PhysicsSystem -- PhysicsComponent
-    PhysicsSystem o-- World
 
     class GraphicsSystem {
         - instance : GraphicsSystem $
