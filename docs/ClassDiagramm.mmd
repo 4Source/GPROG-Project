@@ -25,12 +25,12 @@ classDiagram
 
     Entity <|-- Creature
     class Creature {
-        - circleComponent : CircleComponent
+        - visualComponent : VisualComponent
         - physicsComponent : PhysicsComponent
         - movementComponent : MovementComponent
         - lifeComponent : LifeComponent
-        + getCircleComponent() : CircleComponent
-        + getPhysicsComponent() : PhysicsComponent
+        + getVisualComponent() : VisualComponent
+        + getPhysicsComponent() : DynamicPhysicsComponent
         + getMovementComponent() : MovementComponent
         + getLifeComponent() : LifeComponent
         # onCollisionStart(collision : Collision) : void
@@ -43,6 +43,7 @@ classDiagram
         - gunshotComponent : GunshotComponent
         - grenadeComponent : GrenadeComponent
         /+ getType() : EntityType.AVATAR
+        /+ getVisualComponent() : CircleComponent
         /+ getMovementComponent() : PlayerMovementComponent
         + getGunshotComponent() : GunshotComponent
         + getGrenadeComponent() : GrenadeComponent
@@ -53,6 +54,7 @@ classDiagram
     Creature <|-- Zombie
     class Zombie {
         /+ getType() : EntityType.ZOMBIE
+        /+ getVisualComponent() : CircleComponent
         /+ getMovementComponent() : AIMovementComponent
         /# onCollisionStart(collision : Collision) : void
         /# onCollisionEnd(collision : Collision) : void
@@ -92,15 +94,14 @@ classDiagram
     Entity <|-- Obstacle
     class Obstacle {
         - visualComponent : VisualComponent
-        - physicsComponent : PhysicsComponent
+        - physicsComponent : StaticPhysicsComponent
         + getVisualComponent() : VisualComponent
-        + getPhysicsComponent() : PhysicsComponent
+        + getPhysicsComponent() : StaticPhysicsComponent
     }
     <<Abstract>> Obstacle
 
     Obstacle <|-- Tree
     class Tree {
-        /+ getPhysicsComponent() : StaticPhysicsComponent
         /+ getVisualComponent() : CircleComponent
         /+ getType() : EntityType.TREE
     }

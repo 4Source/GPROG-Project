@@ -8,12 +8,7 @@ class Tree extends Obstacle {
 	 */
 	public Tree(double posX, double posY, int radius) {
 		// this.circleComponent = this.add(new CircleComponent(this, radius, color));
-		super(posX, posY, e -> new StaticPhysicsComponent(e, new CircleHitBox(HitBoxType.Block, radius)), e -> new CircleComponent(e, radius, new Color(64, 160, 64)));
-	}
-
-	@Override
-	public StaticPhysicsComponent getPhysicsComponent() {
-		return (StaticPhysicsComponent) super.getPhysicsComponent();
+		super(posX, posY, new CircleHitBox(HitBoxType.Block, radius), e -> new CircleComponent(e, radius, new Color(64, 160, 64)));
 	}
 
 	@Override

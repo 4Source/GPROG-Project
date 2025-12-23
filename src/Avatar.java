@@ -11,9 +11,14 @@ class Avatar extends Creature {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, 15, new Color(96, 96, 255), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100));
+		super(startX, startY, e -> new CircleComponent(e, 15, new Color(96, 96, 255)), new CircleHitBox(HitBoxType.Block, 15), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100));
 		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2));
 		this.grenadeComponent = this.add(new GrenadeComponent(this));
+	}
+
+	@Override
+	public CircleComponent getVisualComponent() {
+		return (CircleComponent) super.getVisualComponent();
 	}
 
 	@Override

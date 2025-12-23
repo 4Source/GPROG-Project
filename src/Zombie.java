@@ -11,7 +11,12 @@ class Zombie extends Creature {
 	 * @param startY The position in y of the zombie where is should be at game start
 	 */
 	public Zombie(double startX, double startY) {
-		super(startX, startY, 15, new Color(160, 80, 40), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
+		super(startX, startY, e -> new CircleComponent(e, 15, new Color(160, 80, 40)), new CircleHitBox(HitBoxType.Block, 15), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
+	}
+
+	@Override
+	public CircleComponent getVisualComponent() {
+		return (CircleComponent) super.getVisualComponent();
 	}
 
 	@Override
