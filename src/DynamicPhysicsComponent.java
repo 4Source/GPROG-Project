@@ -47,7 +47,7 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
                 style.color(new Color(0, 153, 0));
             }
 
-            if (this.hitBox.collisionType == HitBoxType.Overlap) {
+            if (this.hitBox.getCollisionType() == HitBoxType.Overlap) {
                 float[] dashPattern = { 6.0f, 3.0f };
                 style.stroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
             } else {
@@ -56,16 +56,16 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
 
             if (this.hitBox instanceof CircleHitBox) {
                 int radius = ((CircleHitBox) this.hitBox).getRadius();
-                int x = (int) (entity.posX - radius - Entity.world.worldPartX);
-                int y = (int) (entity.posY - radius - Entity.world.worldPartY);
+                int x = (int) (entity.posX + this.hitBox.getOffsetX() - radius - Entity.world.worldPartX);
+                int y = (int) (entity.posY + this.hitBox.getOffsetY() - radius - Entity.world.worldPartY);
                 int d = (int) (radius * 2);
 
                 GraphicSystem.getInstance().drawOval(x, y, d, d, style);
             } else if (this.hitBox instanceof RectangleHitBox) {
                 int width = ((RectangleHitBox) this.hitBox).getWidth();
                 int height = ((RectangleHitBox) this.hitBox).getHeight();
-                int x = (int) (entity.posX - (width / 2) - Entity.world.worldPartX);
-                int y = (int) (entity.posY - (height / 2) - Entity.world.worldPartY);
+                int x = (int) (entity.posX + this.hitBox.getOffsetX() - (width / 2) - Entity.world.worldPartX);
+                int y = (int) (entity.posY + this.hitBox.getOffsetY() - (height / 2) - Entity.world.worldPartY);
 
                 GraphicSystem.getInstance().drawRect(x, y, width, height, style);
             } else {

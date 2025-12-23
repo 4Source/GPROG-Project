@@ -464,8 +464,12 @@ classDiagram
     %% 
 
     class HitBox {
-        # collisionType : HitBoxType
+        - collisionType : HitBoxType
+        - offsetX : int
+        - offsetY : int
         + getCollisionType() : HitBoxType
+        + getOffsetX() : int
+        + getOffsetY() : int
     }
     <<Abstract>> HitBox
 

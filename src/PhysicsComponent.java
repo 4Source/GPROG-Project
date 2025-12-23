@@ -49,28 +49,28 @@ public abstract class PhysicsComponent extends Component implements Drawable {
     public CollisionResponse checkCollision(PhysicsComponent other) {
         if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof CircleHitBox) {
             double dist = ((CircleHitBox) this.hitBox).getRadius() + ((CircleHitBox) other.hitBox).getRadius();
-            double dx = this.entity.posX - other.entity.posX;
-            double dy = this.entity.posY - other.entity.posY;
+            double dx = this.entity.posX + this.hitBox.getOffsetX() - other.entity.posX + other.hitBox.getOffsetX();
+            double dy = this.entity.posY + this.hitBox.getOffsetY() - other.entity.posY + other.hitBox.getOffsetY();
 
             if (dx * dx + dy * dy < dist * dist) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof RectangleHitBox) {
-            if (this.entity.posX < other.entity.posX + ((RectangleHitBox) other.hitBox).getWidth() &&
-                    this.entity.posX + ((RectangleHitBox) this.hitBox).getWidth() > other.entity.posX &&
-                    this.entity.posY < other.entity.posY + ((RectangleHitBox) other.hitBox).getHeight() &&
-                    this.entity.posY + ((RectangleHitBox) this.hitBox).getHeight() > other.entity.posY) {
+            if (this.entity.posX + this.hitBox.getOffsetX() < other.entity.posX + other.hitBox.getOffsetX() + ((RectangleHitBox) other.hitBox).getWidth() &&
+                    this.entity.posX + this.hitBox.getOffsetX() + ((RectangleHitBox) this.hitBox).getWidth() > other.entity.posX + other.hitBox.getOffsetX() &&
+                    this.entity.posY + this.hitBox.getOffsetY() < other.entity.posY + other.hitBox.getOffsetY() + ((RectangleHitBox) other.hitBox).getHeight() &&
+                    this.entity.posY + this.hitBox.getOffsetY() + ((RectangleHitBox) this.hitBox).getHeight() > other.entity.posY + other.hitBox.getOffsetY()) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof CircleHitBox) {
-            double rectMinX = this.entity.posX - ((RectangleHitBox) this.hitBox).getWidth() / 2;
-            double rectMinY = this.entity.posY - ((RectangleHitBox) this.hitBox).getHeight() / 2;
-            double rectMaxX = this.entity.posX + ((RectangleHitBox) this.hitBox).getWidth() / 2;
-            double rectMaxY = this.entity.posY + ((RectangleHitBox) this.hitBox).getHeight() / 2;
-            double cx = other.entity.posX;
-            double cy = other.entity.posY;
+            double rectMinX = this.entity.posX + this.hitBox.getOffsetX() - ((RectangleHitBox) this.hitBox).getWidth() / 2;
+            double rectMinY = this.entity.posY + this.hitBox.getOffsetY() - ((RectangleHitBox) this.hitBox).getHeight() / 2;
+            double rectMaxX = this.entity.posX + this.hitBox.getOffsetX() + ((RectangleHitBox) this.hitBox).getWidth() / 2;
+            double rectMaxY = this.entity.posY + this.hitBox.getOffsetY() + ((RectangleHitBox) this.hitBox).getHeight() / 2;
+            double cx = other.entity.posX + other.hitBox.getOffsetX();
+            double cy = other.entity.posY + other.hitBox.getOffsetY();
             double r = ((CircleHitBox) other.hitBox).getRadius();
 
             double closestX = Math.max(rectMinX, Math.min(cx, rectMaxX));
@@ -84,12 +84,12 @@ public abstract class PhysicsComponent extends Component implements Drawable {
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof RectangleHitBox) {
-            double rectMinX = other.entity.posX - ((RectangleHitBox) other.hitBox).getWidth() / 2;
-            double rectMinY = other.entity.posY - ((RectangleHitBox) other.hitBox).getHeight() / 2;
-            double rectMaxX = other.entity.posX + ((RectangleHitBox) other.hitBox).getWidth() / 2;
-            double rectMaxY = other.entity.posY + ((RectangleHitBox) other.hitBox).getHeight() / 2;
-            double cx = this.entity.posX;
-            double cy = this.entity.posY;
+            double rectMinX = other.entity.posX + other.hitBox.getOffsetX() - ((RectangleHitBox) other.hitBox).getWidth() / 2;
+            double rectMinY = other.entity.posY + other.hitBox.getOffsetY() - ((RectangleHitBox) other.hitBox).getHeight() / 2;
+            double rectMaxX = other.entity.posX + other.hitBox.getOffsetX() + ((RectangleHitBox) other.hitBox).getWidth() / 2;
+            double rectMaxY = other.entity.posY + other.hitBox.getOffsetY() + ((RectangleHitBox) other.hitBox).getHeight() / 2;
+            double cx = this.entity.posX + this.hitBox.getOffsetX();
+            double cy = this.entity.posY + this.hitBox.getOffsetY();
             double r = ((CircleHitBox) this.hitBox).getRadius();
 
             double closestX = Math.max(rectMinX, Math.min(cx, rectMaxX));
