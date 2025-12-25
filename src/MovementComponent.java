@@ -18,15 +18,15 @@ public abstract class MovementComponent extends Component {
 
     @Override
     public void update(double deltaTime) {
-        this.entity.getComponent(PhysicsComponent.class).ifPresent(component -> PhysicsSystem.getInstance().invalidateBufferFor(component));
+        this.getEntity().getComponent(PhysicsComponent.class).ifPresent(component -> PhysicsSystem.getInstance().invalidateBufferFor(component));
 
         // remember old position
-        this.oldX = this.entity.posX;
-        this.oldY = this.entity.posY;
+        this.oldX = this.getEntity().posX;
+        this.oldY = this.getEntity().posY;
 
         // move one step
-        this.entity.posX += Math.cos(this.alpha) * this.speed * deltaTime;
-        this.entity.posY += Math.sin(this.alpha) * this.speed * deltaTime;
+        this.getEntity().posX += Math.cos(this.alpha) * this.speed * deltaTime;
+        this.getEntity().posY += Math.sin(this.alpha) * this.speed * deltaTime;
     }
 
     // TODO: There is possible a better way
@@ -34,8 +34,8 @@ public abstract class MovementComponent extends Component {
      * Move back to the position before the move Method was called
      */
     public void moveBack() {
-        this.entity.posX = this.oldX;
-        this.entity.posY = this.oldY;
+        this.getEntity().posX = this.oldX;
+        this.getEntity().posY = this.oldY;
     }
 
     /**

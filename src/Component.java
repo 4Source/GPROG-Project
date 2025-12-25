@@ -1,5 +1,5 @@
 public abstract class Component {
-    protected final Entity entity;
+    private final Entity entity;
 
     /**
      * @param entity The entity to which the components belongs to
@@ -14,4 +14,8 @@ public abstract class Component {
      * @param deltaTime The time since last frame in seconds
      */
     public abstract void update(double deltaTime);
+
+    public Entity getEntity() {
+        return this.entity;
+    }
 }

@@ -30,8 +30,8 @@ public class TargetMovementComponent extends MovementComponent {
         // move if object has a destination
         if (this.hasDestination) {
             // stop if destination is reached
-            double diffX = Math.abs(this.entity.posX - this.destX);
-            double diffY = Math.abs(this.entity.posY - this.destY);
+            double diffX = Math.abs(this.getEntity().posX - this.destX);
+            double diffY = Math.abs(this.getEntity().posY - this.destY);
             if (diffX < 3 && diffY < 3) {
                 this.hasDestination = false;
                 return;
@@ -52,7 +52,7 @@ public class TargetMovementComponent extends MovementComponent {
         this.destX = destinationX;
         this.destY = destinationY;
 
-        this.alpha = Math.atan2(destinationY - this.entity.posY, destinationX - this.entity.posX);
+        this.alpha = Math.atan2(destinationY - this.getEntity().posY, destinationX - this.getEntity().posX);
     }
 
     /**

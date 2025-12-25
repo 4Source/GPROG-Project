@@ -39,4 +39,9 @@ public class PlayerMovementComponent extends MovementComponent {
             super.update(deltaTime);
         }
     }
+
+    @Override
+    public Avatar getEntity() {
+        return (Avatar) super.getEntity();
+    }
 }

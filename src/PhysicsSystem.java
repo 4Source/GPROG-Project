@@ -1,4 +1,3 @@
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,13 +121,13 @@ public class PhysicsSystem {
 						this.collisionBuffer.get(otherComponent).put(component, response);
 
 						// Trigger collision onEnter
-						((DynamicPhysicsComponent) component).onEnter.accept(new Collision(otherComponent.entity, response));
+						((DynamicPhysicsComponent) component).onEnter.accept(new Collision(otherComponent.getEntity(), response));
 					} else if (response == CollisionResponse.None && this.collisionBuffer.getOrDefault(component, new HashMap<>()).getOrDefault(otherComponent, CollisionResponse.None) != CollisionResponse.None) {
 						this.collisionBuffer.get(component).remove(otherComponent);
 						this.collisionBuffer.get(otherComponent).remove(component);
 
 						// Trigger collision onExit
-						((DynamicPhysicsComponent) component).onExit.accept(new Collision(otherComponent.entity, response));
+						((DynamicPhysicsComponent) component).onExit.accept(new Collision(otherComponent.getEntity(), response));
 					}
 				});
 			}
@@ -168,7 +167,7 @@ public class PhysicsSystem {
 
 		this.collisionBuffer.get(component).forEach((otherComponent, response) -> {
 			if (response != CollisionResponse.None) {
-				result.add(new Collision(otherComponent.entity, response));
+				result.add(new Collision(otherComponent.getEntity(), response));
 			}
 		});
 

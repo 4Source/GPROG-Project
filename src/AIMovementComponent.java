@@ -37,7 +37,7 @@ public class AIMovementComponent extends TargetMovementComponent {
         Avatar avatar = opt.get();
 
         // if avatar is too far away: stop
-        double dist = PhysicsSystem.distance(this.entity.posX, this.entity.posY, avatar.posX, avatar.posY);
+        double dist = PhysicsSystem.distance(this.getEntity().posX, this.getEntity().posY, avatar.posX, avatar.posY);
 
         if (dist > 1000) {
             this.hasDestination = false;
@@ -78,4 +78,8 @@ public class AIMovementComponent extends TargetMovementComponent {
         }
     }
 
+    @Override
+    public Zombie getEntity() {
+        return (Zombie) super.getEntity();
+    }
 }

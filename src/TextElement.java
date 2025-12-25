@@ -13,7 +13,7 @@ public abstract class TextElement extends UIElement {
 
             @Override
             public String toString() {
-                return this.entity.toString();
+                return this.getEntity().toString();
             }
 
             @Override

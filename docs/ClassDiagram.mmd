@@ -193,8 +193,9 @@ classDiagram
     %%
 
     class Component {
-        # entity : Entity
+        - entity : Entity
         + update(deltaTime : double) : void
+        + getEntity() : Entity
     }
     <<Abstract>> Component
     Component o-- Entity
@@ -261,6 +262,7 @@ classDiagram
     MovementComponent <|-- PlayerMovementComponent
     class PlayerMovementComponent {
         /+ update(deltaTime : double) : void
+        /+ getEntity() : Avatar
     }
 
     MovementComponent <|-- StaticMovementComponent
@@ -284,6 +286,7 @@ classDiagram
         # alphaClear : double
         # secondsClear : secondsClear
         /+ update(deltaTime : double) : void
+        /+ getEntity() : Zombie
     }
 
     Component <|-- PhysicsComponent
@@ -338,6 +341,7 @@ classDiagram
         # font : Font
         /+ draw() : void
         + toString() : String
+        /+ getEntity() : TextElement
     }
     <<Abstract>> TextComponent
 
