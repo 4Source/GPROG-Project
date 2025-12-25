@@ -35,8 +35,30 @@ public class PlayerMovementComponent extends MovementComponent {
         }
 
         if (moved) {
-            this.alpha = Math.atan2(dy, dx);
+            this.getEntity().getVisualComponent().changeState(CharacterAction.MOVE);
+
+            this.alpha = Math.atan2(dy, dx); // range: [-PI, PI]
+
+            // RIGHT: include ±45°
+            if (alpha >= -Math.PI / 4 && alpha <= Math.PI / 4) {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.RIGHT);
+            }
+            // DOWN: strictly between 45° and 135°
+            else if (alpha > Math.PI / 4 && alpha < 3 * Math.PI / 4) {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.DOWN);
+            }
+            // UP: strictly between -135° and -45°
+            else if (alpha > -3 * Math.PI / 4 && alpha < -Math.PI / 4) {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.UP);
+            }
+            // LEFT: include ±135°
+            else {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.LEFT);
+            }
+
             super.update(deltaTime);
+        } else if (this.getEntity().getVisualComponent().getCharacterAction() == CharacterAction.MOVE) {
+            this.getEntity().getVisualComponent().changeState(CharacterAction.IDLE);
         }
     }
 

@@ -43,7 +43,7 @@ classDiagram
         - gunshotComponent : GunshotComponent
         - grenadeComponent : GrenadeComponent
         /+ getType() : EntityType.AVATAR
-        /+ getVisualComponent() : CircleComponent
+        /+ getVisualComponent() : CharacterSpriteComponent
         /+ getMovementComponent() : PlayerMovementComponent
         + getGunshotComponent() : GunshotComponent
         + getGrenadeComponent() : GrenadeComponent
@@ -330,6 +330,30 @@ classDiagram
         /+ getLayer() : GraphicLayer.UI
     }
 
+    VisualComponent <|-- SpriteComponent
+    class SpriteComponent {
+
+    }
+    <<Abstract>> SpriteComponent
+
+    SpriteComponent <|-- CharacterSpriteComponent
+    class CharacterSpriteComponent {
+        - sprites : CharacterPart, CharacterAnimationKey, Sprite [*]
+        - state : CharacterAnimationKey
+        /+ draw() : void
+        /+ getLayer() : GraphicLayer.GAME
+        /+ update(deltaTime : double) : void
+        + changeState(state : CharacterAnimationKey) : void
+        + changeState(action : CharacterAction) : void
+        + changeState(direction : CharacterDirection) : void
+        + changeState(equipment : CharacterEquipment) : void
+        + getCharacterAction() : CharacterAction
+        + getCharacterDirection() : CharacterDirection
+        + getCharacterEquipment() : CharacterEquipment
+        + getState(part : CharacterPart) : CharacterAnimationKey
+        + addSprite(part : CharacterPart, state : CharacterAnimationKey, sprite : Sprite) : void
+    }
+
     VisualComponent <|-- UIComponent
     class UIComponent {
         # color : Color
@@ -389,6 +413,8 @@ classDiagram
         + drawOval(x : int, y : int, width : int, height : int, style : DrawStyle) : void
         + drawFillRect(x : int, y : int, width : int, height : int, style : DrawStyle) : void
         + drawRect(x : int, y : int, width : int, height : int, style : DrawStyle) : void
+        + drawSprite(sprite : BufferedImage, drawX : int, drawY : int, drawWidth : int, drawHeight : int, spriteX : int, spriteY : int, spriteWidth : int, spriteHeight : int) : void
+        + drawSprite(sprite : BufferedImage, posX : int, posY : int, index : int, scale : double, spriteWidth : int, spriteHeight : int) : void
         + swapBuffers() : void
     }
     <<Singleton>> GraphicSystem

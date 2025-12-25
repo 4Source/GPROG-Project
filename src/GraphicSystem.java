@@ -104,6 +104,8 @@ public class GraphicSystem extends JPanel {
         drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).forEach(entity -> entity.draw());
     }
 
+    // TODO: Draw position by center coordinate
+
     /**
      * Renders the text of the specified {@code String}, using the current text attribute state in the {@code Graphics2D} context.
      * The baseline of the first character is at position (<i>x</i>,&nbsp;<i>y</i>) in the User Space.
@@ -181,6 +183,31 @@ public class GraphicSystem extends JPanel {
     public void drawRect(int x, int y, int width, int height, DrawStyle style) {
         this.setStyle(style);
         this.graphics.drawRect(x, y, width, height);
+    }
+
+    /**
+     * Draws as much of the specified image as has already been scaled to fit inside the specified rectangle.
+     * 
+     * @param sprite The specified image to be drawn. This method does nothing if img is null.
+     * @param spriteX The x coordinate.
+     * @param spriteY The y coordinate.
+     * @param spriteWidth The width of the rectangle.
+     * @param spriteHeight The height of the rectangle.
+     */
+    public void drawSprite(BufferedImage sprite, int drawX, int drawY, int drawWidth, int drawHeight, int spriteX, int spriteY, int spriteWidth, int spriteHeight) {
+        this.graphics.drawImage(sprite, drawX, drawY, drawX + drawWidth, drawY + drawHeight, spriteX, spriteY, spriteWidth, spriteHeight, null);
+    }
+
+    public void drawSprite(BufferedImage sprite, int posX, int posY, int index, double scale, int spriteWidth, int spriteHeight) {
+        int columnCount = sprite.getWidth() / spriteWidth;
+        int rowCount = sprite.getHeight() / spriteHeight;
+        int columnIndex = index % columnCount;
+        int rowIndex = (index / columnCount) % rowCount;
+
+        int drawWidth_2 = (int) (spriteWidth * scale / 2);
+        int drawHeight_2 = (int) (spriteHeight * scale / 2);
+
+        this.graphics.drawImage(sprite, posX - drawWidth_2, posY - drawHeight_2, posX + drawWidth_2, posY + drawHeight_2, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
     }
 
     /**
