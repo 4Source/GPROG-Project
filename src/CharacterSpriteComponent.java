@@ -167,7 +167,6 @@ public class CharacterSpriteComponent extends SpriteComponent {
         return Optional.empty();
     }
 
-    // @Override
     public void addSprite(CharacterPart part, CharacterAnimationKey state, Sprite sprite) {
         this.sprites.putIfAbsent(part, new HashMap<>());
         this.sprites.get(part).put(state, sprite);

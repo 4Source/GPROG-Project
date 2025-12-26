@@ -1,19 +1,18 @@
-import java.awt.Color;
-
 class Tree extends Obstacle {
 	/**
 	 * @param posX The position in x of the tree
 	 * @param posY The position in y of the tree
-	 * @param radius The size of the tree
 	 */
-	public Tree(double posX, double posY, int radius) {
+	public Tree(double posX, double posY) {
 		// this.circleComponent = this.add(new CircleComponent(this, radius, color));
-		super(posX, posY, new CircleHitBox(HitBoxType.Block, radius), e -> new CircleComponent(e, radius, new Color(64, 160, 64)));
+		super(posX, posY, new CircleHitBox(HitBoxType.Block, 40), e -> new ObstacleSpriteComponent(e));
+
+		this.getVisualComponent().addSprite(new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Nature\\Dark-Green\\Tree_3_Normal_Dark-Green.png", 1, 1, 3, 0, 0));
 	}
 
 	@Override
-	public CircleComponent getVisualComponent() {
-		return (CircleComponent) super.getVisualComponent();
+	public ObstacleSpriteComponent getVisualComponent() {
+		return (ObstacleSpriteComponent) super.getVisualComponent();
 	}
 
 	@Override

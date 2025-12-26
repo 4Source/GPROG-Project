@@ -20,12 +20,12 @@ class ZombieWorld extends World {
 		// add a little forrest
 		for (int x = 0; x < 5000; x += 1000) {
 			for (int y = 0; y < 4000; y += 800) {
-				this.spawnEntity(new Tree(x + 300, y + 200, 80));
-				this.spawnEntity(new Tree(x + 600, y + 370, 50));
-				this.spawnEntity(new Tree(x + 200, y + 600, 50));
-				this.spawnEntity(new Tree(x + 500, y + 800, 40));
-				this.spawnEntity(new Tree(x + 900, y + 500, 100));
-				this.spawnEntity(new Tree(x + 760, y + 160, 40));
+				this.spawnEntity(new Tree(x + 300, y + 200));
+				this.spawnEntity(new Tree(x + 600, y + 370));
+				this.spawnEntity(new Tree(x + 200, y + 600));
+				this.spawnEntity(new Tree(x + 500, y + 800));
+				this.spawnEntity(new Tree(x + 900, y + 500));
+				this.spawnEntity(new Tree(x + 760, y + 160));
 			}
 		}
 

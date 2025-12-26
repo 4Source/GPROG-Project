@@ -102,7 +102,7 @@ classDiagram
 
     Obstacle <|-- Tree
     class Tree {
-        /+ getVisualComponent() : CircleComponent
+        /+ getVisualComponent() : ObstacleSpriteComponent
         /+ getType() : EntityType.TREE
     }
 
@@ -352,6 +352,15 @@ classDiagram
         + getCharacterEquipment() : CharacterEquipment
         + getState(part : CharacterPart) : CharacterAnimationKey
         + addSprite(part : CharacterPart, state : CharacterAnimationKey, sprite : Sprite) : void
+    }
+
+    SpriteComponent <|-- ObstacleSpriteComponent
+    class ObstacleSpriteComponent {
+        - sprites : StaticSprite [*]
+        /+ draw() : void
+        /+ getLayer() : GraphicLayer.GAME
+        /+ update(deltaTime : double) : void
+        + addSprite(sprite : StaticSprite) : void
     }
 
     VisualComponent <|-- UIComponent
