@@ -1,5 +1,6 @@
 package ZombieGame.Components;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,26 +33,35 @@ public class CharacterSpriteComponent extends SpriteComponent {
         double posX = this.getEntity().getPosX() - Entity.world.worldPartX;
         double posY = this.getEntity().getPosY() - Entity.world.worldPartY;
 
-        this.getState(CharacterPart.BODY).ifPresent(s -> {
-            Sprite body = this.sprites.getOrDefault(CharacterPart.BODY, new HashMap<>()).get(s);
+        ArrayList<CharacterPart> partsOrder = new ArrayList<>();
+        switch (this.getCharacterDirection()) {
+            case DOWN:
+            case LEFT:
+            case RIGHT:
+                partsOrder.add(CharacterPart.BODY);
+                partsOrder.add(CharacterPart.HANDS);
+                break;
+            case UP:
+                partsOrder.add(CharacterPart.HANDS);
+                partsOrder.add(CharacterPart.BODY);
+                break;
 
-            if (body == null) {
-                int size = MissingTexture.getSize();
-                GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), (int) posX, (int) posX, size, size, 0, 0, size, size);
-            }
+            default:
+                break;
+        }
 
-            body.draw(posX, posY);
-        });
+        partsOrder.forEach(p -> {
+            this.getState(p).ifPresent(s -> {
+                Sprite sprite = this.sprites.getOrDefault(p, new HashMap<>()).get(s);
 
-        this.getState(CharacterPart.HANDS).ifPresent(s -> {
-            Sprite hand = this.sprites.getOrDefault(CharacterPart.HANDS, new HashMap<>()).get(s);
+                if (sprite == null) {
+                    int size = MissingTexture.getSize();
+                    GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), (int) posX, (int) posX, size, size, 0, 0, size, size);
+                    return;
+                }
 
-            if (hand == null) {
-                int size = MissingTexture.getSize();
-                GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), (int) posX, (int) posX, size, size, 0, 0, size, size);
-            }
-
-            hand.draw(posX, posY);
+                sprite.draw(posX, posY);
+            });
         });
     }
 
