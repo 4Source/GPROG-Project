@@ -9,7 +9,7 @@ public class Avatar extends Creature {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.HANDS)), new CircleHitBox(HitBoxType.Block, 15), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100) {
+		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.HANDS)), new CircleHitBox(HitBoxType.Block, 12, 0, 20), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100) {
 			@Override
 			public void kill() {
 				((Avatar) this.getEntity()).getVisualComponent().changeState(CharacterAction.DEATH);

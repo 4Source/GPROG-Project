@@ -49,8 +49,8 @@ public abstract class PhysicsComponent extends Component implements Drawable {
     public CollisionResponse checkCollision(PhysicsComponent other) {
         if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof CircleHitBox) {
             double dist = ((CircleHitBox) this.hitBox).getRadius() + ((CircleHitBox) other.hitBox).getRadius();
-            double dx = this.getEntity().posX + this.hitBox.getOffsetX() - other.getEntity().posX + other.hitBox.getOffsetX();
-            double dy = this.getEntity().posY + this.hitBox.getOffsetY() - other.getEntity().posY + other.hitBox.getOffsetY();
+            double dx = (this.getEntity().posX + this.hitBox.getOffsetX()) - (other.getEntity().posX + other.hitBox.getOffsetX());
+            double dy = (this.getEntity().posY + this.hitBox.getOffsetY()) - (other.getEntity().posY + other.hitBox.getOffsetY());
 
             if (dx * dx + dy * dy < dist * dist) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);

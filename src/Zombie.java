@@ -9,7 +9,7 @@ public class Zombie extends Creature {
 	 * @param startY The position in y of the zombie where is should be at game start
 	 */
 	public Zombie(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 15), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
+		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 18, 0, 25), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
 
 		double animationFrameTime = 0.1;
 		double scale = 3;
@@ -48,7 +48,7 @@ public class Zombie extends Creature {
 			// if object is avatar, game over
 			if (type == EntityType.AVATAR) {
 				this.getMovementComponent().moveBack();
-				Entity.world.gameOver = true;
+				((Avatar) collision.entity()).getLifeComponent().takeDamage(10);
 			}
 
 			// if object is zombie, step back
