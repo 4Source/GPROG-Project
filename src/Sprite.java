@@ -1,7 +1,5 @@
 
 import java.awt.image.BufferedImage;
-import java.io.File;
-import javax.imageio.ImageIO;
 
 public abstract class Sprite {
     private BufferedImage sprite;
@@ -21,15 +19,7 @@ public abstract class Sprite {
      * @param scale The Factor about what the Sprite should be scaled to display it
      */
     Sprite(String spritePath, int columnCount, int rowCount, double scale) {
-        try {
-            File file = new File(spritePath);
-            sprite = ImageIO.read(file);
-        } catch (Exception e) {
-            System.err.println("Failed to load file: " + spritePath);
-            System.err.println(e);
-            sprite = MissingTexture.getTexture();
-        }
-
+        this.sprite = SpriteManager.getSprite(spritePath);
         this.columnCount = columnCount;
         this.rowCount = rowCount;
         this.width = sprite.getWidth() / columnCount;
