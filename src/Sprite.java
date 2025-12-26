@@ -3,17 +3,24 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 
-public class Sprite {
+public abstract class Sprite {
     private BufferedImage sprite;
     private final int width;
     private final int height;
     private final double scale;
-    private final double frameTime;
-    private final int columnCount;
-    private double lastUpdate;
-    private int columnIndex;
 
-    Sprite(String spritePath, int columnCount, double scale, double frameTime) {
+    protected final int columnCount;
+    protected int columnIndex;
+    protected final int rowCount;
+    protected int rowIndex;
+
+    /**
+     * @param spritePath The path to the file which should be used as sprite
+     * @param columnCount The number of Sprites positioned side by side
+     * @param rowCount The number of Sprites positioned below each other
+     * @param scale The Factor about what the Sprite should be scaled to display it
+     */
+    Sprite(String spritePath, int columnCount, int rowCount, double scale) {
         try {
             File file = new File(spritePath);
             sprite = ImageIO.read(file);
@@ -24,32 +31,33 @@ public class Sprite {
         }
 
         this.columnCount = columnCount;
+        this.rowCount = rowCount;
         this.width = sprite.getWidth() / columnCount;
-        this.height = sprite.getHeight();
+        this.height = sprite.getHeight() / rowCount;
         this.scale = scale;
-        this.frameTime = frameTime;
-        this.lastUpdate = 0;
         this.columnIndex = 0;
+        this.rowIndex = 0;
     }
 
+    /**
+     * Update the sprite using delta time to get constant change with varying fps
+     * 
+     * @param deltaTime The time since last frame in seconds
+     */
+    public abstract void update(double deltaTime);
+
+    /**
+     * Draw the sprite in the graphics system.
+     */
     public void draw(double posX, double posY) {
-        GraphicSystem.getInstance().drawSprite(this.sprite, (int) posX, (int) posY, this.columnIndex, this.scale, this.width, this.height);
+        GraphicSystem.getInstance().drawSprite(this.sprite, (int) posX, (int) posY, this.columnIndex, this.rowIndex, this.scale, this.width, this.height);
     }
 
-    public void update(double deltaTime) {
-        this.lastUpdate += deltaTime;
-        if (this.lastUpdate > this.frameTime) {
-            this.lastUpdate -= this.frameTime;
-
-            this.columnIndex++;
-
-            if (this.columnIndex > this.columnCount) {
-                this.columnIndex = 0;
-            }
-        }
+    public void setColumnIndex(int index) {
+        this.columnIndex = index;
     }
 
-    public void resetIndex() {
-        this.columnIndex = 0;
+    public void setRowIndex(int index) {
+        this.rowIndex = index;
     }
 }

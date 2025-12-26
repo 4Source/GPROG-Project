@@ -47,6 +47,19 @@ final class Game {
 
 			// no actions if game is over
 			if (this.world.gameOver) {
+				Iterator<Entity> entityIt = this.world.entityIterator();
+				while (entityIt.hasNext()) {
+					Entity e = entityIt.next();
+
+					Optional<VisualComponent> c = e.getComponent(VisualComponent.class);
+					if (c.isPresent()) {
+						c.get().update(millisDiff / 1000.0);
+					}
+				}
+
+				GraphicSystem.getInstance().clear();
+				GraphicSystem.getInstance().draw();
+				GraphicSystem.getInstance().swapBuffers();
 				continue;
 			}
 

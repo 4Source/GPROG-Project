@@ -1,7 +1,7 @@
 
 // (c) Thorsten Hasbargen
 
-class Zombie extends Creature {
+public class Zombie extends Creature {
 	/**
 	 * Spawns a zombie
 	 * 
@@ -14,15 +14,15 @@ class Zombie extends Creature {
 		double animationFrameTime = 0.1;
 		double scale = 3;
 
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Down_Idle-Sheet6.png", 6, scale, animationFrameTime));
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side_Idle-Sheet6.png", 6, scale, animationFrameTime));
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side-left_Idle-Sheet6.png", 6, scale, animationFrameTime));
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Up_Idle-Sheet6.png", 6, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Down_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side-left_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Up_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Down_Walk-Sheet8.png", 8, scale, animationFrameTime));
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side_Walk-Sheet8.png", 8, scale, animationFrameTime));
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side-left_Walk-Sheet8.png", 8, scale, animationFrameTime));
-		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, null), new Sprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Up_Walk-Sheet8.png", 8, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Down_Walk-Sheet8.png", 8, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side_Walk-Sheet8.png", 8, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Side-left_Walk-Sheet8.png", 8, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big_Up_Walk-Sheet8.png", 8, 1, scale, animationFrameTime));
 	}
 
 	@Override

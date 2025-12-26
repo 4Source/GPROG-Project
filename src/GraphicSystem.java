@@ -198,12 +198,7 @@ public class GraphicSystem extends JPanel {
         this.graphics.drawImage(sprite, drawX, drawY, drawX + drawWidth, drawY + drawHeight, spriteX, spriteY, spriteWidth, spriteHeight, null);
     }
 
-    public void drawSprite(BufferedImage sprite, int posX, int posY, int index, double scale, int spriteWidth, int spriteHeight) {
-        int columnCount = sprite.getWidth() / spriteWidth;
-        int rowCount = sprite.getHeight() / spriteHeight;
-        int columnIndex = index % columnCount;
-        int rowIndex = (index / columnCount) % rowCount;
-
+    public void drawSprite(BufferedImage sprite, int posX, int posY, int columnIndex, int rowIndex, double scale, int spriteWidth, int spriteHeight) {
         int drawWidth_2 = (int) (spriteWidth * scale / 2);
         int drawHeight_2 = (int) (spriteHeight * scale / 2);
 

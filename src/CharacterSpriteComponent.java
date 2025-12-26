@@ -96,7 +96,10 @@ public class CharacterSpriteComponent extends SpriteComponent {
         if (changed) {
             for (CharacterPart part : this.sprites.keySet()) {
                 this.getState(part).ifPresent(s -> {
-                    Optional.ofNullable(this.sprites.get(part).get(s)).ifPresent(b -> b.resetIndex());
+                    Optional.ofNullable(this.sprites.get(part).get(s)).ifPresent(b -> {
+                        b.setColumnIndex(0);
+                        b.setRowIndex(0);
+                    });
                 });
             }
         }
