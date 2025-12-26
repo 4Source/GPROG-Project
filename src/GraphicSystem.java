@@ -104,16 +104,14 @@ public class GraphicSystem extends JPanel {
         drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).forEach(entity -> entity.draw());
     }
 
-    // TODO: Draw position by center coordinate
-
     /**
      * Renders the text of the specified {@code String}, using the current text attribute state in the {@code Graphics2D} context.
      * The baseline of the first character is at position (<i>x</i>,&nbsp;<i>y</i>) in the User Space.
      * The rendering attributes applied include the {@code Clip}, {@code Transform}, {@code Paint}, {@code Font} and {@code Composite} attributes. For characters in script systems such as Hebrew and Arabic, the glyphs can be rendered from right to left, in which case the coordinate supplied is the location of the leftmost character on the baseline.
      * 
      * @param str the string to be rendered
-     * @param x the x coordinate of the location where the {@code String} should be rendered
-     * @param y the y coordinate of the location where the {@code String} should be rendered
+     * @param x the x coordinate of the lower left location where the {@code String} should be rendered
+     * @param y the y coordinate of the lower left location where the {@code String} should be rendered
      * @param style the style of the string to be drawn.
      */
     public void drawString(String str, int x, int y, DrawStyle style) {
@@ -129,29 +127,29 @@ public class GraphicSystem extends JPanel {
      * <code>width&nbsp;+&nbsp;1</code> pixels wide
      * and <code>height&nbsp;+&nbsp;1</code> pixels tall.
      * 
-     * @param x the x coordinate of the upper left corner of the oval to be drawn.
-     * @param y the y coordinate of the upper left corner of the oval to be drawn.
-     * @param width the width of the oval to be drawn.
-     * @param height the height of the oval to be drawn.
-     * @param style the style of the oval to be drawn.
+     * @param x the x coordinate of the center of the oval to be filled.
+     * @param y the y coordinate of the center of the oval to be filled.
+     * @param width the width of the oval to be filled.
+     * @param height the height of the oval to be filled.
+     * @param style the style of the oval to be filled.
      */
     public void drawFillOval(int x, int y, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.fillOval(x, y, width, height);
+        this.graphics.fillOval(x - width / 2, y - height / 2, width, height);
     }
 
     /**
      * Fills an oval bounded by the specified rectangle with the current color.
      * 
-     * @param x the x coordinate of the upper left corner of the oval to be filled.
-     * @param y the y coordinate of the upper left corner of the oval to be filled.
-     * @param width the width of the oval to be filled.
-     * @param height the height of the oval to be filled.
+     * @param x the x coordinate of the center of the oval to be drawn.
+     * @param y the y coordinate of the center of the oval to be drawn.
+     * @param width the width of the oval to be drawn.
+     * @param height the height of the oval to be drawn.
      * @param style the style of the oval to be drawn.
      */
     public void drawOval(int x, int y, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.drawOval(x, y, width, height);
+        this.graphics.drawOval(x - width / 2, y - height / 2, width, height);
     }
 
     /**
@@ -160,29 +158,29 @@ public class GraphicSystem extends JPanel {
      * The top and bottom edges are at {@code y} and <code>y&nbsp;+&nbsp;height</code>.
      * The rectangle is drawn using the graphics context's current color.
      * 
-     * @param x the x coordinate of the rectangle to be drawn.
-     * @param y the y coordinate of the rectangle to be drawn.
-     * @param width the width of the rectangle to be drawn.
-     * @param height the height of the rectangle to be drawn.
-     * @param style the style of the rectangle to be drawn.
+     * @param x the x coordinate of the center of the rectangle to be filled.
+     * @param y the y coordinate of the center of the rectangle to be filled.
+     * @param width the width of the rectangle to be filled.
+     * @param height the height of the rectangle to be filled.
+     * @param style the style of the rectangle to be filled.
      */
     public void drawFillRect(int x, int y, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.fillRect(x, y, width, height);
+        this.graphics.fillRect(x - width / 2, y - height / 2, width, height);
     }
 
     /**
      * Draws the outline of the specified rectangle. The left and right edges of the rectangle are at x and x + width. The top and bottom edges are at y and y + height. The rectangle is drawn using the graphics context's current color.
      * 
-     * @param x the x coordinate of the rectangle to be drawn.
-     * @param y the y coordinate of the rectangle to be drawn.
+     * @param x the x coordinate of the center of the rectangle to be drawn.
+     * @param y the y coordinate of the center of the rectangle to be drawn.
      * @param width the width of the rectangle to be drawn.
      * @param height the height of the rectangle to be drawn.
      * @param style the style of the rectangle to be drawn.
      */
     public void drawRect(int x, int y, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.drawRect(x, y, width, height);
+        this.graphics.drawRect(x - width / 2, y - height / 2, width, height);
     }
 
     /**

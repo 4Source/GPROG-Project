@@ -56,16 +56,16 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
 
             if (this.hitBox instanceof CircleHitBox) {
                 int radius = ((CircleHitBox) this.hitBox).getRadius();
-                int x = (int) (this.getEntity().posX + this.hitBox.getOffsetX() - radius - Entity.world.worldPartX);
-                int y = (int) (this.getEntity().posY + this.hitBox.getOffsetY() - radius - Entity.world.worldPartY);
+                int x = (int) (this.getEntity().posX + this.hitBox.getOffsetX() - Entity.world.worldPartX);
+                int y = (int) (this.getEntity().posY + this.hitBox.getOffsetY() - Entity.world.worldPartY);
                 int d = (int) (radius * 2);
 
                 GraphicSystem.getInstance().drawOval(x, y, d, d, style);
             } else if (this.hitBox instanceof RectangleHitBox) {
                 int width = ((RectangleHitBox) this.hitBox).getWidth();
                 int height = ((RectangleHitBox) this.hitBox).getHeight();
-                int x = (int) (this.getEntity().posX + this.hitBox.getOffsetX() - (width / 2) - Entity.world.worldPartX);
-                int y = (int) (this.getEntity().posY + this.hitBox.getOffsetY() - (height / 2) - Entity.world.worldPartY);
+                int x = (int) (this.getEntity().posX + this.hitBox.getOffsetX() - Entity.world.worldPartX);
+                int y = (int) (this.getEntity().posY + this.hitBox.getOffsetY() - Entity.world.worldPartY);
 
                 GraphicSystem.getInstance().drawRect(x, y, width, height, style);
             } else {

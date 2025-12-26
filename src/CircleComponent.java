@@ -19,8 +19,8 @@ public class CircleComponent extends VisualComponent {
 
     @Override
     public void draw() {
-        int x = (int) (this.getEntity().posX - this.radius - Entity.world.worldPartX);
-        int y = (int) (this.getEntity().posY - this.radius - Entity.world.worldPartY);
+        int x = (int) (this.getEntity().posX - Entity.world.worldPartX);
+        int y = (int) (this.getEntity().posY - Entity.world.worldPartY);
         int d = (int) (this.radius * 2);
 
         GraphicSystem.getInstance().drawFillOval(x, y, d, d, new DrawStyle().color(this.color));
