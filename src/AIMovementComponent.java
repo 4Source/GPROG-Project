@@ -1,7 +1,7 @@
 import java.util.Optional;
 
 enum AIState {
-    HUNTING, STUCK, CLEARING
+    HUNTING, STUCK, CLEARING, IDLING
 }
 
 public class AIMovementComponent extends TargetMovementComponent {
@@ -39,9 +39,9 @@ public class AIMovementComponent extends TargetMovementComponent {
         // if avatar is too far away: stop
         double dist = PhysicsSystem.distance(this.getEntity().posX, this.getEntity().posY, avatar.posX, avatar.posY);
 
-        if (dist > 1000) {
+        if (dist > 1500) {
             this.hasDestination = false;
-            return;
+            this.state = AIState.IDLING;
         }
 
         switch (this.state) {
@@ -71,11 +71,39 @@ public class AIMovementComponent extends TargetMovementComponent {
                 // try step in this direction
                 super.update(deltaTime);
                 break;
-
+            case IDLING:
+                if (dist < 800) {
+                    this.state = AIState.HUNTING;
+                }
+                break;
             default:
                 System.err.println("Unknown state: " + this.state);
                 break;
         }
+
+        if (this.hasDestination) {
+            this.getEntity().getVisualComponent().changeState(CharacterAction.MOVE);
+
+            // RIGHT: include ±45°
+            if (alpha >= -Math.PI / 4 && alpha <= Math.PI / 4) {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.RIGHT);
+            }
+            // DOWN: strictly between 45° and 135°
+            else if (alpha > Math.PI / 4 && alpha < 3 * Math.PI / 4) {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.DOWN);
+            }
+            // UP: strictly between -135° and -45°
+            else if (alpha > -3 * Math.PI / 4 && alpha < -Math.PI / 4) {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.UP);
+            }
+            // LEFT: include ±135°
+            else {
+                this.getEntity().getVisualComponent().changeState(CharacterDirection.LEFT);
+            }
+        } else if (this.getEntity().getVisualComponent().getCharacterAction() == CharacterAction.MOVE) {
+            this.getEntity().getVisualComponent().changeState(CharacterAction.IDLE);
+        }
+
     }
 
     @Override
