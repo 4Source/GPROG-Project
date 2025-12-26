@@ -1,7 +1,7 @@
 
 // (c) Thorsten Hasbargen
 
-public class Zombie extends Creature {
+public class Zombie extends Character {
 	/**
 	 * Spawns a zombie
 	 * 

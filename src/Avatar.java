@@ -1,4 +1,4 @@
-public class Avatar extends Creature {
+public class Avatar extends Character {
 	private GunshotComponent gunshotComponent;
 	private GrenadeComponent grenadeComponent;
 

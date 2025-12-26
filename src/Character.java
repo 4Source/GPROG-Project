@@ -1,8 +1,8 @@
 import java.util.function.Function;
 
-public abstract class Creature extends Entity {
+public abstract class Character extends Entity {
     private VisualComponent visualComponent;
-    private DynamicPhysicsComponent physicsComponent;
+    private DynamicPhysicsComponent physicsComponent; // TODO: Multiple physics components one for movement and one for damage
     private MovementComponent movementComponent;
     private LifeComponent lifeComponent;
 
@@ -14,7 +14,7 @@ public abstract class Creature extends Entity {
      * @param movementFactory A Factory method to create the component
      * @param lifeFactory A Factory method to create the component
      */
-    public Creature(double posX, double posY, Function<Entity, VisualComponent> visualFactory, HitBox hitBox, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
+    public Character(double posX, double posY, Function<Entity, VisualComponent> visualFactory, HitBox hitBox, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
         super(posX, posY);
         this.visualComponent = this.add(visualFactory.apply(this));
         this.physicsComponent = this.add(new DynamicPhysicsComponent(this, hitBox, collision -> onCollisionStart(collision), collision -> onCollisionEnd(collision)));

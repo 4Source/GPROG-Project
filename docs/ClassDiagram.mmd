@@ -23,8 +23,8 @@ classDiagram
     Entity o-- Component
     Entity o-- World
 
-    Entity <|-- Creature
-    class Creature {
+    Entity <|-- Character
+    class Character {
         - visualComponent : VisualComponent
         - physicsComponent : PhysicsComponent
         - movementComponent : MovementComponent
@@ -36,9 +36,9 @@ classDiagram
         # onCollisionStart(collision : Collision) : void
         # onCollisionEnd(collision : Collision) : void
     }
-    <<Abstract>> Creature
+    <<Abstract>> Character
 
-    Creature <|-- Avatar
+    Character <|-- Avatar
     class Avatar {
         - gunshotComponent : GunshotComponent
         - grenadeComponent : GrenadeComponent
@@ -51,7 +51,7 @@ classDiagram
         /# onCollisionEnd(collision : Collision) : void
     }
 
-    Creature <|-- Zombie
+    Character <|-- Zombie
     class Zombie {
         /+ getType() : EntityType.ZOMBIE
         /+ getVisualComponent() : CharacterSpriteComponent
