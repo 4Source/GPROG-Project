@@ -103,6 +103,16 @@ final class Game {
 			// After handled the inputs of components clear the input system
 			InputSystem.getInstance().clear();
 
+			// adjust displayed pane of the world
+			this.world.adjustWorldPart();
+
+			// Draw everything
+			GraphicSystem.getInstance().clear();
+			GraphicSystem.getInstance().draw();
+
+			// redraw everything
+			GraphicSystem.getInstance().swapBuffers();
+
 			// Remove all dead Entities
 			entityIt = this.world.entityIterator();
 			while (entityIt.hasNext()) {
@@ -115,16 +125,6 @@ final class Game {
 					continue;
 				}
 			}
-
-			// adjust displayed pane of the world
-			this.world.adjustWorldPart();
-
-			// Draw everything
-			GraphicSystem.getInstance().clear();
-			GraphicSystem.getInstance().draw();
-
-			// redraw everything
-			GraphicSystem.getInstance().swapBuffers();
 
 			// TODO: Entities which can Spawn should implement spawnable
 			// create new objects if needed
