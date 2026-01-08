@@ -1,11 +1,11 @@
 package ZombieGame;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -107,6 +107,7 @@ public class PhysicsSystem {
 	 * Update the collisions of the {@link PhysicsComponent physic components} with each other
 	 */
 	public void update() {
+		long start = System.currentTimeMillis();
 		if (InputSystem.getInstance().isPressed(Action.SHOW_HIT_BOXES)) {
 			PhysicsSystem.enableDebug = !PhysicsSystem.enableDebug;
 		}
@@ -140,24 +141,41 @@ public class PhysicsSystem {
 
 			it.remove();
 		}
+
+		if (PhysicsSystem.enableDebug) {
+			int comp = PhysicsSystem.getInstance().collisionBuffer.size();
+			int coll = 0;
+			for (PhysicsComponent c : PhysicsSystem.getInstance().collisionBuffer.keySet()) {
+				coll += PhysicsSystem.getInstance().getCollisions(c).size();
+			}
+			GraphicSystem.getInstance().drawString("Components: " + comp + " Collisions: " + coll + " Time: " + (System.currentTimeMillis() - start), 20, 60, new DrawStyle().color(Color.MAGENTA));
+		}
 	}
 
 	/**
-	 * Checks for collisions of the game object
+	 * Checks for collisions of the entity
 	 * 
-	 * @param entity The game object for which the collisions should be checked
-	 * @return A list of {@link Collision collisions} the game objects has collisions with
+	 * @param entity The entity for which the collisions should be checked
+	 * @return A list of {@link Collision collisions} the entities has collisions with
 	 */
 	public ArrayList<Collision> getCollisions(Entity entity) {
-		Optional<PhysicsComponent> opt = entity.getComponent(PhysicsComponent.class);
 		ArrayList<Collision> result = new ArrayList<>();
 
-		// No physics component for entity
-		if (opt.isEmpty()) {
-			return result;
+		for (PhysicsComponent component : entity.getComponents(PhysicsComponent.class)) {
+			result.addAll(getCollisions(component));
 		}
 
-		PhysicsComponent component = opt.get();
+		return result;
+	}
+
+	/**
+	 * Checks for collisions of the component
+	 * 
+	 * @param component The component for which the collisions should be checked
+	 * @return A list of {@link Collision collisions} the component has collisions with
+	 */
+	public ArrayList<Collision> getCollisions(PhysicsComponent component) {
+		ArrayList<Collision> result = new ArrayList<>();
 
 		// Physics component is not registered in the PhysicsSystem
 		if (!collisionBuffer.containsKey(component)) {
@@ -187,15 +205,25 @@ public class PhysicsSystem {
 	 * @return True when the first collision was found
 	 */
 	public boolean hasCollision(Entity entity) {
-		Optional<PhysicsComponent> opt = entity.getComponent(PhysicsComponent.class);
 		AtomicBoolean result = new AtomicBoolean(false);
 
-		// No physics component for entity
-		if (opt.isEmpty()) {
-			return false;
+		for (PhysicsComponent component : entity.getComponents(PhysicsComponent.class)) {
+			if (hasCollision(component)) {
+				result.set(true);
+			}
 		}
 
-		PhysicsComponent component = opt.get();
+		return result.get();
+	}
+
+	/**
+	 * Check if entity has a collision with another entity. Returns early if collision found.
+	 * 
+	 * @param component The component for which the collisions should be checked
+	 * @return True when the first collision was found
+	 */
+	public boolean hasCollision(PhysicsComponent component) {
+		AtomicBoolean result = new AtomicBoolean(false);
 
 		// Physics component is not registered in the PhysicsSystem
 		if (!collisionBuffer.containsKey(component)) {
@@ -227,15 +255,26 @@ public class PhysicsSystem {
 	 * @return True when the first collision was found
 	 */
 	public boolean testCollision(Entity entity) {
-		Optional<PhysicsComponent> opt = entity.getComponent(PhysicsComponent.class);
 		AtomicBoolean result = new AtomicBoolean(false);
 
-		// No physics component for entity
-		if (opt.isEmpty()) {
-			return false;
+		for (PhysicsComponent component : entity.getComponents(PhysicsComponent.class)) {
+			if (testCollision(component)) {
+				result.set(true);
+			}
 		}
 
-		PhysicsComponent component = opt.get();
+		return result.get();
+	}
+
+	/**
+	 * Check for an entity which is not registered in the physics system if it has a collision with another entity. Returns early if collision found.
+	 * This is useful to test placement of new entities in world.
+	 * 
+	 * @param component The component for which the collisions should be checked
+	 * @return True when the first collision was found
+	 */
+	public boolean testCollision(PhysicsComponent component) {
+		AtomicBoolean result = new AtomicBoolean(false);
 
 		// Physics component is not registered in the PhysicsSystem
 		if (collisionBuffer.containsKey(component)) {

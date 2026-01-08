@@ -4,20 +4,28 @@ import ZombieGame.CircleHitBox;
 import ZombieGame.CollisionResponse;
 import ZombieGame.GraphicLayer;
 import ZombieGame.HitBox;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.RectangleHitBox;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Entities.Entity;
 
 public abstract class PhysicsComponent extends Component implements Drawable {
     protected HitBox hitBox;
+    protected final int layer;
+    protected final int mask;
 
     /**
      * @param entity The entity to which the components belongs to
      * @param hitBox The hit box against which the {@link PhysicsSystem physics system} checks for collisions
+     * @param layer The layer on which the PhysicsComponent should belong
+     * @param mask The layers which the PhysicsComponent could interact with
      */
-    public PhysicsComponent(Entity entity, HitBox hitBox) {
+    public PhysicsComponent(Entity entity, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask) {
         super(entity);
         this.hitBox = hitBox;
+        this.layer = layer.bit;
+        this.mask = mask.bit;
     }
 
     /**
@@ -27,6 +35,21 @@ public abstract class PhysicsComponent extends Component implements Drawable {
      * @return Collision, overlapping or no collision
      */
     public CollisionResponse checkCollision(PhysicsComponent other) {
+        if (this == other) {
+            // No Collision with is self
+            return CollisionResponse.None;
+        }
+
+        if (this.getEntity() == other.getEntity()) {
+            // No Collision between components of same entity
+            return CollisionResponse.None;
+        }
+
+        if ((this.layer & other.mask) == 0 && (other.layer & this.mask) == 0) {
+            // Components can not collide
+            return CollisionResponse.None;
+        }
+
         if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof CircleHitBox) {
             double dist = ((CircleHitBox) this.hitBox).getRadius() + ((CircleHitBox) other.hitBox).getRadius();
             double dx = (this.getEntity().getPosX() + this.hitBox.getOffsetX()) - (other.getEntity().getPosX() + other.hitBox.getOffsetX());

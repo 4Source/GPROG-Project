@@ -10,8 +10,12 @@ import ZombieGame.Collision;
 import ZombieGame.CollisionResponse;
 import ZombieGame.EntityType;
 import ZombieGame.HitBoxType;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
+import ZombieGame.RectangleHitBox;
 import ZombieGame.ZombieWorld;
 import ZombieGame.Components.CharacterSpriteComponent;
+import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.GrenadeComponent;
 import ZombieGame.Components.GunshotComponent;
 import ZombieGame.Components.LifeComponent;
@@ -30,7 +34,7 @@ public class Avatar extends Character {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, 0, 20), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100) {
+		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, 0, 20), e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 20, 30), PhysicsCollisionLayer.PLAYER_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.ZOMBIE)), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100) {
 			@Override
 			public void kill() {
 				((Avatar) this.getEntity()).getVisualComponent().changeState(CharacterAction.DEATH);
@@ -114,7 +118,7 @@ public class Avatar extends Character {
 	}
 
 	@Override
-	protected void onCollisionStart(Collision collision) {
+	protected void onMovementCollisionStart(Collision collision) {
 		// if Object is a tree, move back one step
 		if (collision.collisionResponse() == CollisionResponse.Block) {
 			this.getMovementComponent().moveBack();
@@ -130,6 +134,6 @@ public class Avatar extends Character {
 	}
 
 	@Override
-	protected void onCollisionEnd(Collision collision) {
+	protected void onMovementCollisionEnd(Collision collision) {
 	}
 }

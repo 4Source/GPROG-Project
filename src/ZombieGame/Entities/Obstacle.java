@@ -3,6 +3,8 @@ package ZombieGame.Entities;
 import java.util.function.Function;
 
 import ZombieGame.HitBox;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Components.StaticPhysicsComponent;
 import ZombieGame.Components.VisualComponent;
@@ -22,7 +24,7 @@ public abstract class Obstacle extends Entity {
     public <P extends PhysicsComponent, V extends VisualComponent> Obstacle(double posX, double posY, HitBox hitBox, Function<Entity, V> visualFactory) {
         super(posX, posY);
         this.visualComponent = this.add(visualFactory.apply(this));
-        this.physicsComponent = this.add(new StaticPhysicsComponent(this, hitBox));
+        this.physicsComponent = this.add(new StaticPhysicsComponent(this, hitBox, PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionMask.ALL()));
     }
 
     public VisualComponent getVisualComponent() {
