@@ -12,7 +12,7 @@ import ZombieGame.Components.Component;
 public abstract class Entity {
     protected double posX, posY;
     public static World world;
-    private Map<Class<? extends Component>, Component> components = new HashMap<>();
+    private Map<Class<? extends Component>, ArrayList<Component>> components = new HashMap<>();
 
     /**
      * @param posX The position in x direction
@@ -31,10 +31,7 @@ public abstract class Entity {
      * @return The specific component
      */
     public <T extends Component> T add(T component) {
-        if (components.containsKey(component.getClass())) {
-            System.out.println("Tried to add the same component twice. Will be overwritten!");
-        }
-        components.put(component.getClass(), component);
+        components.computeIfAbsent(component.getClass(), c -> new ArrayList<>()).add(component);
         return component;
     }
 
@@ -47,9 +44,11 @@ public abstract class Entity {
      */
     public <T extends Component> ArrayList<T> getComponents(Class<T> type) {
         ArrayList<T> result = new ArrayList<>();
-        for (Component c : components.values()) {
-            if (type.isInstance(c)) {
-                result.add(type.cast(c));
+        for (ArrayList<Component> componentList : components.values()) {
+            for (Component c : componentList) {
+                if (type.isInstance(c)) {
+                    result.add(type.cast(c));
+                }
             }
         }
         return result;
@@ -65,9 +64,11 @@ public abstract class Entity {
     public <T extends Capability> ArrayList<T> getComponentsByCapability(Class<T> type) {
 
         ArrayList<T> result = new ArrayList<>();
-        for (Component c : components.values()) {
-            if (type.isInstance(c)) {
-                result.add(type.cast(c));
+        for (ArrayList<Component> componentList : components.values()) {
+            for (Component c : componentList) {
+                if (type.isInstance(c)) {
+                    result.add(type.cast(c));
+                }
             }
         }
         return result;
@@ -84,8 +85,10 @@ public abstract class Entity {
      * @param deltaTime The time since last frame in seconds
      */
     public final void update(double deltaTime) {
-        this.components.forEach((key, component) -> {
-            component.update(deltaTime);
+        this.components.forEach((key, componentList) -> {
+            componentList.forEach(component -> {
+                component.update(deltaTime);
+            });
         });
     }
 
