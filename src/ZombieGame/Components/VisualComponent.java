@@ -17,4 +17,9 @@ public abstract class VisualComponent extends Component implements Drawable {
      * Draw the component in the graphics system.
      */
     public abstract void draw();
+
+    @Override
+    public int getDepth() {
+        return (int) this.getEntity().getPosY();
+    }
 }

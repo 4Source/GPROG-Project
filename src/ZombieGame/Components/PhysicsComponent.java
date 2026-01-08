@@ -97,4 +97,9 @@ public abstract class PhysicsComponent extends Component implements Drawable {
     public GraphicLayer getLayer() {
         return GraphicLayer.UI;
     }
+
+    @Override
+    public int getDepth() {
+        return (int) this.getEntity().getPosY();
+    }
 }

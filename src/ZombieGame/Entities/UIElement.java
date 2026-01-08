@@ -25,7 +25,6 @@ public abstract class UIElement extends Entity {
 
     @Override
     public EntityType getType() {
-        // TODO getType Should maybe return Class type
         return EntityType.UI;
     }
 }

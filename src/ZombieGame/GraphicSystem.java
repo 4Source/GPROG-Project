@@ -99,8 +99,12 @@ public class GraphicSystem extends JPanel {
      */
     public void draw() {
         drawables.getOrDefault(GraphicLayer.BACKGROUND, new ArrayList<>()).forEach(entity -> entity.draw());
-        drawables.getOrDefault(GraphicLayer.GAME, new ArrayList<>()).forEach(entity -> entity.draw());
-        drawables.getOrDefault(GraphicLayer.EFFECTS, new ArrayList<>()).forEach(entity -> entity.draw());
+        ArrayList<Drawable> game = drawables.getOrDefault(GraphicLayer.GAME, new ArrayList<>());
+        game.sort(null);
+        game.forEach(entity -> entity.draw());
+        ArrayList<Drawable> effects = drawables.getOrDefault(GraphicLayer.EFFECTS, new ArrayList<>());
+        effects.sort(null);
+        effects.forEach(entity -> entity.draw());
         drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).forEach(entity -> entity.draw());
     }
 

@@ -11,7 +11,7 @@ import ZombieGame.Components.VisualComponent;
 
 public abstract class Character extends Entity {
     private VisualComponent visualComponent;
-    private DynamicPhysicsComponent physicsComponent; // TODO: Multiple physics components one for movement and one for damage
+    private DynamicPhysicsComponent movementPhysicsComponent; // TODO: Multiple physics components one for movement and one for damage
     private MovementComponent movementComponent;
     private LifeComponent lifeComponent;
 
@@ -26,7 +26,7 @@ public abstract class Character extends Entity {
     public Character(double posX, double posY, Function<Entity, VisualComponent> visualFactory, HitBox hitBox, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
         super(posX, posY);
         this.visualComponent = this.add(visualFactory.apply(this));
-        this.physicsComponent = this.add(new DynamicPhysicsComponent(this, hitBox, collision -> onCollisionStart(collision), collision -> onCollisionEnd(collision)));
+        this.movementPhysicsComponent = this.add(new DynamicPhysicsComponent(this, hitBox, collision -> onCollisionStart(collision), collision -> onCollisionEnd(collision)));
         this.movementComponent = this.add(movementFactory.apply(this));
         this.lifeComponent = this.add(lifeFactory.apply(this));
     }
@@ -35,8 +35,8 @@ public abstract class Character extends Entity {
         return this.visualComponent;
     }
 
-    public DynamicPhysicsComponent getPhysicsComponent() {
-        return this.physicsComponent;
+    public DynamicPhysicsComponent getMovementPhysicsComponent() {
+        return this.movementPhysicsComponent;
     }
 
     public MovementComponent getMovementComponent() {

@@ -66,4 +66,9 @@ public class LifeComponent extends LivingComponent implements Drawable {
     public GraphicLayer getLayer() {
         return GraphicLayer.EFFECTS;
     }
+
+    @Override
+    public int getDepth() {
+        return (int) this.getEntity().getPosY();
+    }
 }
