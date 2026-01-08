@@ -37,7 +37,7 @@ public class StaticPhysicsComponent extends PhysicsComponent {
     public void draw() {
         if (PhysicsSystem.enableDebug) {
             DrawStyle style = new DrawStyle();
-            if (PhysicsSystem.getInstance().hasCollision(this.getEntity())) {
+            if (PhysicsSystem.getInstance().hasCollision(this)) {
                 // #00ffff
                 style.color(new Color(0, 255, 255));
             } else {

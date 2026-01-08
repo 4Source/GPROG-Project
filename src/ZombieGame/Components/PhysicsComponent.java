@@ -35,6 +35,16 @@ public abstract class PhysicsComponent extends Component implements Drawable {
      * @return Collision, overlapping or no collision
      */
     public CollisionResponse checkCollision(PhysicsComponent other) {
+        if (this == other) {
+            // No Collision with is self
+            return CollisionResponse.None;
+        }
+
+        if (this.getEntity() == other.getEntity()) {
+            // No Collision between components of same entity
+            return CollisionResponse.None;
+        }
+
         if ((this.layer & other.mask) == 0 && (other.layer & this.mask) == 0) {
             // Components can not collide
             return CollisionResponse.None;

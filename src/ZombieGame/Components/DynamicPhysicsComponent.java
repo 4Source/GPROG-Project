@@ -57,7 +57,7 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
     public void draw() {
         if (PhysicsSystem.enableDebug) {
             DrawStyle style = new DrawStyle();
-            if (PhysicsSystem.getInstance().hasCollision(this.getEntity())) {
+            if (PhysicsSystem.getInstance().hasCollision(this)) {
                 // #00ff00
                 style.color(new Color(0, 255, 0));
             } else {

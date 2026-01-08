@@ -12,12 +12,12 @@ import ZombieGame.EntityType;
 import ZombieGame.HitBoxType;
 import ZombieGame.PhysicsCollisionLayer;
 import ZombieGame.PhysicsCollisionMask;
+import ZombieGame.RectangleHitBox;
 import ZombieGame.Components.AIMovementComponent;
 import ZombieGame.Components.CharacterSpriteComponent;
+import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifeComponent;
 import ZombieGame.Sprites.LoopingSprite;
-
-// (c) Thorsten Hasbargen
 
 public class Zombie extends Character {
 	/**
@@ -27,7 +27,7 @@ public class Zombie extends Character {
 	 * @param startY The position in y of the zombie where is should be at game start
 	 */
 	public Zombie(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 18, 0, 25), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.CHARACTER, PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.PROJECTILE), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
+		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 18, 0, 25), e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 30, 40), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
 
 		double animationFrameTime = 0.1;
 		double scale = 3;
@@ -59,13 +59,14 @@ public class Zombie extends Character {
 	}
 
 	@Override
-	protected void onCollisionStart(Collision collision) {
+	protected void onMovementCollisionStart(Collision collision) {
 		if (collision.collisionResponse() == CollisionResponse.Block) {
 			EntityType type = collision.entity().getType();
 
 			// if object is avatar, game over
 			if (type == EntityType.AVATAR) {
 				this.getMovementComponent().moveBack();
+				// TODO: Start attack here. By starting attack animation and adding temporary DynamicPhysics component which represent the hitbox where the zombie must hit the player
 				((Avatar) collision.entity()).getLifeComponent().takeDamage(10);
 			}
 
@@ -89,6 +90,6 @@ public class Zombie extends Character {
 	}
 
 	@Override
-	protected void onCollisionEnd(Collision collision) {
+	protected void onMovementCollisionEnd(Collision collision) {
 	}
 }
