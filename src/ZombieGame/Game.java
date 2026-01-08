@@ -94,6 +94,7 @@ final class Game {
 			}
 
 			GraphicSystem.getInstance().update();
+			GraphicSystem.getInstance().clear();
 
 			// Update changed collisions
 			PhysicsSystem.getInstance().update();
@@ -105,7 +106,6 @@ final class Game {
 			this.world.adjustWorldPart();
 
 			// Draw everything
-			GraphicSystem.getInstance().clear();
 			GraphicSystem.getInstance().draw();
 
 			// redraw everything
