@@ -1,0 +1,528 @@
+classDiagram
+
+    %% 
+    %% Entities
+    %%
+
+    class Entity {
+        # posX : double
+        # posY : double
+        # world : World $
+        - components : Component [*]
+
+        + add(T : component) : T
+        + getComponent(type : T) Component [0..1]
+        + getComponents(type : T) Component [*]
+        + getComponentByCapability(type : T) : Capability [0..1]
+        + getComponentsByCapability(type : T) : Capability [*]
+        + getType() : EntityType
+        + update(deltaTime : double) : void
+        + setWorld(world : World) : void $
+    }
+    <<Abstract>> Entity
+    Entity o-- Component
+    Entity o-- World
+
+    Entity <|-- Character
+    class Character {
+        - visualComponent : VisualComponent
+        - physicsComponent : PhysicsComponent
+        - movementComponent : MovementComponent
+        - lifeComponent : LifeComponent
+        + getVisualComponent() : VisualComponent
+        + getPhysicsComponent() : DynamicPhysicsComponent
+        + getMovementComponent() : MovementComponent
+        + getLifeComponent() : LifeComponent
+        # onCollisionStart(collision : Collision) : void
+        # onCollisionEnd(collision : Collision) : void
+    }
+    <<Abstract>> Character
+
+    Character <|-- Avatar
+    class Avatar {
+        - gunshotComponent : GunshotComponent
+        - grenadeComponent : GrenadeComponent
+        /+ getType() : EntityType.AVATAR
+        /+ getVisualComponent() : CharacterSpriteComponent
+        /+ getMovementComponent() : PlayerMovementComponent
+        + getGunshotComponent() : GunshotComponent
+        + getGrenadeComponent() : GrenadeComponent
+        /# onCollisionStart(collision : Collision) : void
+        /# onCollisionEnd(collision : Collision) : void
+    }
+
+    Character <|-- Zombie
+    class Zombie {
+        /+ getType() : EntityType.ZOMBIE
+        /+ getVisualComponent() : CharacterSpriteComponent
+        /+ getMovementComponent() : AIMovementComponent
+        /# onCollisionStart(collision : Collision) : void
+        /# onCollisionEnd(collision : Collision) : void
+    }
+
+    Entity <|-- Gunshot
+    class Gunshot {
+        - circleComponent : CircleComponent
+        - lifetimeComponent : LifetimeComponent
+        - movementComponent : MovementComponent
+        - physicsComponent : PhysicsComponent
+        + getCircleComponent() : CircleComponent
+        + getLifetimeComponent() : LifetimeComponent
+        + getMovementComponent() : MovementComponent
+        + getPhysicsComponent() : PhysicsComponent
+        # onCollision(collision : Collision) : void
+        /+ getType() : EntityType.SHOT
+    }
+
+    Entity <|-- Item
+    class Item {
+        - visualComponent : VisualComponent
+        - physicsComponent : PhysicsComponent
+        + getVisualComponent() : VisualComponent
+        + getPhysicsComponent() : PhysicsComponent
+    }
+    <<Abstract>> Item
+
+    Item <|-- Grenade
+    class Grenade {
+        - lifetimeComponent : LifetimeComponent
+        + getLifetimeComponent() : LifetimeComponent
+        /+ getVisualComponent() : CircleComponent
+        /+ getType() : EntityType.GRENADE_ITEM
+    }
+
+    Entity <|-- Obstacle
+    class Obstacle {
+        - visualComponent : VisualComponent
+        - physicsComponent : StaticPhysicsComponent
+        + getVisualComponent() : VisualComponent
+        + getPhysicsComponent() : StaticPhysicsComponent
+    }
+    <<Abstract>> Obstacle
+
+    Obstacle <|-- Tree
+    class Tree {
+        /+ getVisualComponent() : ObstacleSpriteComponent
+        /+ getType() : EntityType.TREE
+    }
+
+    Entity <|-- UIElement
+    class UIElement {
+        - uiComponent : UIComponent
+        + getUIComponent() : UIComponent
+        /+ getType() : EntityType.UI
+    }
+    <<Abstract>> UIElement
+
+    UIElement <|-- TextElement
+    class TextElement {
+        /+ getUIComponent() : TextComponent
+        + toString() : String
+    }
+    <<Abstract>> TextElement
+
+    TextElement <|-- Counter
+    class Counter {
+        - number : int
+        + getNumber() : int
+        + setNumber(number : int) : void
+        + increment() : int
+        + decrement() : int
+    }
+    <<Abstract>> Counter
+
+    Counter <|-- GrenadesCounter
+    class GrenadesCounter {
+        /+ toString() : String
+    }
+
+    Counter <|-- ZombieCounter
+    class ZombieCounter {
+        /+ toString() : String
+    }
+
+    TextElement <|-- HelpText
+    class HelpText {
+        - lifetimeComponent : LifetimeComponent
+        + getLifetimeComponent() : LifetimeComponent
+        /+ toString() : String
+    }
+
+    %% 
+    %% Capabilities
+    %% 
+
+    class Capability {
+
+    }
+    <<Interface>> Capability 
+    
+    Capability <|.. Drawable
+    class Drawable {
+        + draw() : void
+        + getLayer() : GraphicLayer
+    }
+    <<interface>> Drawable
+
+    Capability <|.. MouseCapability
+    class MouseCapability {
+        + hitTest(x : double, y : double) : boolean
+    }
+    <<Interface>> MouseCapability
+
+    MouseCapability <|.. Clickable
+    class Clickable {
+        + onClick() : void
+    }
+    <<Interface>> Clickable
+
+    MouseCapability <|.. Hoverable
+    class Hoverable {
+        + onHover() : void
+    }
+    <<Interface>> Hoverable
+
+    Capability <|.. Interactable
+    class Interactable {
+        + onInteract() : void
+    }
+    <<interface>> Interactable
+
+    %% 
+    %% Components
+    %%
+
+    class Component {
+        - entity : Entity
+        + update(deltaTime : double) : void
+        + getEntity() : Entity
+    }
+    <<Abstract>> Component
+    Component o-- Entity
+
+    Component <|-- ActionComponent
+    class ActionComponent {
+        - actionHandlers : Action, ActionHandler [*]
+        /+ update(deltaTime : double) : void
+    }
+    <<Abstract>> ActionComponent
+
+    ActionComponent <|-- GrenadeComponent
+    class GrenadeComponent {
+        + onThrow(deltaTime : double) : void
+    }
+    GrenadeComponent -- GrenadesCounter
+
+    ActionComponent <|-- GunshotComponent
+    class GunshotComponent {
+        - timeSinceLastShot : double
+        - fireRate : double
+        + onShoot(deltaTime : double) : void
+    }
+
+    Component <|-- LivingComponent
+    class LivingComponent {
+        - isLiving : boolean
+        + isLiving() : boolean
+        + kill() : void
+    }
+    <<Abstract>> LivingComponent
+
+    LivingComponent <|-- LifeComponent
+    Drawable <|.. LifeComponent
+    class LifeComponent {
+        - life : int
+        - damageTextTimeout : double 
+        - damageText : String
+        - INITIAL_TIMEOUT : double $
+        + takeDamage(damage : int) : void
+        + restoreHealth(health : int) : void
+        /+ update(deltaTime : double) : void
+        /+ draw() : void
+        /+ getLayer() : GraphicLayer.EFFECTS
+    }
+
+    LivingComponent <|-- LifetimeComponent
+    class LifetimeComponent {
+        - lifetime : double
+        /+ update(deltaTime : double) : void
+    }    
+
+    Component <|-- MovementComponent
+    class MovementComponent {
+        # alpha : double
+        # speed : double
+        # oldX : double
+        # oldY : double
+        /+ update(deltaTime : double) : void
+        + moveBack() : void
+    }
+    <<Abstract>> MovementComponent
+
+    MovementComponent <|-- PlayerMovementComponent
+    class PlayerMovementComponent {
+        /+ update(deltaTime : double) : void
+        /+ getEntity() : Avatar
+    }
+
+    MovementComponent <|-- StaticMovementComponent
+    class StaticMovementComponent {
+
+    }
+
+    MovementComponent <|-- TargetMovementComponent
+    class TargetMovementComponent {
+        # destX : double
+        # destY : double
+        # hasDestination : boolean
+        /+ update(deltaTime : double) : void
+        + setDestination(destinationX : double, destinationY : double) : void
+        + setDestination(destination : Entity) : void
+    }
+
+    TargetMovementComponent <|-- AIMovementComponent
+    class AIMovementComponent {
+        # state : AIState
+        # alphaClear : double
+        # secondsClear : secondsClear
+        /+ update(deltaTime : double) : void
+        /+ getEntity() : Zombie
+    }
+
+    Component <|-- PhysicsComponent
+    Drawable <|.. PhysicsComponent
+    class PhysicsComponent {
+        # hitBox : HitBox
+        + checkCollision(other : PhysicsComponent) : CollisionResponse
+        /+ draw() : void
+        /+ getLayer() : GraphicLayer.UI
+    }
+    <<Abstract>> PhysicsComponent
+    PhysicsComponent o-- HitBox 
+
+    PhysicsComponent <|-- DynamicPhysicsComponent
+    class DynamicPhysicsComponent {
+        # onEnter : (Collision) -> void
+        # onExit : (Collision) -> void
+        /+ update(deltaTime : double) : void
+        /+ draw() : void
+    }
+
+    PhysicsComponent <|-- StaticPhysicsComponent
+    class StaticPhysicsComponent {
+        /+ update(deltaTime : double) : void
+        /+ draw() : void
+    }
+
+    Component <|-- VisualComponent
+    Drawable <|.. VisualComponent
+    class VisualComponent {
+        /+ draw() : void
+    }
+    <<Abstract>> VisualComponent
+
+    VisualComponent <|-- CircleComponent
+    class CircleComponent {
+        # radius : int
+        # color : Color
+        /+ update(deltaTime : double) : void
+        /+ draw() : void
+        /+ getLayer() : GraphicLayer.UI
+    }
+
+    VisualComponent <|-- SpriteComponent
+    class SpriteComponent {
+
+    }
+    <<Abstract>> SpriteComponent
+
+    SpriteComponent <|-- CharacterSpriteComponent
+    class CharacterSpriteComponent {
+        - sprites : CharacterPart, CharacterAnimationKey, Sprite [*]
+        - state : CharacterAnimationKey
+        /+ draw() : void
+        /+ getLayer() : GraphicLayer.GAME
+        /+ update(deltaTime : double) : void
+        + changeState(state : CharacterAnimationKey) : void
+        + changeState(action : CharacterAction) : void
+        + changeState(direction : CharacterDirection) : void
+        + changeState(equipment : CharacterEquipment) : void
+        + getCharacterAction() : CharacterAction
+        + getCharacterDirection() : CharacterDirection
+        + getCharacterEquipment() : CharacterEquipment
+        + getState(part : CharacterPart) : CharacterAnimationKey
+        + addSprite(part : CharacterPart, state : CharacterAnimationKey, sprite : Sprite) : void
+    }
+
+    SpriteComponent <|-- ObstacleSpriteComponent
+    class ObstacleSpriteComponent {
+        - sprites : StaticSprite [*]
+        /+ draw() : void
+        /+ getLayer() : GraphicLayer.GAME
+        /+ update(deltaTime : double) : void
+        + addSprite(sprite : StaticSprite) : void
+    }
+
+    VisualComponent <|-- UIComponent
+    class UIComponent {
+        # color : Color
+    }
+    <<Abstract>> UIComponent
+
+    UIComponent <|-- TextComponent
+    class TextComponent {
+        # font : Font
+        /+ draw() : void
+        + toString() : String
+        /+ getEntity() : TextElement
+    }
+    <<Abstract>> TextComponent
+
+    %% 
+    %% Systems
+    %% 
+
+    class PhysicsSystem {
+        - instance : PhysicsSystem $
+        + enableDebug : boolean $
+        - collisionBuffer : PhysicsComponent, CollisionResponse [*]
+        - invalidEntries : PhysicsComponent [*]
+        - PhysicsSystem()
+        + getInstance() : PhysicsSystem$
+        + registerComponent(component : PhysicsComponent) : void
+        + unregisterComponent(component : PhysicsComponent) : void
+        + invalidateBufferFor(component : PhysicsComponent) : void
+        + distance(x1 : double, y1 : double, x2 : double, y2 : double) : double $
+        /+ update(deltaTime : double) : void
+        + getCollisions(entity : Entity) :  Collision [*]
+        + hasCollision(entity : Entity) : boolean
+        + testCollision(entity : Entity) : boolean
+    }
+    <<Singleton>> PhysicsSystem
+    PhysicsSystem -- PhysicsComponent
+
+    class GraphicSystem {
+        - instance : GraphicSystem $
+        - drawables : GraphicLayer, Drawable [*]
+        - showFPS : boolean $
+        - lastTime : long
+        - graphicsConf : GraphicsConfiguration
+        - imageBuffer : BufferedImage
+        - graphics : Graphics2D
+        - GraphicSystem()
+        + getInstance() : GraphicSystem$
+        + registerComponent(component : Drawable) : void
+        + unregisterComponent(component : Drawable) : void
+        + clear() : void
+        - setStyle(style : DrawStyle) : void
+        + update() : void
+        + draw() : void
+        + drawString(str: String, x : int, y : int, style : DrawStyle) : void
+        + drawFillOval(x : int, y : int, width : int, height : int, style : DrawStyle) : void
+        + drawOval(x : int, y : int, width : int, height : int, style : DrawStyle) : void
+        + drawFillRect(x : int, y : int, width : int, height : int, style : DrawStyle) : void
+        + drawRect(x : int, y : int, width : int, height : int, style : DrawStyle) : void
+        + drawSprite(sprite : BufferedImage, drawX : int, drawY : int, drawWidth : int, drawHeight : int, spriteX : int, spriteY : int, spriteWidth : int, spriteHeight : int) : void
+        + drawSprite(sprite : BufferedImage, posX : int, posY : int, index : int, scale : double, spriteWidth : int, spriteHeight : int) : void
+        + swapBuffers() : void
+    }
+    <<Singleton>> GraphicSystem
+    GraphicSystem -- Drawable
+
+    class InputSystem {
+        - instance : InputSystem $
+        - keyMapping : Action, DeviceType, int [*]
+        - actionDown : Action, boolean [*]
+        - actionPressed : Action, boolean [*]
+        - mousePositionX : int
+        - mousePositionY : int
+        - InputSystem()
+        + getInstance() : InputSystem$
+        - setKeyMapping(action : Action, type : DeviceType, key : int) : void
+        - getKeyMapping(action : Action, type : DeviceType) : int
+        + getKeyMapping(action : Action) : String [*]
+        + isDown(action : Action) : boolean
+        + isPressed(action : Action) : boolean
+        + getMousePositionX() : int
+        + getMousePositionY() : int
+        + clear() : void
+        /+ mousePressed(event : MouseEvent) : void
+        /+ mouseReleased(event : MouseEvent) : void
+        /+ mouseClicked(event : MouseEvent) : void
+        /+ mouseMoved(event : MouseEvent) : void
+        /+ mouseDragged(event : MouseEvent) : void
+        /+ mouseEntered(event : MouseEvent) : void
+        /+ mouseExited(event : MouseEvent) : void
+        /+ keyTyped(event : KeyEvent) : void
+        /+ keyPressed(event : KeyEvent) : void
+        /+ keyReleased(event : KeyEvent) : void
+    }
+    <<Singleton>> InputSystem
+    InputSystem -- PlayerMovementComponent
+
+    %% 
+    %% World
+    %% 
+
+    class World {
+        - entities : Entity [*]
+        - uiElements : UIElement [*]
+        - pendingAdditions : Entity [*]
+        - pendingRemovals : UIElement [*]
+        + spawnEntity(entity : Entity) : void
+        + despawnEntity(entity : Entity) : void
+        + update() : void
+        - registerEntityComponents() : void 
+        - addEntity(entiy : Entity) : void
+        - unregisterEntityComponents(uiElement : Entity) : void
+        - removeEntity(entiy : Entity) : void
+        - removeEntity(index : int) : void
+        + getEntities() : Entity [*]
+        + getEntities(type : T) : Entity [*]
+        + getEntitiesWithComponent(type : T) : Entity [*]
+        + getEntity(index : int) Entity [0..1]
+        + getEntity(type : T) Entity [0..1]
+        + entityIterator() : Iterator
+        - registerUIElementComponents(uiElement : UIElement) : void 
+        + addUIElement(uiElement : UIElement) : void
+        - unregisterUIElementComponents(uiElement : UIElement) : void
+        + removeUIElement(uiElement : UIElement) : void
+        + removeUIElement(index : int) : void
+        + getUIElements() : UIElement [*]
+        + getUIElements(type : T) : UIElement [*]
+        + getUIElementsWithComponent(type : T) : UIElement [*]
+        + getUIElement(index : int) UIElement [0..1]
+        + getUIElement(type : T) UIElement [0..1]
+        + uiElementIterator() : Iterator
+        # init() : void
+        # createNewObjects(deltaTime : double)
+    }
+    <<Abstract>> World
+
+    %% 
+    %% Other
+    %% 
+
+    class HitBox {
+        - collisionType : HitBoxType
+        - offsetX : int
+        - offsetY : int
+        + getCollisionType() : HitBoxType
+        + getOffsetX() : int
+        + getOffsetY() : int
+    }
+    <<Abstract>> HitBox
+
+    HitBox <|-- CircleHitBox
+    class CircleHitBox {
+        - radius : int 
+        + getRadius() : int
+    }
+
+    HitBox <|-- RectangleHitBox
+    class RectangleHitBox {
+        - width : int 
+        - height : int 
+        + getWidth() : int 
+        + getHeight() : int 
+    }
