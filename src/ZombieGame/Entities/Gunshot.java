@@ -7,6 +7,8 @@ import ZombieGame.Collision;
 import ZombieGame.CollisionResponse;
 import ZombieGame.EntityType;
 import ZombieGame.HitBoxType;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.CircleComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifetimeComponent;
@@ -31,7 +33,7 @@ public class Gunshot extends Entity {
 		this.circleComponent = this.add(new CircleComponent(this, 4, Color.YELLOW));
 		this.lifetimeComponent = this.add(new LifetimeComponent(this, 1.2));
 		this.movementComponent = this.add(new StaticMovementComponent(this, Math.atan2(destY - posY, destX - posX), 500));
-		this.physicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, 4), c -> onCollision(c), c -> {}));
+		this.physicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, 4), PhysicsCollisionLayer.PROJECTILE, new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.ZOMBIE), c -> onCollision(c), c -> {}));
 	}
 
 	/**
@@ -46,7 +48,7 @@ public class Gunshot extends Entity {
 		this.circleComponent = this.add(new CircleComponent(this, 4, Color.YELLOW));
 		this.lifetimeComponent = this.add(new LifetimeComponent(this, lifetime));
 		this.movementComponent = this.add(new StaticMovementComponent(this, alpha, speed));
-		this.physicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, 4), c -> onCollision(c), c -> {}));
+		this.physicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, 4), PhysicsCollisionLayer.PROJECTILE, new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.ZOMBIE), c -> onCollision(c), c -> {}));
 	}
 
 	public CircleComponent getCircleComponent() {

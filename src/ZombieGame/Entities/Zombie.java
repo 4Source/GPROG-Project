@@ -10,6 +10,8 @@ import ZombieGame.Collision;
 import ZombieGame.CollisionResponse;
 import ZombieGame.EntityType;
 import ZombieGame.HitBoxType;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.AIMovementComponent;
 import ZombieGame.Components.CharacterSpriteComponent;
 import ZombieGame.Components.LifeComponent;
@@ -25,7 +27,7 @@ public class Zombie extends Character {
 	 * @param startY The position in y of the zombie where is should be at game start
 	 */
 	public Zombie(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 18, 0, 25), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
+		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 18, 0, 25), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.CHARACTER, PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.PROJECTILE), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
 
 		double animationFrameTime = 0.1;
 		double scale = 3;

@@ -5,6 +5,8 @@ import java.util.function.Function;
 
 import ZombieGame.CircleHitBox;
 import ZombieGame.HitBoxType;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Components.StaticPhysicsComponent;
 import ZombieGame.Components.VisualComponent;
@@ -24,7 +26,7 @@ public abstract class Item extends Entity {
     public <T extends VisualComponent> Item(double posX, double posY, int radius, Color color, Function<Entity, T> visualFactory) {
         super(posX, posY);
         this.visualComponent = this.add(visualFactory.apply(this));
-        this.physicsComponent = this.add(new StaticPhysicsComponent(this, new CircleHitBox(HitBoxType.Overlap, radius)));
+        this.physicsComponent = this.add(new StaticPhysicsComponent(this, new CircleHitBox(HitBoxType.Overlap, radius), PhysicsCollisionLayer.ITEM, new PhysicsCollisionMask(PhysicsCollisionLayer.PLAYER)));
     }
 
     public VisualComponent getVisualComponent() {

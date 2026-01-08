@@ -4,6 +4,8 @@ import java.util.function.Function;
 
 import ZombieGame.Collision;
 import ZombieGame.HitBox;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifeComponent;
 import ZombieGame.Components.MovementComponent;
@@ -20,13 +22,15 @@ public abstract class Character extends Entity {
      * @param posY The position in y direction
      * @param visualFactory A Factory method to create the component
      * @param hitBox The hit box of the Physics component
+     * @param layer The layer on which the PhysicsComponent should belong
+     * @param mask The layers which the PhysicsComponent could interact with
      * @param movementFactory A Factory method to create the component
      * @param lifeFactory A Factory method to create the component
      */
-    public Character(double posX, double posY, Function<Entity, VisualComponent> visualFactory, HitBox hitBox, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
+    public Character(double posX, double posY, Function<Entity, VisualComponent> visualFactory, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
         super(posX, posY);
         this.visualComponent = this.add(visualFactory.apply(this));
-        this.movementPhysicsComponent = this.add(new DynamicPhysicsComponent(this, hitBox, collision -> onCollisionStart(collision), collision -> onCollisionEnd(collision)));
+        this.movementPhysicsComponent = this.add(new DynamicPhysicsComponent(this, hitBox, layer, mask, collision -> onCollisionStart(collision), collision -> onCollisionEnd(collision)));
         this.movementComponent = this.add(movementFactory.apply(this));
         this.lifeComponent = this.add(lifeFactory.apply(this));
     }

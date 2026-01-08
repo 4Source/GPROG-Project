@@ -8,6 +8,8 @@ import ZombieGame.DrawStyle;
 import ZombieGame.GraphicSystem;
 import ZombieGame.HitBox;
 import ZombieGame.HitBoxType;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.PhysicsSystem;
 import ZombieGame.RectangleHitBox;
 import ZombieGame.Entities.Entity;
@@ -20,9 +22,11 @@ public class StaticPhysicsComponent extends PhysicsComponent {
      * 
      * @param entity The entity to which the components belongs to
      * @param hitBox The hit box against which the {@link PhysicsSystem physics system} checks for collisions
+     * @param layer The layer on which the PhysicsComponent should belong
+     * @param mask The layers which the PhysicsComponent could interact with
      */
-    public StaticPhysicsComponent(Entity entity, HitBox hitBox) {
-        super(entity, hitBox);
+    public StaticPhysicsComponent(Entity entity, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask) {
+        super(entity, hitBox, layer, mask);
     }
 
     @Override

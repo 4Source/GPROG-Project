@@ -10,6 +10,8 @@ import ZombieGame.Collision;
 import ZombieGame.CollisionResponse;
 import ZombieGame.EntityType;
 import ZombieGame.HitBoxType;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.ZombieWorld;
 import ZombieGame.Components.CharacterSpriteComponent;
 import ZombieGame.Components.GrenadeComponent;
@@ -30,7 +32,7 @@ public class Avatar extends Character {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, 0, 20), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100) {
+		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, 0, 20), PhysicsCollisionLayer.PLAYER_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.CHARACTER, PhysicsCollisionLayer.ITEM, PhysicsCollisionLayer.OBSTACLES), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100) {
 			@Override
 			public void kill() {
 				((Avatar) this.getEntity()).getVisualComponent().changeState(CharacterAction.DEATH);
