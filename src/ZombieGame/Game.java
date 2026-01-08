@@ -27,7 +27,6 @@ final class Game {
 		long lastTick = System.currentTimeMillis();
 
 		while (true) {
-			this.world.update();
 
 			// calculate elapsed time
 			long currentTick = System.currentTimeMillis();
@@ -46,6 +45,8 @@ final class Game {
 
 			double secondsDiff = millisDiff / 1000.0;
 			lastTick = currentTick;
+
+			this.world.update(secondsDiff);
 
 			// Open Pause menu
 			if (InputSystem.getInstance().isPressed(Action.GAME_PAUSE)) {

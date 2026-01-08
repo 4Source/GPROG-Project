@@ -38,7 +38,12 @@ public abstract class World {
 		pendingRemovals.add(entity);
 	}
 
-	public final void update() {
+	/**
+     * Update the world using delta time to get constant change with varying fps
+     * 
+     * @param deltaTime The time since last frame in seconds
+     */
+    public final void update(double deltaTime) {
 		// Add new entities
 		for (Entity e : pendingAdditions) {
 			addEntity(e);
