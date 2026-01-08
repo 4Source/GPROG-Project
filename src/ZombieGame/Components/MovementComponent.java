@@ -23,7 +23,7 @@ public abstract class MovementComponent extends Component {
 
     @Override
     public void update(double deltaTime) {
-        this.getEntity().getComponent(PhysicsComponent.class).ifPresent(component -> PhysicsSystem.getInstance().invalidateBufferFor(component));
+        this.getEntity().getComponents(PhysicsComponent.class).forEach(component -> PhysicsSystem.getInstance().invalidateBufferFor(component));
 
         // remember old position
         this.oldX = this.getEntity().getPosX();

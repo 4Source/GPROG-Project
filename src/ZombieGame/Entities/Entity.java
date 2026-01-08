@@ -3,7 +3,6 @@ package ZombieGame.Entities;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import ZombieGame.EntityType;
 import ZombieGame.World;
@@ -40,22 +39,6 @@ public abstract class Entity {
     }
 
     /**
-     * Get a component from the entity
-     * 
-     * @param <T> The type of Component which should be returned
-     * @param type The class of Component which should be returned. The Class or inherited classes from it will match
-     * @return A optional which could hold the Component with the class if it existed in the entity
-     */
-    public <T extends Component> Optional<T> getComponent(Class<T> type) {
-        for (Component c : components.values()) {
-            if (type.isInstance(c)) {
-                return Optional.of(type.cast(c));
-            }
-        }
-        return Optional.empty();
-    }
-
-    /**
      * Get the components from the entity
      * 
      * @param <T> The type of Component which should be returned
@@ -70,22 +53,6 @@ public abstract class Entity {
             }
         }
         return result;
-    }
-
-    /**
-     * Get a component from the entity which implements a capability interface
-     * 
-     * @param <T> The type of the capability which should be returned
-     * @param type The interface of capability which should be returned. The interface or inherited interfaces from it will match
-     * @return An optional which could hold the Component with the class if it existed in the entity
-     */
-    public <T extends Capability> Optional<T> getComponentByCapability(Class<T> type) {
-        for (Component c : components.values()) {
-            if (type.isInstance(c)) {
-                return Optional.of(type.cast(c));
-            }
-        }
-        return Optional.empty();
     }
 
     /**

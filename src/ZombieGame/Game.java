@@ -1,7 +1,6 @@
 package ZombieGame;
 
 import java.util.Iterator;
-import java.util.Optional;
 
 import ZombieGame.Components.LivingComponent;
 import ZombieGame.Components.VisualComponent;
@@ -45,6 +44,7 @@ final class Game {
 				millisDiff = currentTick - lastTick;
 			}
 
+			double secondsDiff = millisDiff / 1000.0;
 			lastTick = currentTick;
 
 			// Open Pause menu
@@ -58,10 +58,9 @@ final class Game {
 				while (entityIt.hasNext()) {
 					Entity e = entityIt.next();
 
-					Optional<VisualComponent> c = e.getComponent(VisualComponent.class);
-					if (c.isPresent()) {
-						c.get().update(millisDiff / 1000.0);
-					}
+					e.getComponents(VisualComponent.class).forEach(c -> {
+						c.update(secondsDiff);
+					});
 				}
 
 				GraphicSystem.getInstance().clear();
@@ -76,7 +75,7 @@ final class Game {
 				Entity e = entityIt.next();
 
 				// Update entity
-				e.update(millisDiff / 1000.0);
+				e.update(secondsDiff);
 			}
 
 			// Update all UI Elements
@@ -85,11 +84,10 @@ final class Game {
 				UIElement ui = uiIt.next();
 
 				// Update entity
-				ui.update(millisDiff / 1000.0);
+				ui.update(secondsDiff);
 
 				// Remove entity if not alive
-				Optional<LivingComponent> c = ui.getComponent(LivingComponent.class);
-				if (c.isPresent() && c.get().isLiving() == false) {
+				if (ui.getComponents(LivingComponent.class).stream().anyMatch(c -> c.isLiving() == false)) {
 					uiIt.remove();
 					continue;
 				}
@@ -119,8 +117,7 @@ final class Game {
 				Entity e = entityIt.next();
 
 				// Remove entity if not alive
-				Optional<LivingComponent> c = e.getComponent(LivingComponent.class);
-				if (c.isPresent() && c.get().isLiving() == false) {
+				if (e.getComponents(LivingComponent.class).stream().anyMatch(c -> c.isLiving() == false)) {
 					entityIt.remove();
 					continue;
 				}
@@ -128,7 +125,7 @@ final class Game {
 
 			// TODO: Entities which can Spawn should implement spawnable
 			// create new objects if needed
-			this.world.createNewObjects(millisDiff / 1000.0);
+			this.world.createNewObjects(secondsDiff);
 		}
 	}
 

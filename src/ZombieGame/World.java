@@ -53,7 +53,7 @@ public abstract class World {
 	}
 
 	private final void registerEntityComponents(Entity entity) {
-		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().registerComponent(c));
+		entity.getComponents(PhysicsComponent.class).forEach(c -> PhysicsSystem.getInstance().registerComponent(c));
 		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().registerComponent(c));
 	}
 
@@ -78,7 +78,7 @@ public abstract class World {
 	}
 
 	private final void unregisterEntityComponents(Entity entity) {
-		entity.getComponent(PhysicsComponent.class).ifPresent(c -> PhysicsSystem.getInstance().unregisterComponent(c));
+		entity.getComponents(PhysicsComponent.class).forEach(c -> PhysicsSystem.getInstance().unregisterComponent(c));
 		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().unregisterComponent(c));
 	}
 
@@ -161,7 +161,7 @@ public abstract class World {
 	public final <T extends Component> Collection<Entity> getEntitiesWithComponent(Class<T> type) {
 		ArrayList<Entity> elements = new ArrayList<>();
 		for (Entity e : this.entities) {
-			if (e.getComponent(type).isPresent()) {
+			if (!e.getComponents(type).isEmpty()) {
 				elements.add(e);
 			}
 		}
@@ -335,7 +335,7 @@ public abstract class World {
 	public final <T extends Component> Collection<UIElement> getUIElementsWithComponent(Class<T> type) {
 		ArrayList<UIElement> elements = new ArrayList<>();
 		for (UIElement e : this.uiElements) {
-			if (e.getComponent(type).isPresent()) {
+			if (!e.getComponents(type).isEmpty()) {
 				elements.add(e);
 			}
 		}
