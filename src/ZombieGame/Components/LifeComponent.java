@@ -10,42 +10,94 @@ import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Entities.Entity;
 
 public class LifeComponent extends LivingComponent implements Drawable {
+    private static final double INITIAL_TIMEOUT = 0.8;
+
+    // life wird jetzt in "Halbherzen" gezählt:
+    // 10 = 5 Herzen
     private int life;
+    private final int maxLife;
+
     private double damageTextTimeout;
     private String damageText;
-    private static final double INITIAL_TIMEOUT = 0.15;
 
-    /**
-     * A component which provides life to the entity. Allows to take damage, heal, or die if life falls below 0.
-     * 
-     * @param entity The entity to which the components belongs to
-     * @param life The initial life of the component
-     */
-    public LifeComponent(Entity entity, int life) {
+    public LifeComponent(Entity entity, int halfHearts) {
         super(entity);
-        this.life = life;
+        this.life = halfHearts;
+        this.maxLife = halfHearts;
         this.damageTextTimeout = 0.0;
+        this.damageText = "";
+    }
+
+    /** Current half-hearts */
+    public int getHalfHearts() {
+        return this.life;
+    }
+
+    /** Max half-hearts */
+    public int getMaxHalfHearts() {
+        return this.maxLife;
+    }
+
+    /** Current full hearts (rounded up/down je nach Bedarf) */
+    public int getHearts() {
+        return (int) Math.ceil(this.life / 2.0);
+    }
+
+    public int getMaxHearts() {
+        return (int) Math.ceil(this.maxLife / 2.0);
+    }
+
+    /** Für alten Code: life == half-hearts */
+    public int getLife() {
+        return this.life;
+    }
+
+    /** Für alten Code: maxLife == maxHalfHearts */
+    public int getMaxLife() {
+        return this.maxLife;
+    }
+
+    public double getLifeRatio() {
+        if (this.maxLife <= 0) return 0.0;
+        return Math.max(0.0, Math.min(1.0, this.life / (double) this.maxLife));
     }
 
     /**
-     * Reduce the life by damage
+     * Damage in HALF-HEARTS.
+     * 1 = 1/2 Herz, 2 = 1 Herz, ...
      */
-    public void takeDamage(int damage) {
-        // every shot decreases life
-        this.life -= damage;
-        this.damageTextTimeout = LifeComponent.INITIAL_TIMEOUT;
-        this.damageText = Integer.toString(damage);
+    public void takeDamage(int halfHeartsDamage) {
+        if (halfHeartsDamage <= 0) return;
+
+        this.life -= halfHeartsDamage;
+        this.damageTextTimeout = INITIAL_TIMEOUT;
+
+        // schöner Text: -½ oder -1, -1½ etc.
+        if (halfHeartsDamage == 1) {
+            this.damageText = "-½";
+        } else if (halfHeartsDamage % 2 == 0) {
+            this.damageText = "-" + (halfHeartsDamage / 2);
+        } else {
+            this.damageText = "-" + (halfHeartsDamage / 2) + "½";
+        }
 
         if (this.life <= 0) {
+            this.life = 0;
             this.kill();
         }
     }
 
     /**
-     * Increases the life by health
+     * Heal in HALF-HEARTS.
+     * 1 = 1/2 Herz
      */
-    public void restoreHealth(int health) {
-        this.life += health;
+    public void restoreHealth(int halfHeartsHeal) {
+        if (halfHeartsHeal <= 0) return;
+
+        this.life += halfHeartsHeal;
+        if (this.life > this.maxLife) {
+            this.life = this.maxLife;
+        }
     }
 
     @Override
@@ -59,7 +111,12 @@ public class LifeComponent extends LivingComponent implements Drawable {
     @Override
     public void draw() {
         if (this.damageTextTimeout > 0.0) {
-            GraphicSystem.getInstance().drawString(damageText, (int) (this.getEntity().getPosX() - Entity.world.worldPartX), (int) (this.getEntity().getPosY() - Entity.world.worldPartY), new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
+            GraphicSystem.getInstance().drawString(
+                    damageText,
+                    (int) (this.getEntity().getPosX() - Entity.world.worldPartX),
+                    (int) (this.getEntity().getPosY() - Entity.world.worldPartY),
+                    new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16))
+            );
         }
     }
 

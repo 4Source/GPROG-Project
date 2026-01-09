@@ -19,6 +19,12 @@ public abstract class MovementComponent extends Component {
         super(entity);
         this.alpha = alpha;
         this.speed = speed;
+
+        // Initialize rollback position so that if a collision happens before the
+        // first call to update(), moveBack() keeps the entity at its spawn
+        // position instead of teleporting to (0,0).
+        this.oldX = entity.getPosX();
+        this.oldY = entity.getPosY();
     }
 
     @Override
