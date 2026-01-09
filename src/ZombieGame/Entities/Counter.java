@@ -3,18 +3,19 @@ package ZombieGame.Entities;
 import java.awt.Color;
 import java.awt.Font;
 
+import ZombieGame.Coordinates.ViewPos;
+
 public abstract class Counter extends TextElement {
     private int number;
 
     /**
-     * @param posX The position in x of the grenades counter on the screen
-     * @param posY The position in y of the grenades counter on the screen
+     * @param pos The position in the world
      * @param color The color of the ui object
      * @param font The font to use to print the text to the screen
      * @param number The initial number of the counter
      */
-    public Counter(double posX, double posY, Color color, Font font, int number) {
-        super(posX, posY, color, font);
+    public Counter(ViewPos pos, Color color, Font font, int number) {
+        super(pos, color, font);
         this.number = number;
     }
 

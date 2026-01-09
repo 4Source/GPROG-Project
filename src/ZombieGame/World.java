@@ -13,6 +13,7 @@ import java.util.Queue;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Components.Component;
 import ZombieGame.Components.PhysicsComponent;
+import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
@@ -30,9 +31,9 @@ public abstract class World {
 	private ArrayList<UIElement> uiElements = new ArrayList<UIElement>();
 	private ArrayList<Entity> pendingAdditions = new ArrayList<>();
 	private ArrayList<Entity> pendingRemovals = new ArrayList<>();
-	private final Map<ChunkCoord, Chunk> generatedChunks = new HashMap<>();
-	private final Map<ChunkCoord, Chunk> loadedChunks = new HashMap<>();
-	private final Queue<ChunkCoord> generateChunks = new PriorityQueue<>();
+	private final Map<ChunkIndex, Chunk> generatedChunks = new HashMap<>();
+	private final Map<ChunkIndex, Chunk> loadedChunks = new HashMap<>();
+	private final Queue<ChunkIndex> generateChunks = new PriorityQueue<>();
 
 	World() {
 	}
@@ -417,62 +418,19 @@ public abstract class World {
 		};
 	}
 
-	public final double worldToViewPosX(double posX) {
-		return posX - this.worldPartX;
+	public double getWorldPartX() {
+		return this.worldPartX;
 	}
 
-	public final double viewToWorldPosX(double posX) {
-		return this.worldPartX + posX;
+	public double getWorldPartY() {
+		return this.worldPartY;
 	}
 
-	public final double worldToViewPosY(double posY) {
-		return posY - this.worldPartY;
-	}
-
-	public final double viewToWorldPosY(double posY) {
-		return this.worldPartY + posY;
-	}
-
-	public final double worldToChunkPosX(double posX) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'worldToChunkPosX'");
-	}
-
-	public final double chunkToWorldPosX(double posX) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'chunkToWorldPosX'");
-	}
-
-	public final double worldToChunkPosY(double posY) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'worldToChunkPosY'");
-	}
-
-	public final double chunkToWorldPosY(double posY) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Unimplemented method 'chunkToWorldPosY'");
-	}
-
-	public final ChunkCoord worldPosToChunkCoord(double posX, double posY) {
-		// TODO This probably need to be change
-		return new ChunkCoord((int) posX, (int) posY);
-	}
-
-	public final double chunkCoordToWorldPosX(ChunkCoord coord) {
-		// TODO This probably need to be change
-		return coord.x();
-	}
-
-	public final double chunkCoordToWorldPosY(ChunkCoord coord) {
-		// TODO This probably need to be change
-		return coord.y();
-	}
-
-	public Optional<Chunk> getChunk(ChunkCoord coord) {
+	public Optional<Chunk> getChunk(ChunkIndex coord) {
 		return Optional.ofNullable(this.generatedChunks.get(coord));
 	}
 
-	public abstract Chunk generateChunk(ChunkCoord coord);
+	public abstract Chunk generateChunk(ChunkIndex coord);
 
 	public void addChunk(Chunk chunk) {
 		this.generatedChunks.put(chunk.getCoord(), chunk);
@@ -492,33 +450,33 @@ public abstract class World {
 		Avatar avatar = opt.get();
 
 		// if avatar is too much right in display ...
-		if (avatar.getPosX() > this.worldPartX + Constants.WORLDPART_WIDTH - Constants.SCROLL_BOUNDS) {
+		if (avatar.getPositionComponent().getWorldPos().x() > this.worldPartX + Constants.WORLDPART_WIDTH - Constants.SCROLL_BOUNDS) {
 			// ... adjust display
-			this.worldPartX = avatar.getPosX() + Constants.SCROLL_BOUNDS - Constants.WORLDPART_WIDTH;
+			this.worldPartX = avatar.getPositionComponent().getWorldPos().x() + Constants.SCROLL_BOUNDS - Constants.WORLDPART_WIDTH;
 			if (this.worldPartX >= RIGHT_END) {
 				this.worldPartX = RIGHT_END;
 			}
 		}
 
 		// same left
-		else if (avatar.getPosX() < this.worldPartX + Constants.SCROLL_BOUNDS) {
-			this.worldPartX = avatar.getPosX() - Constants.SCROLL_BOUNDS;
+		else if (avatar.getPositionComponent().getWorldPos().x() < this.worldPartX + Constants.SCROLL_BOUNDS) {
+			this.worldPartX = avatar.getPositionComponent().getWorldPos().x() - Constants.SCROLL_BOUNDS;
 			if (this.worldPartX <= 0) {
 				this.worldPartX = 0;
 			}
 		}
 
 		// same bottom
-		if (avatar.getPosY() > this.worldPartY + Constants.WORLDPART_HEIGHT - Constants.SCROLL_BOUNDS) {
-			this.worldPartY = avatar.getPosY() + Constants.SCROLL_BOUNDS - Constants.WORLDPART_HEIGHT;
+		if (avatar.getPositionComponent().getWorldPos().y() > this.worldPartY + Constants.WORLDPART_HEIGHT - Constants.SCROLL_BOUNDS) {
+			this.worldPartY = avatar.getPositionComponent().getWorldPos().y() + Constants.SCROLL_BOUNDS - Constants.WORLDPART_HEIGHT;
 			if (this.worldPartY >= BOTTOM_END) {
 				this.worldPartY = BOTTOM_END;
 			}
 		}
 
 		// same top
-		else if (avatar.getPosY() < this.worldPartY + Constants.SCROLL_BOUNDS) {
-			this.worldPartY = avatar.getPosY() - Constants.SCROLL_BOUNDS;
+		else if (avatar.getPositionComponent().getWorldPos().y() < this.worldPartY + Constants.SCROLL_BOUNDS) {
+			this.worldPartY = avatar.getPositionComponent().getWorldPos().y() - Constants.SCROLL_BOUNDS;
 			if (this.worldPartY <= 0) {
 				this.worldPartY = 0;
 			}

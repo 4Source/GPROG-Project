@@ -17,6 +17,8 @@ import ZombieGame.Components.AIMovementComponent;
 import ZombieGame.Components.CharacterSpriteComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifeComponent;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.LoopingSprite;
 
 public class Zombie extends Character {
@@ -26,8 +28,8 @@ public class Zombie extends Character {
 	 * @param startX The position in x of the zombie where is should be at game start
 	 * @param startY The position in y of the zombie where is should be at game start
 	 */
-	public Zombie(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 18, 0, 25), e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 30, 40), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)), e -> new AIMovementComponent(e, 0, 60), e -> new LifeComponent(e, 100));
+	public Zombie(WorldPos start) {
+		super(e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)), new CircleHitBox(HitBoxType.Block, 18, new Offset(0, 25)), e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 30, 40), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)), e -> new AIMovementComponent(e, start, 0, 60), e -> new LifeComponent(e, 100));
 
 		double animationFrameTime = 0.1;
 		double scale = 3;
@@ -49,8 +51,8 @@ public class Zombie extends Character {
 	}
 
 	@Override
-	public AIMovementComponent getMovementComponent() {
-		return (AIMovementComponent) super.getMovementComponent();
+	public AIMovementComponent getPositionComponent() {
+		return (AIMovementComponent) super.getPositionComponent();
 	}
 
 	@Override
@@ -65,23 +67,23 @@ public class Zombie extends Character {
 
 			// if object is avatar, game over
 			if (type == EntityType.AVATAR) {
-				this.getMovementComponent().moveBack();
+				this.getPositionComponent().moveBack();
 				// TODO: Start attack here. By starting attack animation and adding temporary DynamicPhysics component which represent the hitbox where the zombie must hit the player
 				((Avatar) collision.entity()).getLifeComponent().takeDamage(10);
 			}
 
 			// if object is zombie, step back
 			if (type == EntityType.ZOMBIE) {
-				this.getMovementComponent().moveBack();
-				this.getMovementComponent().setState(AIState.STUCK);
+				this.getPositionComponent().moveBack();
+				this.getPositionComponent().setState(AIState.STUCK);
 				;
 				return;
 			}
 
 			// if Object is a tree, move back one step
 			if (type == EntityType.TREE) {
-				this.getMovementComponent().moveBack();
-				this.getMovementComponent().setState(AIState.STUCK);
+				this.getPositionComponent().moveBack();
+				this.getPositionComponent().setState(AIState.STUCK);
 				;
 				return;
 			}

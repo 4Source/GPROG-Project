@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ZombieGame.Coordinates.ViewPos;
+
 enum DeviceType {
 	KEYBOARD, MOUSE,
 }
@@ -103,12 +105,8 @@ public class InputSystem implements KeyListener, MouseListener, MouseMotionListe
 		return this.actionPressed.getOrDefault(action, false);
 	}
 
-	public int getMousePositionX() {
-		return mousePositionX;
-	}
-
-	public int getMousePositionY() {
-		return mousePositionY;
+	public ViewPos getMousePosition() {
+		return new ViewPos(mousePositionX, mousePositionY);
 	}
 
 	/**

@@ -7,6 +7,7 @@ import ZombieGame.DrawStyle;
 import ZombieGame.GraphicLayer;
 import ZombieGame.GraphicSystem;
 import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 
 public class LifeComponent extends LivingComponent implements Drawable {
@@ -59,7 +60,8 @@ public class LifeComponent extends LivingComponent implements Drawable {
     @Override
     public void draw() {
         if (this.damageTextTimeout > 0.0) {
-            GraphicSystem.getInstance().drawString(damageText, (int) Entity.world.worldToViewPosX(this.getEntity().getPosX()), (int) Entity.world.worldToViewPosY(this.getEntity().getPosY()), new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
+            ViewPos view = this.getEntity().getPositionComponent().getViewPos();
+            GraphicSystem.getInstance().drawString(damageText, view, new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
         }
     }
 
@@ -70,6 +72,6 @@ public class LifeComponent extends LivingComponent implements Drawable {
 
     @Override
     public int getDepth() {
-        return (int) this.getEntity().getPosY();
+        return (int) this.getEntity().getPositionComponent().getViewPos().y();
     }
 }

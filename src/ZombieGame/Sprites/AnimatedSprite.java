@@ -1,5 +1,7 @@
 package ZombieGame.Sprites;
 
+import ZombieGame.Coordinates.Offset;
+
 public abstract class AnimatedSprite extends Sprite {
     protected final double frameTime;
     protected double lastUpdate;
@@ -10,11 +12,10 @@ public abstract class AnimatedSprite extends Sprite {
      * @param rowCount The number of Sprites positioned below each other
      * @param scale The Factor about what the Sprite should be scaled to display it
      * @param frameTime The time how long one sprite should be displayed before switching to the next
-     * @param offsetX A positioning offset in x which gets added to the position were to draw the sprite
-     * @param offsetY A positioning offset in y which gets added to the position were to draw the sprite
+     * @param offset A positioning offset which gets added to the position were to draw the sprite
      */
-    public AnimatedSprite(String spritePath, int columnCount, int rowCount, double scale, double frameTime, int offsetX, int offsetY) {
-        super(spritePath, columnCount, rowCount, scale, offsetX, offsetY);
+    public AnimatedSprite(String spritePath, int columnCount, int rowCount, double scale, double frameTime, Offset offset) {
+        super(spritePath, columnCount, rowCount, scale, offset);
 
         this.frameTime = frameTime;
         this.lastUpdate = 0;
@@ -29,7 +30,7 @@ public abstract class AnimatedSprite extends Sprite {
      * @param frameTime The time how long one sprite should be displayed before switching to the next
      */
     public AnimatedSprite(String spritePath, int columnCount, int rowCount, double scale, double frameTime) {
-        this(spritePath, columnCount, rowCount, scale, frameTime, 0, 0);
+        this(spritePath, columnCount, rowCount, scale, frameTime, new Offset());
     }
 
     @Override

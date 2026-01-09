@@ -3,6 +3,7 @@ package ZombieGame.Components;
 import java.util.ArrayList;
 
 import ZombieGame.GraphicLayer;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.StaticSprite;
 
@@ -17,11 +18,10 @@ public class StaticSpriteComponent extends SpriteComponent {
 
     @Override
     public void draw() {
-        double posX = Entity.world.worldToViewPosX(this.getEntity().getPosX());
-        double posY = Entity.world.worldToViewPosY(this.getEntity().getPosY());
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
 
         this.sprites.forEach(s -> {
-            s.draw(posX, posY);
+            s.draw(view);
         });
     }
 

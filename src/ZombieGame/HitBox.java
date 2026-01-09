@@ -1,18 +1,18 @@
 package ZombieGame;
 
+import ZombieGame.Coordinates.Offset;
+
 public abstract class HitBox {
     private HitBoxType collisionType;
-    private int offsetX, offsetY;
+    private Offset offset;
 
     /**
      * @param type The type of the collision the HitBox allows
-     * @param offsetX The offset in x from the entity position to the hit box position
-     * @param offsetY The offset in y from the entity position to the hit box position
+     * @param offset The offset from the entity position to the hit box position
      */
-    protected HitBox(HitBoxType type, int offsetX, int offsetY) {
+    protected HitBox(HitBoxType type, Offset offset) {
         this.collisionType = type;
-        this.offsetX = offsetX;
-        this.offsetY = offsetY;
+        this.offset = offset;
     }
 
     /**
@@ -20,19 +20,14 @@ public abstract class HitBox {
      */
     protected HitBox(HitBoxType type) {
         this.collisionType = type;
-        this.offsetX = 0;
-        this.offsetY = 0;
+        this.offset = new Offset();
     }
 
     public HitBoxType getCollisionType() {
         return this.collisionType;
     }
 
-    public int getOffsetX() {
-        return this.offsetX;
-    }
-
-    public int getOffsetY() {
-        return this.offsetY;
+    public Offset getOffset() {
+        return this.offset;
     }
 }

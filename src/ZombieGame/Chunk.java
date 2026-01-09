@@ -5,17 +5,21 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.ChunkIndex;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.StaticSprite;
 
 public class Chunk implements Drawable {
+    public static int SIZE = 8;
     private final TileType[][] tiles;
     private final StaticSprite[][] sprites;
     private final World world;
-    private final ChunkCoord coord;
+    private final ChunkIndex coord;
     private ArrayList<Entity> entities = new ArrayList<Entity>();
 
-    protected Chunk(World world, ChunkCoord coord, TileType[][] tiles) {
+    protected Chunk(World world, ChunkIndex coord, TileType[][] tiles) {
         this.world = world;
         this.coord = coord;
         this.tiles = tiles;
@@ -33,16 +37,14 @@ public class Chunk implements Drawable {
 
     @Override
     public void draw() {
-        double posX = Entity.world.worldToViewPosX(this.world.chunkCoordToWorldPosX(this.coord));
-        double posY = Entity.world.worldToViewPosY(this.world.chunkCoordToWorldPosY(this.coord));
+        ViewPos viewPos = this.coord.toWorldPos().toViewPos(Entity.world);
 
         for (int y = 0; y < tilesSizeY(); y++) {
             StaticSprite[] spritesRows = this.sprites[y];
             for (int x = 0; x < tilesSizeX(); x++) {
                 StaticSprite sprite = spritesRows[x];
-                double yOffset = y * sprite.getDrawHeight();
-                double xOffset = x * sprite.getDrawWidth();
-                sprite.draw(posX + xOffset, posY + yOffset);
+                Offset offset = new Offset(x * sprite.getDrawWidth(), y * sprite.getDrawHeight());
+                sprite.draw(viewPos.add(offset));
             }
         }
     }
@@ -57,7 +59,7 @@ public class Chunk implements Drawable {
         return this.coord.y();
     }
 
-    public ChunkCoord getCoord() {
+    public ChunkIndex getCoord() {
         return this.coord;
     }
 
@@ -70,35 +72,35 @@ public class Chunk implements Drawable {
     }
 
     public Optional<Chunk> getChunkToTop() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x(), this.coord.y() - 1));
+        return this.world.getChunk(this.coord.add(0, -1));
     }
 
     public Optional<Chunk> getChunkToTopRight() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x() + 1, this.coord.y() - 1));
+        return this.world.getChunk(this.coord.add(1, -1));
     }
 
     public Optional<Chunk> getChunkToRight() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x() + 1, this.coord.y()));
+        return this.world.getChunk(this.coord.add(1, 0));
     }
 
     public Optional<Chunk> getChunkToBottomRight() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x() + 1, this.coord.y() + 1));
+        return this.world.getChunk(this.coord.add(1, 1));
     }
 
     public Optional<Chunk> getChunkToBottom() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x(), this.coord.y() + 1));
+        return this.world.getChunk(this.coord.add(0, 1));
     }
 
     public Optional<Chunk> getChunkToBottomLeft() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x() - 1, this.coord.y() + 1));
+        return this.world.getChunk(this.coord.add(-1, 1));
     }
 
     public Optional<Chunk> getChunkToLeft() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x() - 1, this.coord.y()));
+        return this.world.getChunk(this.coord.add(-1, 0));
     }
 
     public Optional<Chunk> getChunkToTopLeft() {
-        return this.world.getChunk(new ChunkCoord(this.coord.x() - 1, this.coord.y() - 1));
+        return this.world.getChunk(this.coord.add(-1, -1));
     }
 
     private Optional<TileType> getTileToTop(int currentX, int currentY) {

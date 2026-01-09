@@ -1,31 +1,33 @@
 package ZombieGame.Components;
 
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
 
 public class TargetMovementComponent extends MovementComponent {
-    protected double destX, destY;
+    protected WorldPos dest;
     protected boolean hasDestination;
 
     /**
      * A movement component which will move to a given destination.
      * 
      * @param entity The entity to which the components belongs to
+     * @param pos The position in the world
      * @param alpha The angle of rotation in radian
      * @param speed The speed how fast to move
      */
-    public TargetMovementComponent(Entity entity, double alpha, double speed) {
-        super(entity, alpha, speed);
+    public TargetMovementComponent(Entity entity, WorldPos pos, double alpha, double speed) {
+        super(entity, pos, alpha, speed);
         this.hasDestination = false;
     }
 
     /**
      * @param entity The entity to which the components belongs to
+     * @param pos The position in the world
      * @param speed The speed how fast to move
-     * @param destinationX The world position x where to move
-     * @param destinationY The world position y where to move
+     * @param destination The world position where to move
      */
-    public TargetMovementComponent(Entity entity, double speed, double destinationX, double destinationY) {
-        super(entity, Math.atan2(destinationY - entity.getPosY(), destinationX - entity.getPosX()), speed);
+    public TargetMovementComponent(Entity entity, WorldPos pos, double speed, WorldPos destination) {
+        super(entity, pos, Math.atan2(destination.y() - entity.getPositionComponent().getWorldPos().y(), destination.x() - entity.getPositionComponent().getWorldPos().x()), speed);
         this.hasDestination = true;
     }
 
@@ -34,8 +36,8 @@ public class TargetMovementComponent extends MovementComponent {
         // move if object has a destination
         if (this.hasDestination) {
             // stop if destination is reached
-            double diffX = Math.abs(this.getEntity().getPosX() - this.destX);
-            double diffY = Math.abs(this.getEntity().getPosY() - this.destY);
+            double diffX = Math.abs(this.getEntity().getPositionComponent().getWorldPos().x() - this.dest.x());
+            double diffY = Math.abs(this.getEntity().getPositionComponent().getWorldPos().y() - this.dest.y());
             if (diffX < 3 && diffY < 3) {
                 this.hasDestination = false;
                 return;
@@ -48,15 +50,13 @@ public class TargetMovementComponent extends MovementComponent {
     /**
      * Set a point in the world as destination
      * 
-     * @param destinationX The world position x where to move
-     * @param destinationY The world position y where to move
+     * @param destination The world position where to move
      */
-    public void setDestination(double destinationX, double destinationY) {
+    public void setDestination(WorldPos destination) {
         this.hasDestination = true;
-        this.destX = destinationX;
-        this.destY = destinationY;
+        this.dest = destination;
 
-        this.alpha = Math.atan2(destinationY - this.getEntity().getPosY(), destinationX - this.getEntity().getPosX());
+        this.alpha = Math.atan2(destination.y() - this.getEntity().getPositionComponent().getWorldPos().y(), destination.x() - this.getEntity().getPositionComponent().getWorldPos().x());
     }
 
     /**
@@ -65,6 +65,6 @@ public class TargetMovementComponent extends MovementComponent {
      * @param destination The object where to move to
      */
     public void setDestination(Entity destination) {
-        setDestination(destination.getPosX(), destination.getPosY());
+        setDestination(destination.getPositionComponent().getWorldPos());
     }
 }

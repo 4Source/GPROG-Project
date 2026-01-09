@@ -12,42 +12,36 @@ import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.CircleComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifetimeComponent;
-import ZombieGame.Components.MovementComponent;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Components.StaticMovementComponent;
+import ZombieGame.Coordinates.WorldPos;
 
 public class Gunshot extends Entity {
 	private CircleComponent circleComponent;
 	private LifetimeComponent lifetimeComponent;
-	private MovementComponent movementComponent;
 	private PhysicsComponent physicsComponent;
 
 	/**
-	 * @param posX The initial position in x of the gunshot
-	 * @param posY The initial position in y of the gunshot
-	 * @param destX The target direction in x of the gunshot
-	 * @param destY The target direction in y of the gunshot
+	 * @param pos The position in the world
+	 * @param dest The target direction of the gunshot
 	 */
-	public Gunshot(double posX, double posY, double destX, double destY) {
-		super(posX, posY);
+	public Gunshot(WorldPos pos, WorldPos dest) {
+		super(e -> new StaticMovementComponent(e, pos, Math.atan2(dest.y() - pos.y(), dest.x() - pos.x()), 500));
 		this.circleComponent = this.add(new CircleComponent(this, 4, Color.YELLOW));
 		this.lifetimeComponent = this.add(new LifetimeComponent(this, 1.2));
-		this.movementComponent = this.add(new StaticMovementComponent(this, Math.atan2(destY - posY, destX - posX), 500));
 		this.physicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, 4), PhysicsCollisionLayer.PROJECTILE, new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.ZOMBIE), c -> onCollision(c), c -> {}));
 	}
 
 	/**
-	 * @param posX The initial position in x of the gunshot
-	 * @param posY The initial position in y of the gunshot
+	 * @param pos The position in the world
 	 * @param alpha The angle of rotation in radian
 	 * @param speed The speed how fast to move
 	 * @param lifetime The lifetime of the gunshot how long before the gunshot despawns
 	 */
-	public Gunshot(double posX, double posY, double alpha, double speed, double lifetime) {
-		super(posX, posY);
+	public Gunshot(WorldPos pos, double alpha, double speed, double lifetime) {
+		super(e -> new StaticMovementComponent(e, pos, alpha, speed));
 		this.circleComponent = this.add(new CircleComponent(this, 4, Color.YELLOW));
 		this.lifetimeComponent = this.add(new LifetimeComponent(this, lifetime));
-		this.movementComponent = this.add(new StaticMovementComponent(this, alpha, speed));
 		this.physicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Block, 4), PhysicsCollisionLayer.PROJECTILE, new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.ZOMBIE), c -> onCollision(c), c -> {}));
 	}
 
@@ -59,8 +53,9 @@ public class Gunshot extends Entity {
 		return this.lifetimeComponent;
 	}
 
-	public MovementComponent getMovementComponent() {
-		return this.movementComponent;
+	@Override
+	public StaticMovementComponent getPositionComponent() {
+		return (StaticMovementComponent) super.getPositionComponent();
 	}
 
 	public PhysicsComponent getPhysicsComponent() {
