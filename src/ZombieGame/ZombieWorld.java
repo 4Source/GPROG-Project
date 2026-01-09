@@ -1,8 +1,12 @@
 package ZombieGame;
 
-// (c) Thorsten Hasbargen
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+
+import javax.imageio.ImageIO;
 
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Ammunition;
@@ -48,6 +52,8 @@ public class ZombieWorld extends World {
 		this.addUIElement(new HeartUI(20, 20));
 		this.addUIElement(new AmmunitionCounter(770, 40, 0));
 		this.addUIElement(new HelpText(100, 400, 10.0));
+
+		this.addChunk(this.generateChunk(new ChunkCoord((int) (worldPartX / 2), (int) (worldPartY / 2))));
 	}
 
 	protected void createNewObjects(double deltaTime) {
@@ -156,5 +162,61 @@ public class ZombieWorld extends World {
 			counter.increment();
 		}
 
+	}
+
+	@Override
+	public Chunk generateChunk(ChunkCoord coord) {
+		long start = System.currentTimeMillis();
+		final int CHUNK_SIZE = 8;
+		// radius ≤ CHUNK_SIZE / 6
+		final int BLUR_RADIUS = 1;
+		// sigma ≈ radius × 0.7
+		final float SIGMA = 0.55f;
+
+		int W = CHUNK_SIZE + 2 * BLUR_RADIUS;
+		double[][] map = new double[W][W];
+
+		// Fill with random values
+		for (int y = 0; y < map.length; y++) {
+			for (int x = 0; x < map[y].length; x++) {
+				// TODO: Try getting chunks to the side to fill the current values in
+				map[y][x] = ThreadLocalRandom.current().nextDouble();
+			}
+		}
+
+		// Smooth the random values
+		map = GaussianBlur.blur(map, BLUR_RADIUS, SIGMA);
+
+		// Find min and max of the blurred map
+		double min = Double.POSITIVE_INFINITY;
+		double max = Double.NEGATIVE_INFINITY;
+		for (int y = 0; y < map.length; y++) {
+			for (int x = 0; x < map[y].length; x++) {
+				double v = map[y][x];
+				if (v < min)
+					min = v;
+				if (v > max)
+					max = v;
+			}
+		}
+
+		double[][] t = new double[CHUNK_SIZE][CHUNK_SIZE];
+		TileType[][] tiles = new TileType[CHUNK_SIZE][CHUNK_SIZE];
+		for (int y = 0; y < tiles.length; y++) {
+			for (int x = 0; x < tiles[y].length; x++) {
+				// Map everything to 0..1
+				map[y + BLUR_RADIUS][x + BLUR_RADIUS] = (map[y + BLUR_RADIUS][x + BLUR_RADIUS] - min) / (max - min);
+
+				// Convert the random values to TileTypes
+				tiles[y][x] = TileType.select(map[y + BLUR_RADIUS][x + BLUR_RADIUS]);
+				t[y][x] = tiles[y][x].getValue();
+
+				System.out.print(tiles[y][x].toString().charAt(0));
+			}
+			System.out.println();
+		}
+
+		System.out.println("Chunk generation time (ms): " + (System.currentTimeMillis() - start));
+		return new Chunk(this, coord, tiles);
 	}
 }

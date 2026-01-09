@@ -54,8 +54,7 @@ public class GraphicSystem extends JPanel {
      * @param layer The Layer the component should be drawn in
      */
     public void registerComponent(Drawable component) {
-        drawables.putIfAbsent(component.getLayer(), new ArrayList<>());
-        drawables.get(component.getLayer()).add(component);
+        drawables.computeIfAbsent(component.getLayer(), c -> new ArrayList<>()).add(component);
     }
 
     /**

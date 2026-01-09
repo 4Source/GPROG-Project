@@ -3,8 +3,12 @@ package ZombieGame;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Components.Component;
@@ -26,6 +30,9 @@ public abstract class World {
 	private ArrayList<UIElement> uiElements = new ArrayList<UIElement>();
 	private ArrayList<Entity> pendingAdditions = new ArrayList<>();
 	private ArrayList<Entity> pendingRemovals = new ArrayList<>();
+	private final Map<ChunkCoord, Chunk> generatedChunks = new HashMap<>();
+	private final Map<ChunkCoord, Chunk> loadedChunks = new HashMap<>();
+	private final Queue<ChunkCoord> generateChunks = new PriorityQueue<>();
 
 	World() {
 	}
@@ -424,6 +431,52 @@ public abstract class World {
 
 	public final double viewToWorldPosY(double posY) {
 		return this.worldPartY + posY;
+	}
+
+	public final double worldToChunkPosX(double posX) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'worldToChunkPosX'");
+	}
+
+	public final double chunkToWorldPosX(double posX) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'chunkToWorldPosX'");
+	}
+
+	public final double worldToChunkPosY(double posY) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'worldToChunkPosY'");
+	}
+
+	public final double chunkToWorldPosY(double posY) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'chunkToWorldPosY'");
+	}
+
+	public final ChunkCoord worldPosToChunkCoord(double posX, double posY) {
+		// TODO This probably need to be change
+		return new ChunkCoord((int) posX, (int) posY);
+	}
+
+	public final double chunkCoordToWorldPosX(ChunkCoord coord) {
+		// TODO This probably need to be change
+		return coord.x();
+	}
+
+	public final double chunkCoordToWorldPosY(ChunkCoord coord) {
+		// TODO This probably need to be change
+		return coord.y();
+	}
+
+	public Optional<Chunk> getChunk(ChunkCoord coord) {
+		return Optional.ofNullable(this.generatedChunks.get(coord));
+	}
+
+	public abstract Chunk generateChunk(ChunkCoord coord);
+
+	public void addChunk(Chunk chunk) {
+		this.generatedChunks.put(chunk.getCoord(), chunk);
+		GraphicSystem.getInstance().registerComponent(chunk);
 	}
 
 	// adjust the displayed pane of the world according to Avatar and Bounds
