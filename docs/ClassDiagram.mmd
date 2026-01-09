@@ -33,22 +33,20 @@ classDiagram
         + getPhysicsComponent() : DynamicPhysicsComponent
         + getMovementComponent() : MovementComponent
         + getLifeComponent() : LifeComponent
-        # onCollisionStart(collision : Collision) : void
-        # onCollisionEnd(collision : Collision) : void
+        # onMovementCollisionStart(collision : Collision) : void
+        # onMovementCollisionEnd(collision : Collision) : void
     }
     <<Abstract>> Character
 
     Character <|-- Avatar
     class Avatar {
         - gunshotComponent : GunshotComponent
-        - grenadeComponent : GrenadeComponent
         /+ getType() : EntityType.AVATAR
         /+ getVisualComponent() : CharacterSpriteComponent
         /+ getMovementComponent() : PlayerMovementComponent
         + getGunshotComponent() : GunshotComponent
-        + getGrenadeComponent() : GrenadeComponent
-        /# onCollisionStart(collision : Collision) : void
-        /# onCollisionEnd(collision : Collision) : void
+        /# onMovementCollisionStart(collision : Collision) : void
+        /# onMovementCollisionEnd(collision : Collision) : void
     }
 
     Character <|-- Zombie
@@ -56,8 +54,8 @@ classDiagram
         /+ getType() : EntityType.ZOMBIE
         /+ getVisualComponent() : CharacterSpriteComponent
         /+ getMovementComponent() : AIMovementComponent
-        /# onCollisionStart(collision : Collision) : void
-        /# onCollisionEnd(collision : Collision) : void
+        /# onMovementCollisionStart(collision : Collision) : void
+        /# onMovementCollisionEnd(collision : Collision) : void
     }
 
     Entity <|-- Gunshot
@@ -78,17 +76,21 @@ classDiagram
     class Item {
         - visualComponent : VisualComponent
         - physicsComponent : PhysicsComponent
+        - livingComponent : LivingComponent
         + getVisualComponent() : VisualComponent
         + getPhysicsComponent() : PhysicsComponent
+        + getLivingComponent() : LivingComponent
+         /+ getType() : EntityType.ITEM
+         + pickUp(entity : Entity) : void
     }
     <<Abstract>> Item
 
-    Item <|-- Grenade
-    class Grenade {
+    Item <|-- Ammunition
+    class Ammunition {
         - lifetimeComponent : LifetimeComponent
         + getLifetimeComponent() : LifetimeComponent
-        /+ getVisualComponent() : CircleComponent
-        /+ getType() : EntityType.GRENADE_ITEM
+        /+ getVisualComponent() : StaticSpriteComponent
+        /+ pickUp(entity : Entity) : void
     }
 
     Entity <|-- Obstacle
@@ -102,7 +104,7 @@ classDiagram
 
     Obstacle <|-- Tree
     class Tree {
-        /+ getVisualComponent() : ObstacleSpriteComponent
+        /+ getVisualComponent() : StaticSpriteComponent
         /+ getType() : EntityType.TREE
     }
 
@@ -131,8 +133,8 @@ classDiagram
     }
     <<Abstract>> Counter
 
-    Counter <|-- GrenadesCounter
-    class GrenadesCounter {
+    Counter <|-- AmmunitionCounter
+    class AmmunitionCounter {
         /+ toString() : String
     }
 
@@ -207,26 +209,24 @@ classDiagram
     }
     <<Abstract>> ActionComponent
 
-    ActionComponent <|-- GrenadeComponent
-    class GrenadeComponent {
-        + onThrow(deltaTime : double) : void
-    }
-    GrenadeComponent -- GrenadesCounter
-
     ActionComponent <|-- GunshotComponent
     class GunshotComponent {
         - timeSinceLastShot : double
         - fireRate : double
+        - ammunitionCount : int
         + onShoot(deltaTime : double) : void
+        + restockAmmunition(amount : int) : void
+        /+ update(deltaTime : double) : void
     }
+    GunshotComponent -- AmmunitionCounter
 
     Component <|-- LivingComponent
     class LivingComponent {
         - isLiving : boolean
         + isLiving() : boolean
         + kill() : void
+        /+ update(deltaTime : double) : void
     }
-    <<Abstract>> LivingComponent
 
     LivingComponent <|-- LifeComponent
     Drawable <|.. LifeComponent
@@ -354,8 +354,8 @@ classDiagram
         + addSprite(part : CharacterPart, state : CharacterAnimationKey, sprite : Sprite) : void
     }
 
-    SpriteComponent <|-- ObstacleSpriteComponent
-    class ObstacleSpriteComponent {
+    SpriteComponent <|-- StaticSpriteComponent
+    class StaticSpriteComponent {
         - sprites : StaticSprite [*]
         /+ draw() : void
         /+ getLayer() : GraphicLayer.GAME

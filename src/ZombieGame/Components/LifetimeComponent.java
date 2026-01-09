@@ -18,6 +18,7 @@ public class LifetimeComponent extends LivingComponent {
 
     @Override
     public void update(double deltaTime) {
+        super.update(deltaTime);
         this.lifetime -= deltaTime;
         if (this.lifetime < 0) {
             this.kill();

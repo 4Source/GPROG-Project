@@ -2,7 +2,7 @@ package ZombieGame.Components;
 
 import ZombieGame.Entities.Entity;
 
-public abstract class LivingComponent extends Component {
+public class LivingComponent extends Component {
     private boolean isLiving;
 
     /**
@@ -22,5 +22,9 @@ public abstract class LivingComponent extends Component {
 
     public void kill() {
         this.isLiving = false;
+    }
+
+    @Override
+    public void update(double deltaTime) {
     }
 }

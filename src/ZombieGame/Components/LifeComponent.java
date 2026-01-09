@@ -50,6 +50,7 @@ public class LifeComponent extends LivingComponent implements Drawable {
 
     @Override
     public void update(double deltaTime) {
+        super.update(deltaTime);
         if (this.damageTextTimeout > 0.0) {
             this.damageTextTimeout -= deltaTime;
         }

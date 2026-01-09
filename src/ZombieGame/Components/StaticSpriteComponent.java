@@ -6,10 +6,10 @@ import ZombieGame.GraphicLayer;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.StaticSprite;
 
-public class ObstacleSpriteComponent extends SpriteComponent {
+public class StaticSpriteComponent extends SpriteComponent {
     private ArrayList<StaticSprite> sprites;
 
-    public ObstacleSpriteComponent(Entity entity) {
+    public StaticSpriteComponent(Entity entity) {
         super(entity);
 
         this.sprites = new ArrayList<>();
