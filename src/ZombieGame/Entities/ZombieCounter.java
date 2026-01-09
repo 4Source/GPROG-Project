@@ -3,13 +3,14 @@ package ZombieGame.Entities;
 import java.awt.Color;
 import java.awt.Font;
 
+import ZombieGame.Coordinates.ViewPos;
+
 public class ZombieCounter extends Counter {
     /**
-     * @param posX The position in x of the zombie counter on the screen
-     * @param posY The position in y of the zombie counter on the screen
+     * @param pos The position in the world
      */
-    public ZombieCounter(double posX, double posY) {
-        super(posX, posY, new Color(255, 255, 0, 210), new Font("Arial", Font.PLAIN, 24), 0);
+    public ZombieCounter(ViewPos pos) {
+        super(pos, new Color(255, 255, 0, 210), new Font("Arial", Font.PLAIN, 24), 0);
     }
 
     @Override

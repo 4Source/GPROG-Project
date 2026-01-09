@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.swing.JPanel;
 
 import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.ViewPos;
 
 public class GraphicSystem extends JPanel {
     private static GraphicSystem instance;
@@ -117,9 +118,9 @@ public class GraphicSystem extends JPanel {
      * @param y the y coordinate of the lower left location where the {@code String} should be rendered
      * @param style the style of the string to be drawn.
      */
-    public void drawString(String str, int x, int y, DrawStyle style) {
+    public void drawString(String str, ViewPos pos, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.drawString(str, x, y);
+        this.graphics.drawString(str, pos.x(), pos.y());
     }
 
     /**
@@ -136,9 +137,9 @@ public class GraphicSystem extends JPanel {
      * @param height the height of the oval to be filled.
      * @param style the style of the oval to be filled.
      */
-    public void drawFillOval(int x, int y, int width, int height, DrawStyle style) {
+    public void drawFillOval(ViewPos pos, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.fillOval(x - width / 2, y - height / 2, width, height);
+        this.graphics.fillOval(pos.x() - width / 2, pos.y() - height / 2, width, height);
     }
 
     /**
@@ -150,9 +151,9 @@ public class GraphicSystem extends JPanel {
      * @param height the height of the oval to be drawn.
      * @param style the style of the oval to be drawn.
      */
-    public void drawOval(int x, int y, int width, int height, DrawStyle style) {
+    public void drawOval(ViewPos pos, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.drawOval(x - width / 2, y - height / 2, width, height);
+        this.graphics.drawOval(pos.x() - width / 2, pos.y() - height / 2, width, height);
     }
 
     /**
@@ -167,9 +168,9 @@ public class GraphicSystem extends JPanel {
      * @param height the height of the rectangle to be filled.
      * @param style the style of the rectangle to be filled.
      */
-    public void drawFillRect(int x, int y, int width, int height, DrawStyle style) {
+    public void drawFillRect(ViewPos pos, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.fillRect(x - width / 2, y - height / 2, width, height);
+        this.graphics.fillRect(pos.x() - width / 2, pos.y() - height / 2, width, height);
     }
 
     /**
@@ -181,9 +182,9 @@ public class GraphicSystem extends JPanel {
      * @param height the height of the rectangle to be drawn.
      * @param style the style of the rectangle to be drawn.
      */
-    public void drawRect(int x, int y, int width, int height, DrawStyle style) {
+    public void drawRect(ViewPos pos, int width, int height, DrawStyle style) {
         this.setStyle(style);
-        this.graphics.drawRect(x - width / 2, y - height / 2, width, height);
+        this.graphics.drawRect(pos.x() - width / 2, pos.y() - height / 2, width, height);
     }
 
     /**
@@ -195,15 +196,15 @@ public class GraphicSystem extends JPanel {
      * @param spriteWidth The width of the rectangle.
      * @param spriteHeight The height of the rectangle.
      */
-    public void drawSprite(BufferedImage sprite, int drawX, int drawY, int drawWidth, int drawHeight, int spriteX, int spriteY, int spriteWidth, int spriteHeight) {
-        this.graphics.drawImage(sprite, drawX, drawY, drawX + drawWidth, drawY + drawHeight, spriteX, spriteY, spriteWidth, spriteHeight, null);
+    public void drawSprite(BufferedImage sprite, ViewPos drawPos, int drawWidth, int drawHeight, ViewPos spritePos, int spriteWidth, int spriteHeight) {
+        this.graphics.drawImage(sprite, drawPos.x(), drawPos.y(), drawPos.x() + drawWidth, drawPos.y() + drawHeight, spritePos.x(), spritePos.y(), spriteWidth, spriteHeight, null);
     }
 
-    public void drawSprite(BufferedImage sprite, int posX, int posY, int columnIndex, int rowIndex, double scale, int spriteWidth, int spriteHeight) {
+    public void drawSprite(BufferedImage sprite, ViewPos pos, int columnIndex, int rowIndex, double scale, int spriteWidth, int spriteHeight) {
         int drawWidth_2 = (int) (spriteWidth * scale / 2);
         int drawHeight_2 = (int) (spriteHeight * scale / 2);
 
-        this.graphics.drawImage(sprite, posX - drawWidth_2, posY - drawHeight_2, posX + drawWidth_2, posY + drawHeight_2, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
+        this.graphics.drawImage(sprite, pos.x() - drawWidth_2, pos.y() - drawHeight_2, pos.x() + drawWidth_2, pos.y() + drawHeight_2, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
     }
 
     /**
@@ -215,7 +216,7 @@ public class GraphicSystem extends JPanel {
             long diff = currentTime - lastTime;
             lastTime = currentTime;
 
-            this.drawString("FPS: " + (int) Math.ceil(1000.0 / diff), 20, 40, new DrawStyle().color(Color.MAGENTA));
+            this.drawString("FPS: " + (int) Math.ceil(1000.0 / diff), new ViewPos(20, 40), new DrawStyle().color(Color.MAGENTA));
         }
 
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);

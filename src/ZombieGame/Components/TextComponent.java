@@ -21,7 +21,7 @@ public abstract class TextComponent extends UIComponent {
     }
 
     public void draw() {
-        GraphicSystem.getInstance().drawString(this.toString(), (int) this.getEntity().getPosX(), (int) this.getEntity().getPosY(), new DrawStyle().color(this.color).font(this.font));
+        GraphicSystem.getInstance().drawString(this.toString(), this.getEntity().getPositionComponent().getViewPos(), new DrawStyle().color(this.color).font(this.font));
     }
 
     /**

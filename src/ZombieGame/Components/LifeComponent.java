@@ -7,6 +7,7 @@ import ZombieGame.DrawStyle;
 import ZombieGame.GraphicLayer;
 import ZombieGame.GraphicSystem;
 import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 
 public class LifeComponent extends LivingComponent implements Drawable {
@@ -58,7 +59,8 @@ public class LifeComponent extends LivingComponent implements Drawable {
     }
 
     public double getLifeRatio() {
-        if (this.maxLife <= 0) return 0.0;
+        if (this.maxLife <= 0)
+            return 0.0;
         return Math.max(0.0, Math.min(1.0, this.life / (double) this.maxLife));
     }
 
@@ -67,7 +69,8 @@ public class LifeComponent extends LivingComponent implements Drawable {
      * 1 = 1/2 Herz, 2 = 1 Herz, ...
      */
     public void takeDamage(int halfHeartsDamage) {
-        if (halfHeartsDamage <= 0) return;
+        if (halfHeartsDamage <= 0)
+            return;
 
         this.life -= halfHeartsDamage;
         this.damageTextTimeout = INITIAL_TIMEOUT;
@@ -92,7 +95,8 @@ public class LifeComponent extends LivingComponent implements Drawable {
      * 1 = 1/2 Herz
      */
     public void restoreHealth(int halfHeartsHeal) {
-        if (halfHeartsHeal <= 0) return;
+        if (halfHeartsHeal <= 0)
+            return;
 
         this.life += halfHeartsHeal;
         if (this.life > this.maxLife) {
@@ -111,11 +115,8 @@ public class LifeComponent extends LivingComponent implements Drawable {
     @Override
     public void draw() {
         if (this.damageTextTimeout > 0.0) {
-            GraphicSystem.getInstance().drawString(
-                damageText, 
-                (int) Entity.world.worldToViewPosX(this.getEntity().getPosX()), 
-                (int) Entity.world.worldToViewPosY(this.getEntity().getPosY()), 
-                new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
+            ViewPos view = this.getEntity().getPositionComponent().getViewPos();
+            GraphicSystem.getInstance().drawString(damageText, view, new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
         }
     }
 
@@ -126,6 +127,6 @@ public class LifeComponent extends LivingComponent implements Drawable {
 
     @Override
     public int getDepth() {
-        return (int) this.getEntity().getPosY();
+        return (int) this.getEntity().getPositionComponent().getViewPos().y();
     }
 }

@@ -1,9 +1,9 @@
 package ZombieGame.Components;
 
 import ZombieGame.GraphicLayer;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.AnimatedSprite;
-import ZombieGame.Sprites.Sprite;
 
 /**
  * Draws a single sprite (static or animated) and updates it each frame.
@@ -18,9 +18,8 @@ public class AnimatedSpriteComponent extends SpriteComponent {
 
     @Override
     public void draw() {
-        double posX = this.getEntity().getPosX() - Entity.world.worldPartX;
-        double posY = this.getEntity().getPosY() - Entity.world.worldPartY;
-        this.sprite.draw(posX, posY);
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
+        this.sprite.draw(view);
     }
 
     @Override

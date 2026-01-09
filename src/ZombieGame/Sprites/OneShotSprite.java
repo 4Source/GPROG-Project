@@ -1,5 +1,7 @@
 package ZombieGame.Sprites;
 
+import ZombieGame.Coordinates.Offset;
+
 public class OneShotSprite extends AnimatedSprite {
     /**
      * An animated sprite which will go over the sprites once and will than stay at the last
@@ -9,11 +11,10 @@ public class OneShotSprite extends AnimatedSprite {
      * @param rowCount The number of Sprites positioned below each other
      * @param scale The Factor about what the Sprite should be scaled to display it
      * @param frameTime The time how long one sprite should be displayed before switching to the next
-     * @param offsetX A positioning offset in x which gets added to the position were to draw the sprite
-     * @param offsetY A positioning offset in y which gets added to the position were to draw the sprite
+     * @param offset A positioning offset which gets added to the position were to draw the sprite
      */
-    public OneShotSprite(String spritePath, int columnCount, int rowCount, double scale, double frameTime, int offsetX, int offsetY) {
-        super(spritePath, columnCount, rowCount, scale, frameTime, offsetX, offsetY);
+    public OneShotSprite(String spritePath, int columnCount, int rowCount, double scale, double frameTime, Offset offset) {
+        super(spritePath, columnCount, rowCount, scale, frameTime, offset);
     }
 
     /**
@@ -26,7 +27,7 @@ public class OneShotSprite extends AnimatedSprite {
      * @param frameTime The time how long one sprite should be displayed before switching to the next
      */
     public OneShotSprite(String spritePath, int columnCount, int rowCount, double scale, double frameTime) {
-        this(spritePath, columnCount, rowCount, scale, frameTime, 0, 0);
+        this(spritePath, columnCount, rowCount, scale, frameTime, new Offset());
     }
 
     @Override

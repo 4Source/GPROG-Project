@@ -18,11 +18,12 @@ import ZombieGame.Components.AxeThrowAIComponent;
 import ZombieGame.Components.CharacterSpriteComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifeComponent;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Components.ZombieAttackComponent;
 import ZombieGame.Sprites.LoopingSprite;
 import ZombieGame.Sprites.OneShotSprite;
 import ZombieGame.PhysicsSystem;
-
 
 public class Zombie extends Character {
 	private final ZombieType type;
@@ -30,24 +31,16 @@ public class Zombie extends Character {
 	private boolean hasAxe = false;
 
 	/**
-	 * Backwards-compatible constructor: spawns the BIG zombie (tank) like before.
-	 */
-	public Zombie(double startX, double startY) {
-		this(startX, startY, ZombieType.BIG);
-	}
-
-	/**
 	 * Spawns a zombie with a specific type (BIG / SMALL / AXE).
 	 */
-	public Zombie(double startX, double startY, ZombieType type) {
-		super(startX, startY,
-				e -> new CharacterSpriteComponent(e,
-						new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)),
+	public Zombie(WorldPos start, ZombieType type) {
+		super(e -> new CharacterSpriteComponent(e,
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)),
 				bodyCircleHitBoxFor(type),
 				e -> new DynamicPhysicsComponent(e, physicsRectHitBoxFor(type),
 						PhysicsCollisionLayer.ZOMBIE_CHARACTER,
 						new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
-				e -> new AIMovementComponent(e, 0, movementSpeedFor(type)),
+				e -> new AIMovementComponent(e, start, 0, movementSpeedFor(type)),
 				e -> new LifeComponent(e, maxHealthFor(type)));
 
 		this.type = type;
@@ -83,34 +76,31 @@ public class Zombie extends Character {
 					hitTime,
 					duration,
 					(z, target) -> {
-							double dist = PhysicsSystem.distance(z.getPosX(), z.getPosY(), target.getPosX(), target.getPosY());
+						double dist = PhysicsSystem.distance(z.getPositionComponent().getWorldPos(), target.getPositionComponent().getWorldPos());
 
-							// If we still have the axe: throw it only in mid-range.
-							if (z.hasAxe) {
-								if (dist >= minThrowDistance && dist <= maxThrowDistance) {
-									Entity.world.spawnEntity(new AxeProjectile(
-											z.getPosX(),
-											z.getPosY(),
-											target.getPosX(),
-											target.getPosY(),
-											axeThrowDamageFor()));
-									z.hasAxe = false;
-									z.replaceAxeSpritesNoAxe();
-									return;
-								}
-								// Too close to throw → melee strike with axe.
-								if (dist <= meleeRange) {
-									target.getLifeComponent().takeDamage(contactDamage);
-								}
+						// If we still have the axe: throw it only in mid-range.
+						if (z.hasAxe) {
+							if (dist >= minThrowDistance && dist <= maxThrowDistance) {
+								Entity.world.spawnEntity(new AxeProjectile(
+										z.getPositionComponent().getWorldPos(),
+										target.getPositionComponent().getWorldPos(),
+										axeThrowDamageFor()));
+								z.hasAxe = false;
+								z.replaceAxeSpritesNoAxe();
 								return;
 							}
-
-							// After throwing: only weak melee, and only if actually close.
+							// Too close to throw → melee strike with axe.
 							if (dist <= meleeRange) {
-								target.getLifeComponent().takeDamage(1);
+								target.getLifeComponent().takeDamage(contactDamage);
 							}
-					}
-			));
+							return;
+						}
+
+						// After throwing: only weak melee, and only if actually close.
+						if (dist <= meleeRange) {
+							target.getLifeComponent().takeDamage(1);
+						}
+					}));
 			// Start ranged throws when the player is in mid range.
 			this.add(new AxeThrowAIComponent(this, minThrowDistance, maxThrowDistance));
 		} else {
@@ -122,49 +112,49 @@ public class Zombie extends Character {
 
 	private static int maxHealthFor(ZombieType type) {
 		switch (type) {
-		case SMALL:
-			return 50; // low life
-		case AXE:
-			return 70; // less than BIG
-		case BIG:
-		default:
-			return 100;
+			case SMALL:
+				return 50; // low life
+			case AXE:
+				return 70; // less than BIG
+			case BIG:
+			default:
+				return 100;
 		}
 	}
 
 	private static int movementSpeedFor(ZombieType type) {
 		switch (type) {
-		case SMALL:
-			return 92; // faster (as requested), still below the player
-		case AXE:
-			return 62; // slightly faster than BIG, still heavy
-		case BIG:
-		default:
-			return 60;
+			case SMALL:
+				return 92; // faster (as requested), still below the player
+			case AXE:
+				return 62; // slightly faster than BIG, still heavy
+			case BIG:
+			default:
+				return 60;
 		}
 	}
 
 	private static int contactDamageFor(ZombieType type) {
 		switch (type) {
-		case SMALL:
-			return 1;
-		case AXE:
-			return 2; // more damage
-		case BIG:
-		default:
-			return 1;
+			case SMALL:
+				return 1;
+			case AXE:
+				return 2; // more damage
+			case BIG:
+			default:
+				return 1;
 		}
 	}
 
 	private static long attackCooldownFor(ZombieType type) {
 		switch (type) {
-		case SMALL:
-			return 950; // small attacks slower (but moves faster)
-		case AXE:
-			return 900;
-		case BIG:
-		default:
-			return 650;
+			case SMALL:
+				return 950; // small attacks slower (but moves faster)
+			case AXE:
+				return 900;
+			case BIG:
+			default:
+				return 650;
 		}
 	}
 
@@ -191,51 +181,51 @@ public class Zombie extends Character {
 
 	private static double attackRangeFor(ZombieType type) {
 		switch (type) {
-		case SMALL:
-			return 55;
-		case AXE:
-			return 75;
-		case BIG:
-		default:
-			return 65;
+			case SMALL:
+				return 55;
+			case AXE:
+				return 75;
+			case BIG:
+			default:
+				return 65;
 		}
 	}
 
 	private static double attackDurationFor(ZombieType type) {
 		// duration = frames * 0.1
 		switch (type) {
-		case SMALL:
-			return 0.4; // 4 frames
-		case AXE:
-			return 0.7; // 7 frames
-		case BIG:
-		default:
-			return 0.8; // 8 frames
+			case SMALL:
+				return 0.4; // 4 frames
+			case AXE:
+				return 0.7; // 7 frames
+			case BIG:
+			default:
+				return 0.8; // 8 frames
 		}
 	}
 
 	private static double attackHitTimeFor(ZombieType type) {
 		// Apply damage roughly mid animation
 		switch (type) {
-		case SMALL:
-			return 0.20;
-		case AXE:
-			return 0.30;
-		case BIG:
-		default:
-			return 0.35;
+			case SMALL:
+				return 0.20;
+			case AXE:
+				return 0.30;
+			case BIG:
+			default:
+				return 0.35;
 		}
 	}
 
 	private static CircleHitBox bodyCircleHitBoxFor(ZombieType type) {
 		switch (type) {
 			case SMALL:
-				return new CircleHitBox(HitBoxType.Block, 10, 0, 15);
+				return new CircleHitBox(HitBoxType.Block, 10, new Offset(0, 15));
 			case AXE:
-				return new CircleHitBox(HitBoxType.Block, 14, 0, 20);
+				return new CircleHitBox(HitBoxType.Block, 14, new Offset(0, 20));
 			case BIG:
 			default:
-				return new CircleHitBox(HitBoxType.Block, 18, 0, 25);
+				return new CircleHitBox(HitBoxType.Block, 18, new Offset(0, 25));
 		}
 	}
 
@@ -251,7 +241,6 @@ public class Zombie extends Character {
 		}
 	}
 
-
 	private void addSpritesForType(ZombieType type) {
 		final double animationFrameTime = 0.1;
 
@@ -262,28 +251,28 @@ public class Zombie extends Character {
 		final double scale;
 
 		switch (type) {
-		case SMALL:
-			base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Small\\";
-			prefix = "Zombie_Small";
-			moveFrames = 6;
-			attackFrames = 4;
-			scale = 2.6;
-			break;
-		case AXE:
-			base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\";
-			prefix = "Zombie_Axe";
-			moveFrames = 8;
-			attackFrames = 7;
-			scale = 3.0;
-			break;
-		case BIG:
-		default:
-			base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\";
-			prefix = "Zombie_Big";
-			moveFrames = 8;
-			attackFrames = 8;
-			scale = 3.0;
-			break;
+			case SMALL:
+				base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Small\\";
+				prefix = "Zombie_Small";
+				moveFrames = 6;
+				attackFrames = 4;
+				scale = 2.6;
+				break;
+			case AXE:
+				base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\";
+				prefix = "Zombie_Axe";
+				moveFrames = 8;
+				attackFrames = 7;
+				scale = 3.0;
+				break;
+			case BIG:
+			default:
+				base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\";
+				prefix = "Zombie_Big";
+				moveFrames = 8;
+				attackFrames = 8;
+				scale = 3.0;
+				break;
 		}
 
 		// IDLE
@@ -314,34 +303,27 @@ public class Zombie extends Character {
 				new LoopingSprite(downWalkFile, moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, null),
-				new LoopingSprite(base + prefix + "_Side_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale,
-						animationFrameTime));
+				new LoopingSprite(base + prefix + "_Side_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, null),
-				new LoopingSprite(base + prefix + "_Side-left_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale,
-						animationFrameTime));
+				new LoopingSprite(base + prefix + "_Side-left_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, null),
-				new LoopingSprite(base + prefix + "_Up_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale,
-						animationFrameTime));
+				new LoopingSprite(base + prefix + "_Up_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 
 		// ATTACK (One-shot) - "First Attack" sheets
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, null),
-				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1,
-						scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, null),
-				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1,
-						scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, null),
-				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1,
-						scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, null),
-				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1,
-						scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
 	}
 
 	/**
@@ -409,8 +391,8 @@ public class Zombie extends Character {
 	}
 
 	@Override
-	public AIMovementComponent getMovementComponent() {
-		return (AIMovementComponent) super.getMovementComponent();
+	public AIMovementComponent getPositionComponent() {
+		return (AIMovementComponent) super.getPositionComponent();
 	}
 
 	@Override
@@ -430,15 +412,15 @@ public class Zombie extends Character {
 
 			// if object is zombie, step back
 			if (entityType == EntityType.ZOMBIE) {
-				this.getMovementComponent().moveBack();
-				this.getMovementComponent().setState(AIState.STUCK);
+				this.getPositionComponent().moveBack();
+				this.getPositionComponent().setState(AIState.STUCK);
 				return;
 			}
 
 			// if Object is a tree, move back one step
 			if (entityType == EntityType.TREE) {
-				this.getMovementComponent().moveBack();
-				this.getMovementComponent().setState(AIState.STUCK);
+				this.getPositionComponent().moveBack();
+				this.getPositionComponent().setState(AIState.STUCK);
 				return;
 			}
 		}

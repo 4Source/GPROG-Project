@@ -6,6 +6,7 @@ import ZombieGame.AIState;
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterDirection;
 import ZombieGame.PhysicsSystem;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Zombie;
@@ -19,11 +20,12 @@ public class AIMovementComponent extends TargetMovementComponent {
      * A movement component which provides "intelligent" movement by different states.
      * 
      * @param entity The entity to which the components belongs to
+     * @param pos The position in the world
      * @param alpha The angle of rotation in radian
      * @param speed The speed how fast to move
      */
-    public AIMovementComponent(Entity entity, double alpha, double speed) {
-        super(entity, alpha, speed);
+    public AIMovementComponent(Entity entity, WorldPos pos, double alpha, double speed) {
+        super(entity, pos, alpha, speed);
         this.state = AIState.HUNTING;
 
         // turn left or right to clear
@@ -49,7 +51,7 @@ public class AIMovementComponent extends TargetMovementComponent {
         Avatar avatar = opt.get();
 
         // if avatar is too far away: stop
-        double dist = PhysicsSystem.distance(this.getEntity().getPosX(), this.getEntity().getPosY(), avatar.getPosX(), avatar.getPosY());
+        double dist = PhysicsSystem.distance(this.getWorldPos(), avatar.getPositionComponent().getWorldPos());
 
         if (dist > 1500) {
             this.hasDestination = false;

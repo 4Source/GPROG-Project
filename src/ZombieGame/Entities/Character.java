@@ -15,20 +15,18 @@ public abstract class Character extends Entity {
     private VisualComponent visualComponent;
     private DynamicPhysicsComponent movementPhysicsComponent;
     private DynamicPhysicsComponent damagePhysicsComponent;
-    private MovementComponent movementComponent;
     private LifeComponent lifeComponent;
 
     /**
-     * @param posX The position in x direction
-     * @param posY The position in y direction
+     * @param pos The position in the world
      * @param visualFactory A Factory method to create the component
      * @param hitBox The hit box of the Movement Physics component
      * @param damagePhysicsFactory A Factory method to create the component
      * @param movementFactory A Factory method to create the component
      * @param lifeFactory A Factory method to create the component
      */
-    public Character(double posX, double posY, Function<Entity, VisualComponent> visualFactory, HitBox hitBox, Function<Entity, DynamicPhysicsComponent> damagePhysicsFactory, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
-        super(posX, posY);
+    public Character(Function<Entity, VisualComponent> visualFactory, HitBox hitBox, Function<Entity, DynamicPhysicsComponent> damagePhysicsFactory, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
+        super(movementFactory);
         this.visualComponent = this.add(visualFactory.apply(this));
         this.movementPhysicsComponent = this.add(new DynamicPhysicsComponent(
                 this,
@@ -39,8 +37,12 @@ public abstract class Character extends Entity {
                 collision -> onMovementCollisionStay(collision),
                 collision -> onMovementCollisionEnd(collision)));
         this.damagePhysicsComponent = this.add(damagePhysicsFactory.apply(this));
-        this.movementComponent = this.add(movementFactory.apply(this));
         this.lifeComponent = this.add(lifeFactory.apply(this));
+    }
+
+    @Override
+    public MovementComponent getPositionComponent() {
+        return (MovementComponent) super.getPositionComponent();
     }
 
     public VisualComponent getVisualComponent() {
@@ -53,10 +55,6 @@ public abstract class Character extends Entity {
 
     public DynamicPhysicsComponent getDamagePhysicsComponent() {
         return this.damagePhysicsComponent;
-    }
-
-    public MovementComponent getMovementComponent() {
-        return this.movementComponent;
     }
 
     public LifeComponent getLifeComponent() {

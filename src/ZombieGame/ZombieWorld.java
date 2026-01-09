@@ -9,6 +9,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import javax.imageio.ImageIO;
 
 import ZombieGame.Entities.Avatar;
+import ZombieGame.Coordinates.ChunkIndex;
+import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Ammunition;
 import ZombieGame.Entities.AmmunitionCounter;
 import ZombieGame.Entities.HeartUI;
@@ -26,7 +29,7 @@ public class ZombieWorld extends World {
 
 	protected void init() {
 		// add the Avatar
-		this.spawnEntity(new Avatar(2500, 2000));
+		this.spawnEntity(new Avatar(new WorldPos(2500, 2000)));
 
 		// set WorldPart position
 		this.worldPartX = 1500;
@@ -35,25 +38,24 @@ public class ZombieWorld extends World {
 		// add a little forrest
 		for (int x = 0; x < 5000; x += 1000) {
 			for (int y = 0; y < 4000; y += 800) {
-				this.spawnEntity(new Tree(x + 300, y + 200));
-				this.spawnEntity(new Tree(x + 600, y + 370));
-				this.spawnEntity(new Tree(x + 200, y + 600));
-				this.spawnEntity(new Tree(x + 500, y + 800));
-				this.spawnEntity(new Tree(x + 900, y + 500));
-				this.spawnEntity(new Tree(x + 760, y + 160));
+				this.spawnEntity(new Tree(new WorldPos(x + 300, y + 200)));
+				this.spawnEntity(new Tree(new WorldPos(x + 600, y + 370)));
+				this.spawnEntity(new Tree(new WorldPos(x + 200, y + 600)));
+				this.spawnEntity(new Tree(new WorldPos(x + 500, y + 800)));
+				this.spawnEntity(new Tree(new WorldPos(x + 900, y + 500)));
+				this.spawnEntity(new Tree(new WorldPos(x + 760, y + 160)));
 			}
 		}
 
 		// add one zombie
-		this.spawnEntity(new Zombie(100, 100, ZombieType.BIG));
+		this.spawnEntity(new Zombie(new WorldPos(100, 100), ZombieType.BIG));
 
-		this.addUIElement(new ZombieCounter(345, 40));
-		// Player health bar (screen coordinates)
-		this.addUIElement(new HeartUI(20, 20));
-		this.addUIElement(new AmmunitionCounter(770, 40, 0));
-		this.addUIElement(new HelpText(100, 400, 10.0));
+		this.addUIElement(new ZombieCounter(new ViewPos(345, 40)));
+		this.addUIElement(new HeartUI(new ViewPos(20, 20)));
+		this.addUIElement(new AmmunitionCounter(new ViewPos(770, 40), 0));
+		this.addUIElement(new HelpText(new ViewPos(100, 400), 10.0));
 
-		this.addChunk(this.generateChunk(new ChunkCoord((int) (worldPartX / 2), (int) (worldPartY / 2))));
+		this.addChunk(this.generateChunk(new ChunkIndex((int) (worldPartX / 2), (int) (worldPartY / 2))));
 	}
 
 	protected void createNewObjects(double deltaTime) {
@@ -80,15 +82,15 @@ public class ZombieWorld extends World {
 			Avatar avatar = opt.get();
 
 			// if too close to Avatar, cancel
-			double dx = x - avatar.getPosX();
-			double dy = y - avatar.getPosY();
+			double dx = x - avatar.getPositionComponent().getWorldPos().x();
+			double dy = y - avatar.getPositionComponent().getWorldPos().y();
 			if (dx * dx + dy * dy < 200 * 200) {
 				this.spawnAmmunition = INTERVAL;
 				return;
 			}
 
 			// if collisions occur, cancel
-			Ammunition grenade = new Ammunition(x, y);
+			Ammunition grenade = new Ammunition(new WorldPos(x, y));
 			if (PhysicsSystem.getInstance().testCollision(grenade)) {
 				this.spawnAmmunition = INTERVAL;
 				return;
@@ -126,8 +128,8 @@ public class ZombieWorld extends World {
 			Avatar avatar = optA.get();
 
 			// if too close to Avatar, cancel
-			double dx = x - avatar.getPosX();
-			double dy = y - avatar.getPosY();
+			double dx = x - avatar.getPositionComponent().getWorldPos().x();
+			double dy = y - avatar.getPositionComponent().getWorldPos().y();
 			if (dx * dx + dy * dy < 400 * 400) {
 				this.timePassed = INTERVAL;
 				return;
@@ -145,7 +147,7 @@ public class ZombieWorld extends World {
 			}
 
 			// if collisions occur, cancel
-			Zombie zombie = new Zombie(x, y, type);
+			Zombie zombie = new Zombie(new WorldPos(x, y), type);
 			if (PhysicsSystem.getInstance().testCollision(zombie)) {
 				this.timePassed = INTERVAL;
 				return;
@@ -153,7 +155,7 @@ public class ZombieWorld extends World {
 
 			// else add zombie to world
 			this.spawnEntity(zombie);
-			zombie.getMovementComponent().setDestination(avatar);
+			zombie.getPositionComponent().setDestination(avatar);
 			Optional<ZombieCounter> optZ = this.getUIElement(ZombieCounter.class);
 			if (optZ.isEmpty()) {
 				System.err.println("Could not find ZombieCounter");
@@ -161,13 +163,12 @@ public class ZombieWorld extends World {
 			ZombieCounter counter = optZ.get();
 			counter.increment();
 		}
-
 	}
 
 	@Override
-	public Chunk generateChunk(ChunkCoord coord) {
+	public Chunk generateChunk(ChunkIndex coord) {
 		long start = System.currentTimeMillis();
-		final int CHUNK_SIZE = 8;
+		final int CHUNK_SIZE = Chunk.SIZE;
 		// radius ≤ CHUNK_SIZE / 6
 		final int BLUR_RADIUS = 1;
 		// sigma ≈ radius × 0.7

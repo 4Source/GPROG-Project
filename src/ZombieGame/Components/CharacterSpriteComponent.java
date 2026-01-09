@@ -14,6 +14,7 @@ import ZombieGame.CharacterPart;
 import ZombieGame.GraphicLayer;
 import ZombieGame.GraphicSystem;
 import ZombieGame.MissingTexture;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.Sprite;
 
@@ -30,8 +31,7 @@ public class CharacterSpriteComponent extends SpriteComponent {
 
     @Override
     public void draw() {
-        double posX = Entity.world.worldToViewPosX(this.getEntity().getPosX());
-        double posY = Entity.world.worldToViewPosY(this.getEntity().getPosY());
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
 
         ArrayList<CharacterPart> partsOrder = new ArrayList<>();
         switch (this.getCharacterDirection()) {
@@ -56,11 +56,11 @@ public class CharacterSpriteComponent extends SpriteComponent {
 
                 if (sprite == null) {
                     int size = MissingTexture.getSize();
-                    GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), (int) posX, (int) posX, size, size, 0, 0, size, size);
+                    GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), view, size, size, new ViewPos(), size, size);
                     return;
                 }
 
-                sprite.draw(posX, posY);
+                sprite.draw(view);
             });
         });
     }

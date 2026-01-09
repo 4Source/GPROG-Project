@@ -11,6 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.PhysicsComponent;
+import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
 
 public class PhysicsSystem {
@@ -91,15 +93,13 @@ public class PhysicsSystem {
 	/**
 	 * Calculates the distance between two points
 	 * 
-	 * @param x1 The x position of point 1
-	 * @param y1 The y position of point 1
-	 * @param x2 The x position of point 2
-	 * @param y2 The y position of point 2
+	 * @param pos1 The position of point 1
+	 * @param pos2 The position of point 2
 	 * @return The distance between point 1 and point 2
 	 */
-	public static double distance(double x1, double y1, double x2, double y2) {
-		double xd = x1 - x2;
-		double yd = y1 - y2;
+	public static double distance(WorldPos pos1, WorldPos pos2) {
+		double xd = pos1.x() - pos2.x();
+		double yd = pos1.y() - pos2.y();
 		return Math.sqrt(xd * xd + yd * yd);
 	}
 
@@ -170,7 +170,7 @@ public class PhysicsSystem {
 			for (PhysicsComponent c : PhysicsSystem.getInstance().collisionBuffer.keySet()) {
 				coll += PhysicsSystem.getInstance().getCollisions(c).size();
 			}
-			GraphicSystem.getInstance().drawString("Components: " + comp + " Collisions: " + coll + " Time: " + (System.currentTimeMillis() - start), 20, 60, new DrawStyle().color(Color.MAGENTA));
+			GraphicSystem.getInstance().drawString("Components: " + comp + " Collisions: " + coll + " Time: " + (System.currentTimeMillis() - start), new ViewPos(20, 60), new DrawStyle().color(Color.MAGENTA));
 		}
 	}
 

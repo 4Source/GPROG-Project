@@ -1,5 +1,7 @@
 package ZombieGame.Sprites;
 
+import ZombieGame.Coordinates.Offset;
+
 public class StaticSprite extends Sprite {
 
     /**
@@ -11,11 +13,10 @@ public class StaticSprite extends Sprite {
      * @param scale The Factor about what the Sprite should be scaled to display it
      * @param columnIndex Specifies the index of the sprite which should be displayed
      * @param rowIndex Specifies the index of the sprite which should be displayed
-     * @param offsetX A positioning offset in x which gets added to the position were to draw the sprite
-     * @param offsetY A positioning offset in y which gets added to the position were to draw the sprite
+     * @param offset A positioning offset which gets added to the position were to draw the sprite
      */
-    public StaticSprite(String spritePath, int columnCount, int rowCount, double scale, int columnIndex, int rowIndex, int offsetX, int offsetY) {
-        super(spritePath, columnCount, rowCount, scale, offsetX, offsetY);
+    public StaticSprite(String spritePath, int columnCount, int rowCount, double scale, int columnIndex, int rowIndex, Offset offset) {
+        super(spritePath, columnCount, rowCount, scale, offset);
 
         this.columnIndex = columnIndex;
         this.rowIndex = rowIndex;
@@ -32,7 +33,7 @@ public class StaticSprite extends Sprite {
      * @param rowIndex Specifies the index of the sprite which should be displayed
      */
     public StaticSprite(String spritePath, int columnCount, int rowCount, double scale, int columnIndex, int rowIndex) {
-        this(spritePath, columnCount, rowCount, scale, columnIndex, rowIndex, 0, 0);
+        this(spritePath, columnCount, rowCount, scale, columnIndex, rowIndex, new Offset());
     }
 
     @Override

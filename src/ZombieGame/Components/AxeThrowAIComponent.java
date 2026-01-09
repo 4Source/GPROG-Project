@@ -39,7 +39,7 @@ public class AxeThrowAIComponent extends Component {
         }
 
         Avatar avatar = avatarOpt.get();
-        double dist = PhysicsSystem.distance(zombie.getPosX(), zombie.getPosY(), avatar.getPosX(), avatar.getPosY());
+        double dist = PhysicsSystem.distance(zombie.getPositionComponent().getWorldPos(), avatar.getPositionComponent().getWorldPos());
 
         // Only throw if not too close (melee) and not too far.
         if (dist >= minThrowDistance && dist <= maxThrowDistance) {

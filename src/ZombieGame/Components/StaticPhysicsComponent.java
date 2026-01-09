@@ -12,6 +12,7 @@ import ZombieGame.PhysicsCollisionLayer;
 import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.PhysicsSystem;
 import ZombieGame.RectangleHitBox;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 
 public class StaticPhysicsComponent extends PhysicsComponent {
@@ -54,18 +55,16 @@ public class StaticPhysicsComponent extends PhysicsComponent {
 
             if (this.hitBox instanceof CircleHitBox) {
                 int radius = ((CircleHitBox) this.hitBox).getRadius();
-                int x = (int) Entity.world.worldToViewPosX(this.getEntity().getPosX() + this.hitBox.getOffsetX());
-                int y = (int) Entity.world.worldToViewPosY(this.getEntity().getPosY() + this.hitBox.getOffsetY());
+                ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
                 int d = (int) (radius * 2);
 
-                GraphicSystem.getInstance().drawOval(x, y, d, d, style);
+                GraphicSystem.getInstance().drawOval(view, d, d, style);
             } else if (this.hitBox instanceof RectangleHitBox) {
                 int width = ((RectangleHitBox) this.hitBox).getWidth();
                 int height = ((RectangleHitBox) this.hitBox).getHeight();
-                int x = (int) Entity.world.worldToViewPosX(this.getEntity().getPosX() + this.hitBox.getOffsetX());
-                int y = (int) Entity.world.worldToViewPosY(this.getEntity().getPosY() + this.hitBox.getOffsetY());
+                ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
 
-                GraphicSystem.getInstance().drawRect(x, y, width, height, style);
+                GraphicSystem.getInstance().drawRect(view, width, height, style);
             } else {
                 System.err.println("Unsupported hit box for debug visualization.");
             }

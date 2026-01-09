@@ -15,16 +15,16 @@ import java.util.function.BiConsumer;
 public class ZombieAttackComponent extends Component {
     private final Zombie zombie;
 
-    // Tunables
+    // Config
     private final int damage;
     private final double hitRange;
     private final double hitTimeSeconds;
     private final double attackDurationSeconds;
-    private final long cooldownMs;
+    private final long coolDownMs;
 
     /**
      * Optional handler executed at hit-time (if target is still in range).
-     * If present, it replaces the default "apply melee damage" behaviour.
+     * If present, it replaces the default "apply melee damage" behavior.
      */
     private final BiConsumer<Zombie, Avatar> onHit;
 
@@ -34,16 +34,16 @@ public class ZombieAttackComponent extends Component {
     private double attackTimer = 0;
     private Avatar target;
 
-    public ZombieAttackComponent(Zombie zombie, int damage, long cooldownMs, double hitRange, double hitTimeSeconds, double attackDurationSeconds) {
-        this(zombie, damage, cooldownMs, hitRange, hitTimeSeconds, attackDurationSeconds, null);
+    public ZombieAttackComponent(Zombie zombie, int damage, long coolDownMs, double hitRange, double hitTimeSeconds, double attackDurationSeconds) {
+        this(zombie, damage, coolDownMs, hitRange, hitTimeSeconds, attackDurationSeconds, null);
     }
 
-    public ZombieAttackComponent(Zombie zombie, int damage, long cooldownMs, double hitRange, double hitTimeSeconds, double attackDurationSeconds,
-                                BiConsumer<Zombie, Avatar> onHit) {
+    public ZombieAttackComponent(Zombie zombie, int damage, long coolDownMs, double hitRange, double hitTimeSeconds, double attackDurationSeconds,
+            BiConsumer<Zombie, Avatar> onHit) {
         super(zombie);
         this.zombie = zombie;
         this.damage = damage;
-        this.cooldownMs = cooldownMs;
+        this.coolDownMs = coolDownMs;
         this.hitRange = hitRange;
         this.hitTimeSeconds = hitTimeSeconds;
         this.attackDurationSeconds = attackDurationSeconds;
@@ -56,7 +56,7 @@ public class ZombieAttackComponent extends Component {
         if (attacking) {
             return;
         }
-        if (now - lastAttackMillis < cooldownMs) {
+        if (now - lastAttackMillis < coolDownMs) {
             return;
         }
 
@@ -67,8 +67,8 @@ public class ZombieAttackComponent extends Component {
         this.target = target;
 
         // Pause movement and play attack animation.
-        this.zombie.getMovementComponent().setState(AIState.IDLING);
-        this.zombie.getMovementComponent().stopMoving();
+        this.zombie.getPositionComponent().setState(AIState.IDLING);
+        this.zombie.getPositionComponent().stopMoving();
         this.zombie.getVisualComponent().changeState(CharacterAction.ATTACK);
     }
 
@@ -84,7 +84,7 @@ public class ZombieAttackComponent extends Component {
         if (!damageApplied && attackTimer >= hitTimeSeconds) {
             damageApplied = true;
             if (target != null) {
-                double dist = PhysicsSystem.distance(zombie.getPosX(), zombie.getPosY(), target.getPosX(), target.getPosY());
+                double dist = PhysicsSystem.distance(zombie.getPositionComponent().getWorldPos(), target.getPositionComponent().getWorldPos());
                 if (dist <= hitRange) {
                     if (onHit != null) {
                         onHit.accept(zombie, target);
@@ -100,7 +100,7 @@ public class ZombieAttackComponent extends Component {
             attacking = false;
             target = null;
             zombie.getVisualComponent().changeState(CharacterAction.IDLE);
-            zombie.getMovementComponent().setState(AIState.HUNTING);
+            zombie.getPositionComponent().setState(AIState.HUNTING);
         }
     }
 

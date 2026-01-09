@@ -4,16 +4,17 @@ import ZombieGame.CircleHitBox;
 import ZombieGame.EntityType;
 import ZombieGame.HitBoxType;
 import ZombieGame.Components.StaticSpriteComponent;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.StaticSprite;
 
 public class Tree extends Obstacle {
 	/**
-	 * @param posX The position in x of the tree
-	 * @param posY The position in y of the tree
+	 * @param pos The position of the tree
 	 */
-	public Tree(double posX, double posY) {
+	public Tree(WorldPos pos) {
 		// this.circleComponent = this.add(new CircleComponent(this, radius, color));
-		super(posX, posY, new CircleHitBox(HitBoxType.Block, 18, 0, 30), e -> new StaticSpriteComponent(e));
+		super(pos, new CircleHitBox(HitBoxType.Block, 18, new Offset(0, 30)), e -> new StaticSpriteComponent(e));
 
 		this.getVisualComponent().addSprite(new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Nature\\Dark-Green\\Tree_3_Normal_Dark-Green.png", 1, 1, 3, 0, 0));
 	}
