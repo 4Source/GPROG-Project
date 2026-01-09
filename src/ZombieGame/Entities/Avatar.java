@@ -13,10 +13,8 @@ import ZombieGame.HitBoxType;
 import ZombieGame.PhysicsCollisionLayer;
 import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.RectangleHitBox;
-import ZombieGame.ZombieWorld;
 import ZombieGame.Components.CharacterSpriteComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
-import ZombieGame.Components.GrenadeComponent;
 import ZombieGame.Components.GunshotComponent;
 import ZombieGame.Components.LifeComponent;
 import ZombieGame.Components.PlayerMovementComponent;
@@ -25,7 +23,6 @@ import ZombieGame.Sprites.OneShotSprite;
 
 public class Avatar extends Character {
 	private GunshotComponent gunshotComponent;
-	private GrenadeComponent grenadeComponent;
 
 	/**
 	 * Spawns an avatar
@@ -42,8 +39,7 @@ public class Avatar extends Character {
 				Entity.world.gameOver = true;
 			}
 		});
-		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2));
-		this.grenadeComponent = this.add(new GrenadeComponent(this));
+		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2, 20));
 
 		double animationFrameTime = 0.1;
 		double scale = 3;
@@ -108,10 +104,6 @@ public class Avatar extends Character {
 		return this.gunshotComponent;
 	}
 
-	public GrenadeComponent getGrenadeComponent() {
-		return this.grenadeComponent;
-	}
-
 	@Override
 	public EntityType getType() {
 		return EntityType.AVATAR;
@@ -124,11 +116,10 @@ public class Avatar extends Character {
 			this.getMovementComponent().moveBack();
 		}
 
-		// pick up Grenades
+		// pick up Items
 		else if (collision.collisionResponse() == CollisionResponse.Overlap) {
-			if (collision.entity().getType() == EntityType.GRENADE_ITEM) {
-				((ZombieWorld) Entity.world).addGrenade();
-				((Grenade) collision.entity()).getLifetimeComponent().kill();
+			if (collision.entity().getType() == EntityType.ITEM) {
+				((Item) collision.entity()).pickUp(this);
 			}
 		}
 	}

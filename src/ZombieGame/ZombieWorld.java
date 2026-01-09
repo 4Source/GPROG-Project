@@ -5,8 +5,8 @@ package ZombieGame;
 import java.util.Optional;
 
 import ZombieGame.Entities.Avatar;
-import ZombieGame.Entities.Grenade;
-import ZombieGame.Entities.GrenadesCounter;
+import ZombieGame.Entities.Ammunition;
+import ZombieGame.Entities.AmmunitionCounter;
 import ZombieGame.Entities.HelpText;
 import ZombieGame.Entities.Tree;
 import ZombieGame.Entities.Zombie;
@@ -16,7 +16,7 @@ public class ZombieWorld extends World {
 	private double timePassed = 0;
 
 	// for grenades
-	private double spawnGrenade = 0;
+	private double spawnAmmunition = 0;
 
 	protected void init() {
 		// add the Avatar
@@ -42,23 +42,23 @@ public class ZombieWorld extends World {
 		this.spawnEntity(new Zombie(100, 100));
 
 		this.addUIElement(new ZombieCounter(20, 40));
-		this.addUIElement(new GrenadesCounter(770, 40, 5));
+		this.addUIElement(new AmmunitionCounter(770, 40, 0));
 		this.addUIElement(new HelpText(100, 400, 10.0));
 	}
 
 	protected void createNewObjects(double deltaTime) {
 		createZombie(deltaTime);
-		createGrenade(deltaTime);
+		createAmmunition(deltaTime);
 	}
 
-	private void createGrenade(double deltaTime) {
+	private void createAmmunition(double deltaTime) {
 		final double INTERVAL = Constants.SPAWN_GRENADE;
 
-		this.spawnGrenade += deltaTime;
-		if (this.spawnGrenade > INTERVAL) {
-			this.spawnGrenade -= INTERVAL;
+		this.spawnAmmunition += deltaTime;
+		if (this.spawnAmmunition > INTERVAL) {
+			this.spawnAmmunition -= INTERVAL;
 
-			// create new Grenade
+			// create new Ammunition
 			double x = this.worldPartX + Math.random() * Constants.WORLDPART_WIDTH;
 			double y = this.worldPartY + Math.random() * Constants.WORLDPART_HEIGHT;
 
@@ -73,14 +73,14 @@ public class ZombieWorld extends World {
 			double dx = x - avatar.getPosX();
 			double dy = y - avatar.getPosY();
 			if (dx * dx + dy * dy < 200 * 200) {
-				this.spawnGrenade = INTERVAL;
+				this.spawnAmmunition = INTERVAL;
 				return;
 			}
 
 			// if collisions occur, cancel
-			Grenade grenade = new Grenade(x, y);
+			Ammunition grenade = new Ammunition(x, y);
 			if (PhysicsSystem.getInstance().testCollision(grenade)) {
-				this.spawnGrenade = INTERVAL;
+				this.spawnAmmunition = INTERVAL;
 				return;
 			}
 
@@ -141,18 +141,5 @@ public class ZombieWorld extends World {
 			counter.increment();
 		}
 
-	}
-
-	public void addGrenade() {
-		Optional<GrenadesCounter> opt = this.getUIElement(GrenadesCounter.class);
-		if (opt.isEmpty()) {
-			System.err.println("Could not find GrenadesCounterText");
-			return;
-		}
-
-		GrenadesCounter grenades = opt.get();
-		if (grenades.getNumber() < 999) {
-			grenades.increment();
-		}
 	}
 }
