@@ -59,7 +59,7 @@ public class LifeComponent extends LivingComponent implements Drawable {
     @Override
     public void draw() {
         if (this.damageTextTimeout > 0.0) {
-            GraphicSystem.getInstance().drawString(damageText, (int) (this.getEntity().getPosX() - Entity.world.worldPartX), (int) (this.getEntity().getPosY() - Entity.world.worldPartY), new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
+            GraphicSystem.getInstance().drawString(damageText, (int) Entity.world.worldToViewPosX(this.getEntity().getPosX()), (int) Entity.world.worldToViewPosY(this.getEntity().getPosY()), new DrawStyle().color(Color.RED).font(new Font("Arial", Font.PLAIN, 16)));
         }
     }
 
