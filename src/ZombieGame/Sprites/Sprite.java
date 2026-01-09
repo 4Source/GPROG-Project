@@ -69,4 +69,12 @@ public abstract class Sprite {
     public void setRowIndex(int index) {
         this.rowIndex = index;
     }
+
+    public double getDrawHeight() {
+        return this.scale * this.height;
+    }
+
+    public double getDrawWidth() {
+        return this.scale * this.width;
+    }
 }
