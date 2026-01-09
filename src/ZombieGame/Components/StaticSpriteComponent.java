@@ -17,8 +17,8 @@ public class StaticSpriteComponent extends SpriteComponent {
 
     @Override
     public void draw() {
-        double posX = this.getEntity().getPosX() - Entity.world.worldPartX;
-        double posY = this.getEntity().getPosY() - Entity.world.worldPartY;
+        double posX = Entity.world.worldToViewPosX(this.getEntity().getPosX());
+        double posY = Entity.world.worldToViewPosY(this.getEntity().getPosY());
 
         this.sprites.forEach(s -> {
             s.draw(posX, posY);

@@ -15,8 +15,8 @@ import ZombieGame.Entities.UIElement;
 
 public abstract class World {
 	// top left corner of the displayed pane of the world
-	public double worldPartX = 0;
-	public double worldPartY = 0;
+	protected double worldPartX = 0;
+	protected double worldPartY = 0;
 
 	// if game is over
 	public boolean gameOver = false;
@@ -39,11 +39,11 @@ public abstract class World {
 	}
 
 	/**
-     * Update the world using delta time to get constant change with varying fps
-     * 
-     * @param deltaTime The time since last frame in seconds
-     */
-    public final void update(double deltaTime) {
+	 * Update the world using delta time to get constant change with varying fps
+	 * 
+	 * @param deltaTime The time since last frame in seconds
+	 */
+	public final void update(double deltaTime) {
 		// Add new entities
 		for (Entity e : pendingAdditions) {
 			addEntity(e);
@@ -408,6 +408,22 @@ public abstract class World {
 				last = null;
 			}
 		};
+	}
+
+	public final double worldToViewPosX(double posX) {
+		return posX - this.worldPartX;
+	}
+
+	public final double viewToWorldPosX(double posX) {
+		return this.worldPartX + posX;
+	}
+
+	public final double worldToViewPosY(double posY) {
+		return posY - this.worldPartY;
+	}
+
+	public final double viewToWorldPosY(double posY) {
+		return this.worldPartY + posY;
 	}
 
 	// adjust the displayed pane of the world according to Avatar and Bounds
