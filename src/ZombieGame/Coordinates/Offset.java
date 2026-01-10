@@ -148,4 +148,10 @@ public record Offset(double x, double y) {
     public Offset abs() {
         return new Offset(Math.abs(this.x), Math.abs(this.y));
     }
+
+    
+    @Override
+    public final String toString() {
+        return String.format("x: %.2f y: %.2f", this.x, this.y);
+    }
 }

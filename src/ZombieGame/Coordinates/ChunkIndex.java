@@ -116,4 +116,9 @@ public record ChunkIndex(int x, int y) {
     public WorldPos toWorldPos(ChunkLocalPos localPos) {
         return new WorldPos(this.x * Chunk.getChunkSize() + localPos.x(), this.y * Chunk.getChunkSize() + localPos.y());
     }
+    
+    @Override
+    public final String toString() {
+        return String.format("x: %d y: %d", this.x, this.y);
+    }
 }
