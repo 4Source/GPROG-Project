@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.Systems.Physic;
 
 import ZombieGame.Coordinates.Offset;
 

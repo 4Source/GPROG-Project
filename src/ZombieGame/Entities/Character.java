@@ -2,14 +2,14 @@ package ZombieGame.Entities;
 
 import java.util.function.Function;
 
-import ZombieGame.Collision;
-import ZombieGame.HitBox;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifeComponent;
 import ZombieGame.Components.MovementComponent;
 import ZombieGame.Components.VisualComponent;
+import ZombieGame.Systems.Physic.Collision;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 
 public abstract class Character extends Entity {
     private VisualComponent visualComponent;

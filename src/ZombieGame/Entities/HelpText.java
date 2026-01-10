@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.List;
 
-import ZombieGame.Action;
-import ZombieGame.InputSystem;
 import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
 
 public class HelpText extends TextElement {
     private LifetimeComponent lifetimeComponent;

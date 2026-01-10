@@ -2,9 +2,9 @@ package ZombieGame.Sprites;
 
 import java.awt.image.BufferedImage;
 
-import ZombieGame.GraphicSystem;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
 public abstract class Sprite {
     private BufferedImage sprite;

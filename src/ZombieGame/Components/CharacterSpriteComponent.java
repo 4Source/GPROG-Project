@@ -11,12 +11,12 @@ import ZombieGame.CharacterAnimationKey;
 import ZombieGame.CharacterDirection;
 import ZombieGame.CharacterEquipment;
 import ZombieGame.CharacterPart;
-import ZombieGame.GraphicLayer;
-import ZombieGame.GraphicSystem;
-import ZombieGame.MissingTexture;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.Sprite;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.Systems.Graphic.MissingTexture;
 
 public class CharacterSpriteComponent extends SpriteComponent {
     private EnumMap<CharacterPart, Map<CharacterAnimationKey, Sprite>> sprites;

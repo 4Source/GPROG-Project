@@ -2,19 +2,19 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 
-import ZombieGame.CircleHitBox;
-import ZombieGame.Collision;
-import ZombieGame.CollisionResponse;
 import ZombieGame.EntityType;
-import ZombieGame.HitBoxType;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.CircleComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Components.StaticMovementComponent;
 import ZombieGame.Coordinates.WorldPos;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.Collision;
+import ZombieGame.Systems.Physic.CollisionResponse;
+import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 
 public class Gunshot extends Entity {
 	private CircleComponent circleComponent;

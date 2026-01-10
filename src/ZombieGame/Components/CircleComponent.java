@@ -2,11 +2,11 @@ package ZombieGame.Components;
 
 import java.awt.Color;
 
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicLayer;
-import ZombieGame.GraphicSystem;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
 public class CircleComponent extends VisualComponent {
     protected int radius;

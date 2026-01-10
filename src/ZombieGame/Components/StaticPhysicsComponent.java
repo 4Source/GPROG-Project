@@ -3,17 +3,17 @@ package ZombieGame.Components;
 import java.awt.BasicStroke;
 import java.awt.Color;
 
-import ZombieGame.CircleHitBox;
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicSystem;
-import ZombieGame.HitBox;
-import ZombieGame.HitBoxType;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.PhysicsSystem;
-import ZombieGame.RectangleHitBox;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.PhysicsSystem;
+import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class StaticPhysicsComponent extends PhysicsComponent {
 

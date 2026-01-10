@@ -2,14 +2,14 @@ package ZombieGame.Entities;
 
 import java.util.function.Function;
 
-import ZombieGame.HitBox;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Components.StaticPhysicsComponent;
 import ZombieGame.Components.VisualComponent;
 import ZombieGame.Components.WorldPositionComponent;
 import ZombieGame.Coordinates.WorldPos;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 
 public abstract class Obstacle extends Entity {
     private VisualComponent visualComponent;

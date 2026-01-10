@@ -1,7 +1,7 @@
 package ZombieGame.Coordinates;
 
-import ZombieGame.Chunk;
-import ZombieGame.World;
+import ZombieGame.World.Chunk;
+import ZombieGame.World.World;
 
 /**
  * Represents the absolute position of point in the world.

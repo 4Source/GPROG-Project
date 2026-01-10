@@ -2,10 +2,10 @@ package ZombieGame.Components;
 
 import java.awt.*;
 
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicSystem;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.TextElement;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
 public abstract class TextComponent extends UIComponent {
     protected Font font;

@@ -1,12 +1,12 @@
 package ZombieGame.Entities;
 
-import ZombieGame.CircleHitBox;
 import ZombieGame.EntityType;
-import ZombieGame.HitBoxType;
 import ZombieGame.Components.StaticSpriteComponent;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.HitBoxType;
 
 public class Tree extends Obstacle {
 	/**

@@ -1,16 +1,16 @@
 package ZombieGame.Components;
 
-import ZombieGame.CircleHitBox;
-import ZombieGame.CollisionResponse;
-import ZombieGame.GraphicLayer;
-import ZombieGame.HitBox;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.RectangleHitBox;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.CollisionResponse;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public abstract class PhysicsComponent extends Component implements Drawable {
     protected HitBox hitBox;

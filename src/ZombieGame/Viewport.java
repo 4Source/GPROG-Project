@@ -10,11 +10,11 @@ public final class Viewport {
 
     private WorldPos worldPart;
 
-    Viewport() {
+    public Viewport() {
         this.worldPart = new WorldPos(-screenWidth / 2, -screenHeight / 2);
     }
 
-    Viewport(WorldPos pos) {
+    public Viewport(WorldPos pos) {
         this.worldPart = pos;
     }
 

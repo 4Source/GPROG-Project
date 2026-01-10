@@ -5,14 +5,7 @@ import ZombieGame.CharacterAction;
 import ZombieGame.CharacterAnimationKey;
 import ZombieGame.CharacterDirection;
 import ZombieGame.CharacterPart;
-import ZombieGame.CircleHitBox;
-import ZombieGame.Collision;
-import ZombieGame.CollisionResponse;
 import ZombieGame.EntityType;
-import ZombieGame.HitBoxType;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.RectangleHitBox;
 import ZombieGame.Components.AIMovementComponent;
 import ZombieGame.Components.CharacterSpriteComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
@@ -20,6 +13,13 @@ import ZombieGame.Components.LifeComponent;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.LoopingSprite;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.Collision;
+import ZombieGame.Systems.Physic.CollisionResponse;
+import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class Zombie extends Character {
 	/**
