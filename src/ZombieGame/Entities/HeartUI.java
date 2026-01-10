@@ -2,8 +2,9 @@ package ZombieGame.Entities;
 
 import java.awt.image.BufferedImage;
 
-import ZombieGame.GraphicLayer;
-import ZombieGame.GraphicSystem;
+import ZombieGame.Game;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Components.LifeComponent;
 import ZombieGame.Components.UIComponent;
 import ZombieGame.Coordinates.ViewPos;
@@ -37,7 +38,7 @@ public class HeartUI extends UIElement {
 
             @Override
             public void draw() {
-                Avatar player = Entity.world.getEntity(Avatar.class).orElse(null);
+                Avatar player = Game.world.getEntity(Avatar.class).orElse(null);
                 if (player == null) {
                     System.err.println("Could not find Avatar");
                     return;

@@ -1,6 +1,6 @@
 package ZombieGame.Capabilities;
 
-import ZombieGame.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 
 public interface Drawable extends Capability, Comparable<Drawable> {
     /**

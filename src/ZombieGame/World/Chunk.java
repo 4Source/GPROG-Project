@@ -1,32 +1,39 @@
-package ZombieGame;
+package ZombieGame.World;
 
-import java.awt.Color;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.Optional;
 
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.ViewPos;
-import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 
 public class Chunk implements Drawable {
     public static double TILE_SIZE = 0;
     public static final int SIZE = 8;
-    private static boolean debugBorders = false;
+    /**
+     * Additional chunks around the visible viewport to load
+     */
+    public static final int CHUNK_LOADING = 1;
+    /**
+     * Additional chunks around the visible viewport to generate
+     */
+    public static final int CHUNK_GENERATING = 2;
+    /**
+     * Additional chunks around the visible viewport to keep the entities (with LifeComponent). Outside entities (with LifeComponent) will despawn
+     */
+    public static final int CHUNK_DESPAWN = 5;
 
     private final TileType[][] tiles;
     private final StaticSprite[][] sprites;
     private final World world;
-    private final ChunkIndex coord;
-    private ArrayList<Entity> entities = new ArrayList<Entity>();
-    // TODO: Debug Chunk borders
+    private final ChunkIndex index;
 
-    protected Chunk(World world, ChunkIndex coord, TileType[][] tiles) {
+    public Chunk(World world, ChunkIndex index, TileType[][] tiles) {
         this.world = world;
-        this.coord = coord;
+        this.index = index;
         this.tiles = tiles;
 
         StaticSprite[][] sprites = new StaticSprite[tilesCountY()][tilesCountX()];
@@ -42,7 +49,7 @@ public class Chunk implements Drawable {
 
     @Override
     public void draw() {
-        ViewPos viewPos = this.coord.toWorldPos().toViewPos(Entity.world);
+        ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
 
         for (int y = 0; y < tilesCountY(); y++) {
             StaticSprite[] spritesRows = this.sprites[y];
@@ -51,15 +58,6 @@ public class Chunk implements Drawable {
                 Offset offset = new Offset((x + 0.5) * sprite.getDrawWidth(), (y + 0.5) * sprite.getDrawHeight());
                 sprite.draw(viewPos.add(offset));
             }
-        }
-
-        if (debugBorders) {
-            ViewPos pos = new ViewPos(20, 200);
-            DrawStyle style = new DrawStyle().color(Color.GREEN);
-            GraphicSystem.getInstance().drawString("Loaded: " + world.getLoadedChunksSize(), pos, style);
-            GraphicSystem.getInstance().drawString("Generated: " + world.getGeneratedChunksSize(), pos.add(0, 20), style);
-            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerationQueueSize(), pos.add(0, 40), style);
-            GraphicSystem.getInstance().drawRect(getCoord().toWorldPos().toViewPos(world).add((int) (getChunkSize() / 2.0), (int) (getChunkSize() / 2.0)), (int) getChunkSize(), (int) getChunkSize(), style);
         }
     }
 
@@ -70,11 +68,11 @@ public class Chunk implements Drawable {
 
     @Override
     public int getDepth() {
-        return this.coord.y();
+        return this.index.y();
     }
 
-    public ChunkIndex getCoord() {
-        return this.coord;
+    public ChunkIndex getIndex() {
+        return this.index;
     }
 
     public int tilesCountX() {
@@ -87,41 +85,44 @@ public class Chunk implements Drawable {
 
     public static double getChunkSize() {
         if (TILE_SIZE <= 0) {
-            throw new InvalidParameterException("TILE_SIZE is not set jet");
+            TileType.preLoadSprite();
+            if (TILE_SIZE <= 0) {
+                throw new InvalidParameterException("TILE_SIZE is not set jet");
+            }
         }
         return TILE_SIZE * SIZE;
     }
 
     public Optional<Chunk> getChunkToTop() {
-        return this.world.getChunk(this.coord.ToTop());
+        return this.world.getChunk(this.index.atTop());
     }
 
     public Optional<Chunk> getChunkToTopRight() {
-        return this.world.getChunk(this.coord.ToTopRight());
+        return this.world.getChunk(this.index.atTopRight());
     }
 
     public Optional<Chunk> getChunkToRight() {
-        return this.world.getChunk(this.coord.ToRight());
+        return this.world.getChunk(this.index.atRight());
     }
 
     public Optional<Chunk> getChunkToBottomRight() {
-        return this.world.getChunk(this.coord.ToBottomRight());
+        return this.world.getChunk(this.index.atBottomRight());
     }
 
     public Optional<Chunk> getChunkToBottom() {
-        return this.world.getChunk(this.coord.ToBottom());
+        return this.world.getChunk(this.index.atBottom());
     }
 
     public Optional<Chunk> getChunkToBottomLeft() {
-        return this.world.getChunk(this.coord.ToBottomLeft());
+        return this.world.getChunk(this.index.atBottomLeft());
     }
 
     public Optional<Chunk> getChunkToLeft() {
-        return this.world.getChunk(this.coord.ToLeft());
+        return this.world.getChunk(this.index.atLeft());
     }
 
     public Optional<Chunk> getChunkToTopLeft() {
-        return this.world.getChunk(this.coord.ToTopLeft());
+        return this.world.getChunk(this.index.atTopLeft());
     }
 
     private Optional<TileType> getTileToTop(int currentX, int currentY) {

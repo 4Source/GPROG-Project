@@ -1,6 +1,6 @@
 package ZombieGame.Coordinates;
 
-import ZombieGame.Chunk;
+import ZombieGame.World.Chunk;
 
 /**
  * Represents a position inside a chunk.
@@ -67,7 +67,7 @@ public record ChunkLocalPos(double x, double y) {
     public ChunkLocalPos mul(double factorX, double factorY) {
         return new ChunkLocalPos(this.x * factorX, this.y * factorY);
     }
-    
+
     /**
      * @return Returns a new pos where the parts are multiplied with the factor
      */
@@ -88,7 +88,7 @@ public record ChunkLocalPos(double x, double y) {
     public ChunkLocalPos div(double divisorX, double divisorY) {
         return new ChunkLocalPos(this.x / divisorX, this.y / divisorY);
     }
-    
+
     /**
      * @return Returns a new pos where the parts are divided by the divisor
      */
@@ -161,7 +161,7 @@ public record ChunkLocalPos(double x, double y) {
     public WorldPos toWorldPos(ChunkIndex chunk) {
         return new WorldPos(chunk.x() * Chunk.getChunkSize() + this.x, chunk.y() * Chunk.getChunkSize() + this.y);
     }
-    
+
     @Override
     public final String toString() {
         return String.format("x: %.2f y: %.2f", this.x, this.y);

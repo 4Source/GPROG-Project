@@ -5,11 +5,12 @@ import java.util.Optional;
 import ZombieGame.AIState;
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterDirection;
-import ZombieGame.PhysicsSystem;
+import ZombieGame.Game;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Zombie;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class AIMovementComponent extends TargetMovementComponent {
     protected AIState state;
@@ -43,7 +44,7 @@ public class AIMovementComponent extends TargetMovementComponent {
             return;
         }
 
-        Optional<Avatar> opt = Entity.world.getEntity(Avatar.class);
+        Optional<Avatar> opt = Game.world.getEntity(Avatar.class);
         if (opt.isEmpty()) {
             System.err.println("No avatar found");
             return;

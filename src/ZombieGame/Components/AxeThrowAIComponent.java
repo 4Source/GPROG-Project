@@ -2,9 +2,9 @@ package ZombieGame.Components;
 
 import java.util.Optional;
 
-import ZombieGame.PhysicsSystem;
+import ZombieGame.Systems.Physic.PhysicsSystem;
+import ZombieGame.Game;
 import ZombieGame.Entities.Avatar;
-import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Zombie;
 
 /**
@@ -33,7 +33,7 @@ public class AxeThrowAIComponent extends Component {
             return;
         }
 
-        Optional<Avatar> avatarOpt = Entity.world.getEntity(Avatar.class);
+        Optional<Avatar> avatarOpt = Game.world.getEntity(Avatar.class);
         if (avatarOpt.isEmpty()) {
             return;
         }

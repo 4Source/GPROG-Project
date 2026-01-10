@@ -1,8 +1,8 @@
 package ZombieGame.Components;
 
-import ZombieGame.PhysicsSystem;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public abstract class MovementComponent extends WorldPositionComponent {
     protected double alpha;

@@ -4,16 +4,16 @@ import java.awt.Color;
 import java.util.function.Function;
 
 import ZombieGame.EntityType;
-import ZombieGame.HitBox;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.PhysicsSystem;
 import ZombieGame.Components.LivingComponent;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Components.StaticPhysicsComponent;
 import ZombieGame.Components.VisualComponent;
 import ZombieGame.Components.WorldPositionComponent;
 import ZombieGame.Coordinates.WorldPos;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public abstract class Item extends Entity {
     private VisualComponent visualComponent;

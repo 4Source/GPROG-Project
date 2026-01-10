@@ -2,7 +2,7 @@ package ZombieGame.Components;
 
 import ZombieGame.AIState;
 import ZombieGame.CharacterAction;
-import ZombieGame.PhysicsSystem;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Zombie;
 

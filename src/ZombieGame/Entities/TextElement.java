@@ -5,7 +5,7 @@ import java.awt.Font;
 
 import ZombieGame.Components.TextComponent;
 import ZombieGame.Coordinates.ViewPos;
-import ZombieGame.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 
 public abstract class TextElement extends UIElement {
     /**

@@ -2,18 +2,20 @@ package ZombieGame.Components;
 
 import java.awt.Color;
 
-import ZombieGame.Action;
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterDirection;
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicLayer;
-import ZombieGame.GraphicSystem;
-import ZombieGame.InputSystem;
+import ZombieGame.Game;
+import ZombieGame.Viewport;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
 
 // TODO: Change drawable to Debugable
 public class PlayerMovementComponent extends MovementComponent implements Drawable {
@@ -90,10 +92,11 @@ public class PlayerMovementComponent extends MovementComponent implements Drawab
     @Override
     public void draw() {
         if (debugPos) {
-            ViewPos pos = new ViewPos(20, 160);
+            ViewPos pos = new ViewPos(20, 140);
             DrawStyle style = new DrawStyle().color(Color.RED);
-            GraphicSystem.getInstance().drawString("Pos   " + this.getWorldPos().toString(), pos, style);
-            GraphicSystem.getInstance().drawString("Chunk " + this.getWorldPos().toChunkIndex().toString(), pos.add(0, 20), style);
+            GraphicSystem.getInstance().drawString("Player Pos   " + this.getWorldPos().toString(), pos, style);
+            GraphicSystem.getInstance().drawString("Player Chunk " + this.getWorldPos().toChunkIndex().toString(), pos.add(0, 20), style);
+            GraphicSystem.getInstance().drawString("Center Chunk " + Viewport.getCenter().toWorldPos(Game.world).toChunkIndex().toString(), pos.add(0, 40), style);
         }
     }
 

@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.Systems.Input;
 
 import java.awt.event.*;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
 package ZombieGame.Coordinates;
 
 import ZombieGame.Viewport;
-import ZombieGame.World;
+import ZombieGame.World.World;
 
 /**
  * Represents a position in the view or screen coordinates.

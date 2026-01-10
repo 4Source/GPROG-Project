@@ -1,12 +1,12 @@
 package ZombieGame.Entities;
 
-import ZombieGame.CircleHitBox;
-import ZombieGame.Collision;
-import ZombieGame.CollisionResponse;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.Collision;
+import ZombieGame.Systems.Physic.CollisionResponse;
 import ZombieGame.EntityType;
-import ZombieGame.HitBoxType;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 import ZombieGame.Components.AnimatedSpriteComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.LifetimeComponent;

@@ -6,13 +6,11 @@ import java.util.Map;
 import java.util.function.Function;
 
 import ZombieGame.EntityType;
-import ZombieGame.World;
 import ZombieGame.Capabilities.Capability;
 import ZombieGame.Components.Component;
 import ZombieGame.Components.PositionComponent;
 
 public abstract class Entity {
-    public static World world;
     private Map<Class<? extends Component>, ArrayList<Component>> components = new HashMap<>();
     // TODO: make all components to final this ensures there are in constructor
     private PositionComponent positionComponent;
@@ -96,14 +94,5 @@ public abstract class Entity {
                 component.update(deltaTime);
             });
         });
-    }
-
-    /**
-     * Set the world where the game objects are belonging to
-     * 
-     * @param world The world to which it should be set
-     */
-    public static void setWorld(World world) {
-        Entity.world = world;
     }
 }

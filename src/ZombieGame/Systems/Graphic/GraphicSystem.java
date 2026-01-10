@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.Systems.Graphic;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -7,8 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.JPanel;
 
+import ZombieGame.Constants;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
 
 public class GraphicSystem extends JPanel {
     private static GraphicSystem instance;
@@ -49,26 +52,32 @@ public class GraphicSystem extends JPanel {
     }
 
     /**
-     * Register a drawable component for the visualization
+     * Register a drawable for the visualization
      * 
-     * @param component The component to register
-     * @param layer The Layer the component should be drawn in
+     * @param drawable The drawable to register
+     * @param layer The Layer the drawable should be drawn in
+     * @return {@code true} if this registered the drawable as a result of the call
      */
-    public void registerComponent(Drawable component) {
-        drawables.computeIfAbsent(component.getLayer(), c -> new ArrayList<>()).add(component);
+    public boolean registerDrawable(Drawable drawable) {
+        ArrayList<Drawable> list = drawables.computeIfAbsent(drawable.getLayer(), c -> new ArrayList<>());
+        if (!list.contains(drawable)) {
+            return list.add(drawable);
+        }
+        return false;
     }
 
     /**
-     * Unregister a drawable component from the visualization
+     * Unregister a drawable from the visualization
      * 
-     * @param component The component to unregister
+     * @param drawable The drawable to unregister
+     * @return {@code true} if this had the specified drawable registered for drawing
      */
-    public void unregisterComponent(Drawable component) {
-        drawables.forEach((l, d) -> {
-            if (d.remove(component)) {
-                return;
-            }
-        });
+    public boolean unregisterDrawable(Drawable drawable) {
+        ArrayList<Drawable> list = drawables.get(drawable.getLayer());
+        if (list != null) {
+            return list.remove(drawable);
+        }
+        return false;
     }
 
     /**
@@ -212,11 +221,13 @@ public class GraphicSystem extends JPanel {
      */
     public void swapBuffers() {
         if (showFPS) {
-            long currentTime = System.currentTimeMillis();
+            long currentTime = System.nanoTime();
             long diff = currentTime - lastTime;
             lastTime = currentTime;
 
-            this.drawString("FPS: " + (int) Math.ceil(1000.0 / diff), new ViewPos(20, 40), new DrawStyle().color(Color.MAGENTA));
+            ViewPos pos = new ViewPos(20, 100);
+            this.drawString(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / diff)), pos, new DrawStyle().color(Color.MAGENTA));
+            this.drawString(String.format("Frame time: %.2f ms", diff / 1_000_000.0), pos.add(0, 20), new DrawStyle().color(Color.MAGENTA));
         }
 
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);

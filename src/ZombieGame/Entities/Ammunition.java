@@ -3,13 +3,13 @@ package ZombieGame.Entities;
 import java.awt.Color;
 
 import ZombieGame.Constants;
-import ZombieGame.HitBoxType;
-import ZombieGame.RectangleHitBox;
 import ZombieGame.Components.GunshotComponent;
 import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Components.StaticSpriteComponent;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class Ammunition extends Item {
 	private LifetimeComponent lifetimeComponent;
@@ -19,7 +19,7 @@ public class Ammunition extends Item {
 	 */
 	public Ammunition(WorldPos pos) {
 		super(pos, new RectangleHitBox(HitBoxType.Overlap, 21, 16), Color.ORANGE, e -> new StaticSpriteComponent(e));
-		this.lifetimeComponent = this.add(new LifetimeComponent(this, Constants.LIFE_GRENADE));
+		this.lifetimeComponent = this.add(new LifetimeComponent(this, Constants.DESPAWN_COOL_DOWN));
 		this.getVisualComponent().addSprite(new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Ammo-crate_Blue.png", 1, 1, 3, 0, 0));
 	}
 

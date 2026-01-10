@@ -1,5 +1,6 @@
 package ZombieGame.Components;
 
+import ZombieGame.Game;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
@@ -22,7 +23,7 @@ public class ViewPositionComponent extends PositionComponent {
 
     @Override
     public final WorldPos getWorldPos() {
-        return this.pos.toWorldPos(Entity.world);
+        return this.pos.toWorldPos(Game.world);
     }
 
     @Override
@@ -32,7 +33,7 @@ public class ViewPositionComponent extends PositionComponent {
 
     @Override
     public final void setWorldPos(WorldPos pos) {
-        this.pos = pos.toViewPos(Entity.world);
+        this.pos = pos.toViewPos(Game.world);
     }
 
     @Override

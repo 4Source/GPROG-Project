@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.World;
 
 import ZombieGame.Sprites.StaticSprite;
 
@@ -51,6 +51,15 @@ public enum TileType {
         return (start + end) * 0.5 / TOTAL;
     }
 
+    private static StaticSprite getSprite(int column, int row) {
+        return new StaticSprite("assets\\PostApocalypse_AssetPack\\Tiles\\Background_Dark-Green_TileSet.png", 24, 17, 3, column, row);
+    }
+
+    public static void preLoadSprite() {
+        StaticSprite sprite = getSprite(0, 0);
+        Chunk.TILE_SIZE = sprite.getDrawWidth();
+    }
+
     public static StaticSprite TileToSprite(TileType c, TileType t, TileType tr, TileType r, TileType br, TileType b, TileType bl, TileType l, TileType tl) {
         int col;
         int row;
@@ -66,7 +75,7 @@ public enum TileType {
             return new StaticSprite("", 1, 1, 3, 0, 0);
         }
 
-        StaticSprite sprite = new StaticSprite("assets\\PostApocalypse_AssetPack\\Tiles\\Background_Dark-Green_TileSet.png", 24, 17, 3, col, row);
+        StaticSprite sprite = getSprite(col, row);
         Chunk.TILE_SIZE = sprite.getDrawWidth();
         return sprite;
     }

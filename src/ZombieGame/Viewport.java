@@ -10,11 +10,11 @@ public final class Viewport {
 
     private WorldPos worldPart;
 
-    Viewport() {
+    public Viewport() {
         this.worldPart = new WorldPos(-screenWidth / 2, -screenHeight / 2);
     }
 
-    Viewport(WorldPos pos) {
+    public Viewport(WorldPos pos) {
         this.worldPart = pos;
     }
 
@@ -37,10 +37,31 @@ public final class Viewport {
     }
 
     /**
+     * @return The top-left corner of the screen in view-space coordinates.
+     */
+    public static ViewPos getTopLeft() {
+        return new ViewPos();
+    }
+
+    /**
+     * @return The top-right corner of the screen in view-space coordinates.
+     */
+    public static ViewPos getTopRight() {
+        return new ViewPos(Viewport.screenWidth, 0);
+    }
+
+    /**
      * @return The bottom-right corner of the screen in view-space coordinates.
      */
-    public static ViewPos getMax() {
+    public static ViewPos getBottomRight() {
         return new ViewPos(Viewport.screenWidth, Viewport.screenHeight);
+    }
+
+    /**
+     * @return The bottom-left corner of the screen in view-space coordinates.
+     */
+    public static ViewPos getBottomLeft() {
+        return new ViewPos(0, Viewport.screenHeight);
     }
 
     /**

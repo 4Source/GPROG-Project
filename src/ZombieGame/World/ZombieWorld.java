@@ -1,10 +1,14 @@
-package ZombieGame;
+package ZombieGame.World;
 
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import ZombieGame.Entities.Avatar;
+import ZombieGame.Constants;
+import ZombieGame.Viewport;
+import ZombieGame.Algorithms.GaussianBlur;
 import ZombieGame.Coordinates.ChunkIndex;
+import ZombieGame.Coordinates.ChunkLocalPos;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Ammunition;
@@ -15,115 +19,60 @@ import ZombieGame.Entities.Tree;
 import ZombieGame.Entities.Zombie;
 import ZombieGame.Entities.ZombieCounter;
 import ZombieGame.Entities.ZombieType;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class ZombieWorld extends World {
-	private double timePassed = 0;
+	private double zombieTime = 0;
 
 	// for grenades
-	private double spawnAmmunition = 0;
+	private double ammunitionTime = 0;
 
-	protected void init() {
+	public void init() {
 		// add the Avatar
 		this.spawnEntity(new Avatar(Viewport.getCenter().toWorldPos(this)));
 
-		// add a little forrest
-		for (int x = 0; x < 5000; x += 1000) {
-			for (int y = 0; y < 4000; y += 800) {
-				this.spawnEntity(new Tree(new WorldPos(x + 300, y + 200)));
-				this.spawnEntity(new Tree(new WorldPos(x + 600, y + 370)));
-				this.spawnEntity(new Tree(new WorldPos(x + 200, y + 600)));
-				this.spawnEntity(new Tree(new WorldPos(x + 500, y + 800)));
-				this.spawnEntity(new Tree(new WorldPos(x + 900, y + 500)));
-				this.spawnEntity(new Tree(new WorldPos(x + 760, y + 160)));
-			}
-		}
-
-		// add one zombie
-		this.spawnEntity(new Zombie(new WorldPos(100, 100), ZombieType.BIG));
-
-		this.addUIElement(new ZombieCounter(new ViewPos(345, 40)));
-		this.addUIElement(new HeartUI(new ViewPos(20, 20)));
-		this.addUIElement(new AmmunitionCounter(new ViewPos(770, 40), 0));
+		this.addUIElement(new ZombieCounter(Viewport.getTopRight()));
+		this.addUIElement(new HeartUI(Viewport.getBottomLeft()));
+		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(100, 0), 0));
 		this.addUIElement(new HelpText(new ViewPos(100, 400), 10.0));
 
-		final int PREGENERATE_CHUNK_X = 16;
-		final int PREGENERATE_CHUNK_Y = 9;
+		// Pregenerate chunks
+		final int PREGENERATE_CHUNK_X = 8;
+		final int PREGENERATE_CHUNK_Y = 6;
 		for (int x = -(int) (PREGENERATE_CHUNK_X / 2); x < (int) (PREGENERATE_CHUNK_X / 2); x++) {
 			for (int y = -(int) (PREGENERATE_CHUNK_Y / 2); y < (int) (PREGENERATE_CHUNK_Y / 2); y++) {
-				this.addChunk(this.generateChunk(new ChunkIndex(x, y)));
+				this.enqueueChunkForGeneration(new ChunkIndex(x, y));
 			}
 		}
+		this.processGenerationQueue(this.getGenerationQueueSize());
+		this.updateLoadedChunks();
 	}
 
-	protected void createNewObjects(double deltaTime) {
-		createZombie(deltaTime);
-		createAmmunition(deltaTime);
+	public void UpdateEntityGeneration(double deltaTime) {
+		this.ammunitionTime += deltaTime;
+		this.zombieTime += deltaTime;
+		// this.spawnZombies();
 	}
 
-	private void createAmmunition(double deltaTime) {
-		final double INTERVAL = Constants.SPAWN_GRENADE;
+	private void spawnZombies() {
+		// Spawn up to 10 Zombies
+		for (int i = 0; i < 10 && this.zombieTime > Constants.SPAWN_INTERVAL; i++) {
+			this.zombieTime -= Constants.SPAWN_INTERVAL;
 
-		this.spawnAmmunition += deltaTime;
-		if (this.spawnAmmunition > INTERVAL) {
-			this.spawnAmmunition -= INTERVAL;
-
-			// create new Ammunition
-			WorldPos pos = this.getViewport().getWorldPart().add(Math.random() * Constants.WORLDPART_WIDTH, Math.random() * Constants.WORLDPART_HEIGHT);
-
-			Optional<Avatar> opt = this.getEntity(Avatar.class);
-			if (opt.isEmpty()) {
-				System.err.println("No avatar found");
-				return;
-			}
-			Avatar avatar = opt.get();
-
-			// if too close to Avatar, cancel
-			WorldPos d2 = pos.sub(avatar.getPositionComponent().getWorldPos()).pow2();
-			if (d2.x() + d2.y() < 200 * 200) {
-				this.spawnAmmunition = INTERVAL;
-				return;
-			}
-
-			// if collisions occur, cancel
-			Ammunition grenade = new Ammunition(pos);
-			if (PhysicsSystem.getInstance().testCollision(grenade)) {
-				this.spawnAmmunition = INTERVAL;
-				return;
-			}
-
-			// else add zombie to world
-			this.spawnEntity(grenade);
-			// this.counterG.setNumber(this.grenades);
-		}
-	}
-
-	private void createZombie(double deltaTime) {
-		final double INTERVAL = Constants.SPAWN_INTERVAL;
-
-		this.timePassed += deltaTime;
-		if (this.timePassed > INTERVAL) {
-			this.timePassed -= INTERVAL;
-
-			// create new Zombie; preference to current screen
-			WorldPos pos;
-			if (Math.random() < 0.7) {
-				pos = new WorldPos(Math.random() * Constants.WORLD_WIDTH, Math.random() * Constants.WORLD_HEIGHT);
-			} else {
-				pos = this.getViewport().getWorldPart().add(Math.random() * Constants.WORLDPART_WIDTH, Math.random() * Constants.WORLDPART_HEIGHT);
-			}
+			WorldPos pos = Viewport.getCenter().toWorldPos(this).add((ThreadLocalRandom.current().nextDouble() - 0.5) * Viewport.getScreenWidth(), (ThreadLocalRandom.current().nextDouble() - 0.5) * Viewport.getScreenHeight());
 
 			Optional<Avatar> optA = this.getEntity(Avatar.class);
 			if (optA.isEmpty()) {
 				System.err.println("Could not find Avatar");
-				return;
+				break;
 			}
 			Avatar avatar = optA.get();
 
 			// if too close to Avatar, cancel
 			WorldPos d2 = pos.sub(avatar.getPositionComponent().getWorldPos()).pow2();
 			if (d2.x() + d2.y() < 400 * 400) {
-				this.timePassed = INTERVAL;
-				return;
+				this.zombieTime += Constants.SPAWN_INTERVAL;
+				break;
 			}
 
 			// Pick a type: mostly BIG, some SMALL, few AXE
@@ -140,8 +89,8 @@ public class ZombieWorld extends World {
 			// if collisions occur, cancel
 			Zombie zombie = new Zombie(pos, type);
 			if (PhysicsSystem.getInstance().testCollision(zombie)) {
-				this.timePassed = INTERVAL;
-				return;
+				this.zombieTime += Constants.SPAWN_INTERVAL;
+				break;
 			}
 
 			// else add zombie to world
@@ -157,8 +106,9 @@ public class ZombieWorld extends World {
 	}
 
 	@Override
-	public Chunk generateChunk(ChunkIndex coord) {
+	public Chunk generateChunk(ChunkIndex index) {
 		long start = System.currentTimeMillis();
+
 		final int CHUNK_SIZE = Chunk.SIZE;
 		// radius ≤ CHUNK_SIZE / 6
 		final int BLUR_RADIUS = 1;
@@ -208,7 +158,45 @@ public class ZombieWorld extends World {
 			System.out.println();
 		}
 
+		// Generate tree in chunk
+		{
+			ChunkLocalPos pos = new ChunkLocalPos(ThreadLocalRandom.current().nextDouble() * Chunk.getChunkSize(), ThreadLocalRandom.current().nextDouble() * Chunk.getChunkSize());
+			this.spawnEntity(new Tree(pos.toWorldPos(index)));
+		}
+
+		// Add loot
+		while (this.ammunitionTime > Constants.SPAWN_GRENADE) {
+			this.ammunitionTime -= Constants.SPAWN_GRENADE;
+
+			WorldPos pos = new ChunkLocalPos(ThreadLocalRandom.current().nextDouble() * Chunk.getChunkSize(), ThreadLocalRandom.current().nextDouble() * Chunk.getChunkSize()).toWorldPos(index);
+
+			Optional<Avatar> opt = this.getEntity(Avatar.class);
+			if (opt.isEmpty()) {
+				System.err.println("No avatar found");
+				break;
+			}
+			Avatar avatar = opt.get();
+
+			// if too close to Avatar, cancel
+			WorldPos d2 = pos.sub(avatar.getPositionComponent().getWorldPos()).pow2();
+			if (d2.x() + d2.y() < 200 * 200) {
+				this.ammunitionTime += Constants.SPAWN_GRENADE;
+				break;
+			}
+
+			// if collisions occur, cancel
+			Ammunition ammunition = new Ammunition(pos);
+			if (PhysicsSystem.getInstance().testCollision(ammunition)) {
+				this.ammunitionTime = Constants.SPAWN_GRENADE;
+				break;
+			}
+
+			this.spawnEntity(ammunition);
+		}
+
+		// TODO: Add zombie spawnpoints
+
 		System.out.println("Chunk generation time (ms): " + (System.currentTimeMillis() - start));
-		return new Chunk(this, coord, tiles);
+		return new Chunk(this, index, tiles);
 	}
 }

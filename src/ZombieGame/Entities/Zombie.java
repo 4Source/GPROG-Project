@@ -5,14 +5,8 @@ import ZombieGame.CharacterAction;
 import ZombieGame.CharacterAnimationKey;
 import ZombieGame.CharacterDirection;
 import ZombieGame.CharacterPart;
-import ZombieGame.CircleHitBox;
-import ZombieGame.Collision;
-import ZombieGame.CollisionResponse;
 import ZombieGame.EntityType;
-import ZombieGame.HitBoxType;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.RectangleHitBox;
+import ZombieGame.Game;
 import ZombieGame.Components.AIMovementComponent;
 import ZombieGame.Components.AxeThrowAIComponent;
 import ZombieGame.Components.CharacterSpriteComponent;
@@ -22,8 +16,15 @@ import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Components.ZombieAttackComponent;
 import ZombieGame.Sprites.LoopingSprite;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.Collision;
+import ZombieGame.Systems.Physic.CollisionResponse;
+import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.RectangleHitBox;
 import ZombieGame.Sprites.OneShotSprite;
-import ZombieGame.PhysicsSystem;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class Zombie extends Character {
 	private final ZombieType type;
@@ -37,9 +38,7 @@ public class Zombie extends Character {
 		super(e -> new CharacterSpriteComponent(e,
 				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)),
 				bodyCircleHitBoxFor(type),
-				e -> new DynamicPhysicsComponent(e, physicsRectHitBoxFor(type),
-						PhysicsCollisionLayer.ZOMBIE_CHARACTER,
-						new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
+				e -> new DynamicPhysicsComponent(e, physicsRectHitBoxFor(type), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
 				e -> new AIMovementComponent(e, start, 0, movementSpeedFor(type)),
 				e -> new LifeComponent(e, maxHealthFor(type)));
 
@@ -81,7 +80,7 @@ public class Zombie extends Character {
 						// If we still have the axe: throw it only in mid-range.
 						if (z.hasAxe) {
 							if (dist >= minThrowDistance && dist <= maxThrowDistance) {
-								Entity.world.spawnEntity(new AxeProjectile(
+								Game.world.spawnEntity(new AxeProjectile(
 										z.getPositionComponent().getWorldPos(),
 										target.getPositionComponent().getWorldPos(),
 										axeThrowDamageFor()));

@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.DataStructures;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -9,7 +9,7 @@ import java.util.Queue;
 
 public final class UniquePriorityQueue<T> implements Queue<T> {
     private final HashSet<T> set;
-    private final PriorityQueue<T> queue;
+    private PriorityQueue<T> queue;
 
     public UniquePriorityQueue() {
         this.set = new HashSet<>();
@@ -19,6 +19,15 @@ public final class UniquePriorityQueue<T> implements Queue<T> {
     public UniquePriorityQueue(Comparator<T> comparator) {
         this.set = new HashSet<>();
         this.queue = new PriorityQueue<>(comparator);
+    }
+
+    /**
+     * Update the order of of the queue
+     */
+    public void sort() {
+        PriorityQueue<T> temp = new PriorityQueue<>(this.queue.comparator());
+        temp.addAll(this.queue);
+        this.queue = temp;
     }
 
     @Override

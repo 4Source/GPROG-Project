@@ -1,6 +1,6 @@
 package ZombieGame.Components;
 
-import ZombieGame.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.AnimatedSprite;

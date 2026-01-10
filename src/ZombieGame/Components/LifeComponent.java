@@ -3,12 +3,12 @@ package ZombieGame.Components;
 import java.awt.Color;
 import java.awt.Font;
 
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicLayer;
-import ZombieGame.GraphicSystem;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
 public class LifeComponent extends LivingComponent implements Drawable {
     private static final double INITIAL_TIMEOUT = 0.8;

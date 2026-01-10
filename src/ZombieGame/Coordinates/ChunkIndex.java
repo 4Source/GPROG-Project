@@ -1,12 +1,22 @@
 package ZombieGame.Coordinates;
 
-import ZombieGame.Chunk;
+import java.awt.BasicStroke;
+import java.awt.Color;
+
+import ZombieGame.Game;
+import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.World.Chunk;
+import ZombieGame.World.World;
 
 /**
  * Represents the integer coordinates of a chunk in the world grid.
  * The origin of the chunk is at (0,0) top-left of chunk.
  */
-public record ChunkIndex(int x, int y) {
+public record ChunkIndex(int x, int y) implements Drawable {
+    private static boolean debugBorders = true;
 
     public ChunkIndex() {
         this(0, 0);
@@ -68,35 +78,35 @@ public record ChunkIndex(int x, int y) {
         return new ChunkIndex(this.x / divisorX, this.y / divisorY);
     }
 
-    public ChunkIndex ToTop() {
+    public ChunkIndex atTop() {
         return this.add(0, -1);
     }
 
-    public ChunkIndex ToTopRight() {
+    public ChunkIndex atTopRight() {
         return this.add(1, -1);
     }
 
-    public ChunkIndex ToRight() {
+    public ChunkIndex atRight() {
         return this.add(1, 0);
     }
 
-    public ChunkIndex ToBottomRight() {
+    public ChunkIndex atBottomRight() {
         return this.add(1, 1);
     }
 
-    public ChunkIndex ToBottom() {
+    public ChunkIndex atBottom() {
         return this.add(0, 1);
     }
 
-    public ChunkIndex ToBottomLeft() {
+    public ChunkIndex atBottomLeft() {
         return this.add(-1, 1);
     }
 
-    public ChunkIndex ToLeft() {
+    public ChunkIndex atLeft() {
         return this.add(-1, 0);
     }
 
-    public ChunkIndex ToTopLeft() {
+    public ChunkIndex atTopLeft() {
         return this.add(-1, -1);
     }
 
@@ -116,9 +126,45 @@ public record ChunkIndex(int x, int y) {
     public WorldPos toWorldPos(ChunkLocalPos localPos) {
         return new WorldPos(this.x * Chunk.getChunkSize() + localPos.x(), this.y * Chunk.getChunkSize() + localPos.y());
     }
-    
+
     @Override
     public final String toString() {
         return String.format("x: %d y: %d", this.x, this.y);
+    }
+
+    @Override
+    public void draw() {
+        World world = Game.world;
+        ViewPos viewPos = this.toWorldPos().toViewPos(world);
+
+        if (debugBorders) {
+            ViewPos pos = new ViewPos(20, 200);
+            DrawStyle style = new DrawStyle();
+
+            if (world.isChunkQueuedForGeneration(this)) {
+                float[] dashPattern = { 2.0f, 8.0f };
+                style.color(Color.YELLOW).stroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+            }
+
+            if (world.isChunkLoaded(this)) {
+                style.color(Color.GREEN);
+            } else if (world.isChunkGenerated(this)) {
+                style.color(Color.BLUE);
+            }
+            GraphicSystem.getInstance().drawString("Loaded: " + world.getLoadedChunksSize(), pos, new DrawStyle().color(Color.GREEN));
+            GraphicSystem.getInstance().drawString("Generated: " + world.getGeneratedChunksSize(), pos.add(0, 20), new DrawStyle().color(Color.GREEN));
+            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerationQueueSize(), pos.add(0, 40), new DrawStyle().color(Color.GREEN));
+            GraphicSystem.getInstance().drawRect(viewPos.add((int) (Chunk.getChunkSize() / 2.0), (int) (Chunk.getChunkSize() / 2.0)), (int) Chunk.getChunkSize(), (int) Chunk.getChunkSize(), style);
+        }
+    }
+
+    @Override
+    public GraphicLayer getLayer() {
+        return GraphicLayer.UI;
+    }
+
+    @Override
+    public int getDepth() {
+        return 0;
     }
 }

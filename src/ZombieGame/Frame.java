@@ -4,6 +4,8 @@ package ZombieGame;
 
 import javax.swing.*;
 
+import ZombieGame.Systems.Graphic.GraphicSystem;
+
 class Frame extends JFrame {
 	private static final long serialVersionUID = 2L;
 

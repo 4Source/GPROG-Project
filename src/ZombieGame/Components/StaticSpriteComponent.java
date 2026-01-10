@@ -2,10 +2,10 @@ package ZombieGame.Components;
 
 import java.util.ArrayList;
 
-import ZombieGame.GraphicLayer;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 
 public class StaticSpriteComponent extends SpriteComponent {
     private ArrayList<StaticSprite> sprites;

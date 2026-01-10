@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.Algorithms;
 
 // Source: https://www.codestudy.net/blog/fastest-gaussian-blur-implementation/
 public class GaussianBlur {
