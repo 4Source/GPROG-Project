@@ -1,12 +1,7 @@
 package ZombieGame;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
-
-import javax.imageio.ImageIO;
 
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Coordinates.ChunkIndex;
@@ -29,11 +24,11 @@ public class ZombieWorld extends World {
 
 	protected void init() {
 		// add the Avatar
-		this.spawnEntity(new Avatar(new WorldPos(2500, 2000)));
+		this.spawnEntity(new Avatar(new WorldPos(0, 0)));
 
 		// set WorldPart position
-		this.worldPartX = 1500;
-		this.worldPartY = 1500;
+		this.worldPartX = 0;
+		this.worldPartY = 0;
 
 		// add a little forrest
 		for (int x = 0; x < 5000; x += 1000) {
@@ -55,7 +50,13 @@ public class ZombieWorld extends World {
 		this.addUIElement(new AmmunitionCounter(new ViewPos(770, 40), 0));
 		this.addUIElement(new HelpText(new ViewPos(100, 400), 10.0));
 
-		this.addChunk(this.generateChunk(new ChunkIndex((int) (worldPartX / 2), (int) (worldPartY / 2))));
+		final int PREGENERATE_CHUNK_X = 16;
+		final int PREGENERATE_CHUNK_Y = 9;
+		for (int x = - (int) (PREGENERATE_CHUNK_X / 2); x < (int) (PREGENERATE_CHUNK_X / 2); x++) {
+			for (int y = - (int) (PREGENERATE_CHUNK_Y / 2); y < (int) (PREGENERATE_CHUNK_Y / 2); y++) {
+				this.addChunk(this.generateChunk(new ChunkIndex(x, y)));
+			}
+		}
 	}
 
 	protected void createNewObjects(double deltaTime) {

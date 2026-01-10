@@ -40,14 +40,14 @@ public record WorldPos(double x, double y) {
      * @return The chunk index containing this world position.
      */
     public ChunkIndex toChunkIndex() {
-        return new ChunkIndex((int) Math.floor(this.x / Chunk.SIZE), (int) Math.floor(this.y / Chunk.SIZE));
+        return new ChunkIndex((int) Math.floor(this.x / Chunk.getChunkSize()), (int) Math.floor(this.y / Chunk.getChunkSize()));
     }
 
     /**
      * Converts this world position to a view/screen position relative to the camera or viewport.
      *
      * @param world The world containing the current viewport/camera offset.
-     * @return The position in view/screen coordinates.
+     * @return The position in view/screen coordinates.s
      */
     public ViewPos toViewPos(World world) {
         return new ViewPos((int) (this.x - world.getWorldPartX()), (int) (this.y - world.getWorldPartY()));
@@ -58,6 +58,6 @@ public record WorldPos(double x, double y) {
      * @return The local position within the given chunk.
      */
     public ChunkLocalPos toLocalPos(ChunkIndex chunk) {
-        return new ChunkLocalPos(this.x - chunk.x() * Chunk.SIZE, this.y - chunk.y() * Chunk.SIZE);
+        return new ChunkLocalPos(this.x - chunk.x() * Chunk.getChunkSize(), this.y - chunk.y() * Chunk.getChunkSize());
     }
 }

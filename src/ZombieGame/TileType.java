@@ -66,6 +66,8 @@ public enum TileType {
             return new StaticSprite("", 1, 1, 3, 0, 0);
         }
 
-        return new StaticSprite("assets\\PostApocalypse_AssetPack\\Tiles\\Background_Dark-Green_TileSet.png", 24, 17, 3, col, row);
+        StaticSprite sprite = new StaticSprite("assets\\PostApocalypse_AssetPack\\Tiles\\Background_Dark-Green_TileSet.png", 24, 17, 3, col, row);
+        Chunk.TILE_SIZE = sprite.getDrawWidth();
+        return sprite;
     }
 }
