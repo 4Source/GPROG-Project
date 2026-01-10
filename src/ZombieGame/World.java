@@ -16,7 +16,6 @@ import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.ViewPos;
-import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
@@ -428,6 +427,18 @@ public abstract class World {
 	public void addChunk(Chunk chunk) {
 		this.generatedChunks.put(chunk.getCoord(), chunk);
 		GraphicSystem.getInstance().registerComponent(chunk);
+	}
+
+	public int getGeneratedChunksSize() {
+		return this.generatedChunks.size();
+	}
+
+	public int getLoadedChunksSize() {
+		return this.loadedChunks.size();
+	}
+
+	public int getGenerateChunksSize() {
+		return this.generateChunks.size();
 	}
 
 	public Viewport getViewport() {

@@ -129,4 +129,9 @@ public record ViewPos(int x, int y) {
     public boolean isInsideScrollBoundMaxY() {
         return y < Viewport.getScreenHeight() - Viewport.SCROLL_BOUNDS;
     }
+
+    @Override
+    public final String toString() {
+        return String.format("x: %d y: %d", this.x, this.y);
+    }
 }

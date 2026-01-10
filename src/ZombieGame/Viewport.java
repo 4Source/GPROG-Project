@@ -5,13 +5,13 @@ import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 
 public final class Viewport {
-    private static int screenWidth, screenHeight;
+    private static int screenWidth = 0, screenHeight = 0;
     public static final int SCROLL_BOUNDS = 300;
 
     private WorldPos worldPart;
 
     Viewport() {
-        this.worldPart = new WorldPos();
+        this.worldPart = new WorldPos(-screenWidth / 2, -screenHeight / 2);
     }
 
     Viewport(WorldPos pos) {

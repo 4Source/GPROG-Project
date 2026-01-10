@@ -1,5 +1,6 @@
 package ZombieGame;
 
+import java.awt.Color;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -12,8 +13,10 @@ import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.StaticSprite;
 
 public class Chunk implements Drawable {
-    public static int SIZE = 8;
     public static double TILE_SIZE = 0;
+    public static final int SIZE = 8;
+    private static boolean debugBorders = false;
+
     private final TileType[][] tiles;
     private final StaticSprite[][] sprites;
     private final World world;
@@ -45,9 +48,18 @@ public class Chunk implements Drawable {
             StaticSprite[] spritesRows = this.sprites[y];
             for (int x = 0; x < tilesCountX(); x++) {
                 StaticSprite sprite = spritesRows[x];
-                Offset offset = new Offset(x * sprite.getDrawWidth(), y * sprite.getDrawHeight());
+                Offset offset = new Offset((x + 0.5) * sprite.getDrawWidth(), (y + 0.5) * sprite.getDrawHeight());
                 sprite.draw(viewPos.add(offset));
             }
+        }
+
+        if (debugBorders) {
+            ViewPos pos = new ViewPos(20, 200);
+            DrawStyle style = new DrawStyle().color(Color.GREEN);
+            GraphicSystem.getInstance().drawString("Loaded: " + world.getLoadedChunksSize(), pos, style);
+            GraphicSystem.getInstance().drawString("Generated: " + world.getGeneratedChunksSize(), pos.add(0, 20), style);
+            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerateChunksSize(), pos.add(0, 40), style);
+            GraphicSystem.getInstance().drawRect(getCoord().toWorldPos().toViewPos(world).add((int) (getChunkSize() / 2.0), (int) (getChunkSize() / 2.0)), (int) getChunkSize(), (int) getChunkSize(), style);
         }
     }
 

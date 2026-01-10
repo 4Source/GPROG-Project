@@ -172,4 +172,9 @@ public record WorldPos(double x, double y) {
     public ChunkLocalPos toLocalPos(ChunkIndex chunk) {
         return new ChunkLocalPos(this.x - chunk.x() * Chunk.getChunkSize(), this.y - chunk.y() * Chunk.getChunkSize());
     }
+
+    @Override
+    public final String toString() {
+        return String.format("x: %.2f y: %.2f", this.x, this.y);
+    }
 }
