@@ -28,11 +28,43 @@ public record ChunkIndex(int x, int y) {
         return new ChunkIndex((int) (x - offset.x()), (int) (y - offset.y()));
     }
 
+    public ChunkIndex ToTop() {
+        return this.add(0, -1);
+    }
+
+    public ChunkIndex ToTopRight() {
+        return this.add(1, -1);
+    }
+
+    public ChunkIndex ToRight() {
+        return this.add(1, 0);
+    }
+
+    public ChunkIndex ToBottomRight() {
+        return this.add(1, 1);
+    }
+
+    public ChunkIndex ToBottom() {
+        return this.add(0, 1);
+    }
+
+    public ChunkIndex ToBottomLeft() {
+        return this.add(-1, 1);
+    }
+
+    public ChunkIndex ToLeft() {
+        return this.add(-1, 0);
+    }
+
+    public ChunkIndex ToTopLeft() {
+        return this.add(-1, -1);
+    }
+
     /**
      * @return The top-left world position of this chunk.
      */
     public WorldPos toWorldPos() {
-        return new WorldPos(x * Chunk.SIZE, y * Chunk.SIZE);
+        return new WorldPos(x * Chunk.getChunkSize(), y * Chunk.getChunkSize());
     }
 
     /**
@@ -42,6 +74,6 @@ public record ChunkIndex(int x, int y) {
      * @return World position corresponding to the local offset inside this chunk.
      */
     public WorldPos toWorldPos(ChunkLocalPos localPos) {
-        return new WorldPos(this.x * Chunk.SIZE + localPos.x(), this.y * Chunk.SIZE + localPos.y());
+        return new WorldPos(this.x * Chunk.getChunkSize() + localPos.x(), this.y * Chunk.getChunkSize() + localPos.y());
     }
 }

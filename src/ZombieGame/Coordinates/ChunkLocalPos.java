@@ -47,6 +47,6 @@ public record ChunkLocalPos(double x, double y) {
      * @return Absolute world position.
      */
     public WorldPos toWorldPos(ChunkIndex chunk) {
-        return new WorldPos(chunk.x() * Chunk.SIZE + this.x, chunk.y() * Chunk.SIZE + this.y);
+        return new WorldPos(chunk.x() * Chunk.getChunkSize() + this.x, chunk.y() * Chunk.getChunkSize() + this.y);
     }
 }
