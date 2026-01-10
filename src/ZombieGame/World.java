@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.Queue;
 
 import ZombieGame.Capabilities.Drawable;
@@ -32,8 +31,8 @@ public abstract class World {
 	private ArrayList<Entity> pendingAdditions = new ArrayList<>();
 	private ArrayList<Entity> pendingRemovals = new ArrayList<>();
 	private final Map<ChunkIndex, Chunk> generatedChunks = new HashMap<>();
-	private final Map<ChunkIndex, Chunk> loadedChunks = new HashMap<>();
-	private final Queue<ChunkIndex> generateChunks = new PriorityQueue<>();
+	private final Map<ChunkIndex, Boolean> loadedChunks = new HashMap<>();
+	private final Queue<ChunkIndex> generationQueue = new UniquePriorityQueue<>(new ChunkDistanceComparator(this));
 
 	World() {
 	}
@@ -437,8 +436,8 @@ public abstract class World {
 		return this.loadedChunks.size();
 	}
 
-	public int getGenerateChunksSize() {
-		return this.generateChunks.size();
+	public int getGenerationQueueSize() {
+		return this.generationQueue.size();
 	}
 
 	public Viewport getViewport() {

@@ -58,7 +58,7 @@ public class Chunk implements Drawable {
             DrawStyle style = new DrawStyle().color(Color.GREEN);
             GraphicSystem.getInstance().drawString("Loaded: " + world.getLoadedChunksSize(), pos, style);
             GraphicSystem.getInstance().drawString("Generated: " + world.getGeneratedChunksSize(), pos.add(0, 20), style);
-            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerateChunksSize(), pos.add(0, 40), style);
+            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerationQueueSize(), pos.add(0, 40), style);
             GraphicSystem.getInstance().drawRect(getCoord().toWorldPos().toViewPos(world).add((int) (getChunkSize() / 2.0), (int) (getChunkSize() / 2.0)), (int) getChunkSize(), (int) getChunkSize(), style);
         }
     }
