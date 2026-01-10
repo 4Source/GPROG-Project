@@ -14,17 +14,18 @@ import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Components.Component;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Coordinates.ChunkIndex;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
 
 public abstract class World {
-	// top left corner of the displayed pane of the world
-	protected double worldPartX = 0;
-	protected double worldPartY = 0;
-
 	// if game is over
 	public boolean gameOver = false;
+
+	private Viewport viewport = new Viewport();
 
 	// all objects in the game, including the Avatar
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
@@ -418,14 +419,6 @@ public abstract class World {
 		};
 	}
 
-	public double getWorldPartX() {
-		return this.worldPartX;
-	}
-
-	public double getWorldPartY() {
-		return this.worldPartY;
-	}
-
 	public Optional<Chunk> getChunk(ChunkIndex coord) {
 		return Optional.ofNullable(this.generatedChunks.get(coord));
 	}
@@ -437,51 +430,49 @@ public abstract class World {
 		GraphicSystem.getInstance().registerComponent(chunk);
 	}
 
+	public Viewport getViewport() {
+		return this.viewport;
+	}
+
 	// adjust the displayed pane of the world according to Avatar and Bounds
 	public final void adjustWorldPart() {
-		final int RIGHT_END = Constants.WORLD_WIDTH - Constants.WORLDPART_WIDTH;
-		final int BOTTOM_END = Constants.WORLD_HEIGHT - Constants.WORLDPART_HEIGHT;
-
 		Optional<Avatar> opt = this.getEntity(Avatar.class);
 		if (opt.isEmpty()) {
 			System.err.println("No avatar found in world!");
 			return;
 		}
 		Avatar avatar = opt.get();
+		ViewPos avatarPos = avatar.getPositionComponent().getViewPos();
 
-		// if avatar is too much right in display ...
-		if (avatar.getPositionComponent().getWorldPos().x() > this.worldPartX + Constants.WORLDPART_WIDTH - Constants.SCROLL_BOUNDS) {
-			// ... adjust display
-			this.worldPartX = avatar.getPositionComponent().getWorldPos().x() + Constants.SCROLL_BOUNDS - Constants.WORLDPART_WIDTH;
-			if (this.worldPartX >= RIGHT_END) {
-				this.worldPartX = RIGHT_END;
-			}
+		// if avatar is too much right in display
+		if (!avatarPos.isInsideScrollBoundMaxX()) {
+			Offset o = new Offset(avatarPos.x(), 0);
+			o = o.sub(Viewport.getMax().x() - Viewport.SCROLL_BOUNDS, 0);
+
+			viewport.move(o);
+		}
+		// if avatar is too much left in display
+		else if (!avatarPos.isInsideScrollBoundMinX()) {
+			Offset o = new Offset(avatarPos.x(), 0);
+			o = o.sub(Viewport.SCROLL_BOUNDS, 0);
+
+			viewport.move(o);
 		}
 
-		// same left
-		else if (avatar.getPositionComponent().getWorldPos().x() < this.worldPartX + Constants.SCROLL_BOUNDS) {
-			this.worldPartX = avatar.getPositionComponent().getWorldPos().x() - Constants.SCROLL_BOUNDS;
-			if (this.worldPartX <= 0) {
-				this.worldPartX = 0;
-			}
-		}
+		// if avatar is too much bottom in display
+		if (!avatarPos.isInsideScrollBoundMaxY()) {
+			Offset o = new Offset(0, avatarPos.y());
+			o = o.sub(0, Viewport.getMax().y() - Viewport.SCROLL_BOUNDS);
 
-		// same bottom
-		if (avatar.getPositionComponent().getWorldPos().y() > this.worldPartY + Constants.WORLDPART_HEIGHT - Constants.SCROLL_BOUNDS) {
-			this.worldPartY = avatar.getPositionComponent().getWorldPos().y() + Constants.SCROLL_BOUNDS - Constants.WORLDPART_HEIGHT;
-			if (this.worldPartY >= BOTTOM_END) {
-				this.worldPartY = BOTTOM_END;
-			}
+			viewport.move(o);
 		}
+		// if avatar is too much top in display
+		else if (!avatarPos.isInsideScrollBoundMinY()) {
+			Offset o = new Offset(0, avatarPos.y());
+			o = o.sub(0, Viewport.SCROLL_BOUNDS);
 
-		// same top
-		else if (avatar.getPositionComponent().getWorldPos().y() < this.worldPartY + Constants.SCROLL_BOUNDS) {
-			this.worldPartY = avatar.getPositionComponent().getWorldPos().y() - Constants.SCROLL_BOUNDS;
-			if (this.worldPartY <= 0) {
-				this.worldPartY = 0;
-			}
+			viewport.move(o);
 		}
-
 	}
 
 	protected abstract void init();

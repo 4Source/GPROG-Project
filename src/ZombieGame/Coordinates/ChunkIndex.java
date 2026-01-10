@@ -12,20 +12,60 @@ public record ChunkIndex(int x, int y) {
         this(0, 0);
     }
 
-    public ChunkIndex add(int x, int y) {
-        return new ChunkIndex(this.x + x, this.y + y);
+    /**
+     * @return Returns a new pos where the summands are added to it
+     */
+    public ChunkIndex add(int summandX, int summandY) {
+        return new ChunkIndex(this.x + summandX, this.y + summandY);
     }
 
+    /**
+     * @return Returns a new pos where the offset is added to it
+     */
     public ChunkIndex add(Offset offset) {
         return new ChunkIndex((int) (x + offset.x()), (int) (y + offset.y()));
     }
 
-    public ChunkIndex sub(int x, int y) {
-        return new ChunkIndex(this.x - x, this.y - y);
+    /**
+     * @return Returns a new pos where the subtrahends are subtracted from this pos
+     */
+    public ChunkIndex sub(int subtrahendX, int subtrahendY) {
+        return new ChunkIndex(this.x - subtrahendX, this.y - subtrahendY);
     }
 
+    /**
+     * @return Returns a new pos where the offset is subtracted from this pos
+     */
     public ChunkIndex sub(Offset offset) {
         return new ChunkIndex((int) (x - offset.x()), (int) (y - offset.y()));
+    }
+
+    /**
+     * @return Returns a new pos where the parts are multiplied with the factor
+     */
+    public ChunkIndex mul(int factor) {
+        return new ChunkIndex(this.x * factor, this.y * factor);
+    }
+
+    /**
+     * @return Returns a new pos where the parts are multiplied with the factor
+     */
+    public ChunkIndex mul(int factorX, int factorY) {
+        return new ChunkIndex(this.x * factorX, this.y * factorY);
+    }
+
+    /**
+     * @return Returns a new pos where the parts are divided by the divisor
+     */
+    public ChunkIndex div(int divisor) {
+        return new ChunkIndex(this.x / divisor, this.y / divisor);
+    }
+
+    /**
+     * @return Returns a new pos where the parts are divided by the divisor
+     */
+    public ChunkIndex div(int divisorX, int divisorY) {
+        return new ChunkIndex(this.x / divisorX, this.y / divisorY);
     }
 
     public ChunkIndex ToTop() {

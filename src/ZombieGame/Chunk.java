@@ -19,6 +19,7 @@ public class Chunk implements Drawable {
     private final World world;
     private final ChunkIndex coord;
     private ArrayList<Entity> entities = new ArrayList<Entity>();
+    // TODO: Debug Chunk borders
 
     protected Chunk(World world, ChunkIndex coord, TileType[][] tiles) {
         this.world = world;
