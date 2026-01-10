@@ -2,15 +2,16 @@ package ZombieGame.Components;
 
 import ZombieGame.GraphicLayer;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Sprites.AnimatedSprite;
 import ZombieGame.Sprites.Sprite;
 
 /**
  * Draws a single sprite (static or animated) and updates it each frame.
  */
 public class AnimatedSpriteComponent extends SpriteComponent {
-    private final Sprite sprite;
+    private final AnimatedSprite sprite;
 
-    public AnimatedSpriteComponent(Entity entity, Sprite sprite) {
+    public AnimatedSpriteComponent(Entity entity, AnimatedSprite sprite) {
         super(entity);
         this.sprite = sprite;
     }

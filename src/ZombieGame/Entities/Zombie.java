@@ -43,8 +43,8 @@ public class Zombie extends Character {
 		super(startX, startY,
 				e -> new CharacterSpriteComponent(e,
 						new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)),
-				new CircleHitBox(HitBoxType.Block, 18, 0, 25),
-				e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 30, 40),
+				bodyCircleHitBoxFor(type),
+				e -> new DynamicPhysicsComponent(e, physicsRectHitBoxFor(type),
 						PhysicsCollisionLayer.ZOMBIE_CHARACTER,
 						new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
 				e -> new AIMovementComponent(e, 0, movementSpeedFor(type)),
@@ -226,6 +226,31 @@ public class Zombie extends Character {
 			return 0.35;
 		}
 	}
+
+	private static CircleHitBox bodyCircleHitBoxFor(ZombieType type) {
+		switch (type) {
+			case SMALL:
+				return new CircleHitBox(HitBoxType.Block, 10, 0, 15);
+			case AXE:
+				return new CircleHitBox(HitBoxType.Block, 14, 0, 20);
+			case BIG:
+			default:
+				return new CircleHitBox(HitBoxType.Block, 18, 0, 25);
+		}
+	}
+
+	private static RectangleHitBox physicsRectHitBoxFor(ZombieType type) {
+		switch (type) {
+			case SMALL:
+				return new RectangleHitBox(HitBoxType.Block, 22, 28);
+			case AXE:
+				return new RectangleHitBox(HitBoxType.Block, 22, 35);
+			case BIG:
+			default:
+				return new RectangleHitBox(HitBoxType.Block, 30, 40);
+		}
+	}
+
 
 	private void addSpritesForType(ZombieType type) {
 		final double animationFrameTime = 0.1;
