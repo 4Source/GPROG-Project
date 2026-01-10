@@ -1,14 +1,23 @@
 package ZombieGame.Components;
 
+import java.awt.Color;
+
 import ZombieGame.Action;
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterDirection;
+import ZombieGame.DrawStyle;
+import ZombieGame.GraphicLayer;
+import ZombieGame.GraphicSystem;
 import ZombieGame.InputSystem;
+import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 
-public class PlayerMovementComponent extends MovementComponent {
+// TODO: Change drawable to Debugable
+public class PlayerMovementComponent extends MovementComponent implements Drawable {
+    private static boolean debugPos = true;
 
     /**
      * A Component which can move the entity via the inputs of the user.
@@ -76,5 +85,25 @@ public class PlayerMovementComponent extends MovementComponent {
     @Override
     public Avatar getEntity() {
         return (Avatar) super.getEntity();
+    }
+
+    @Override
+    public void draw() {
+        if (debugPos) {
+            ViewPos pos = new ViewPos(20, 160);
+            DrawStyle style = new DrawStyle().color(Color.RED);
+            GraphicSystem.getInstance().drawString("Pos   " + this.getWorldPos().toString(), pos, style);
+            GraphicSystem.getInstance().drawString("Chunk " + this.getWorldPos().toChunkIndex().toString(), pos.add(0, 20), style);
+        }
+    }
+
+    @Override
+    public GraphicLayer getLayer() {
+        return GraphicLayer.UI;
+    }
+
+    @Override
+    public int getDepth() {
+        return 0;
     }
 }
