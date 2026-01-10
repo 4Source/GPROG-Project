@@ -30,7 +30,14 @@ public abstract class Character extends Entity {
     public Character(double posX, double posY, Function<Entity, VisualComponent> visualFactory, HitBox hitBox, Function<Entity, DynamicPhysicsComponent> damagePhysicsFactory, Function<Entity, MovementComponent> movementFactory, Function<Entity, LifeComponent> lifeFactory) {
         super(posX, posY);
         this.visualComponent = this.add(visualFactory.apply(this));
-        this.movementPhysicsComponent = this.add(new DynamicPhysicsComponent(this, hitBox, PhysicsCollisionLayer.PLAYER_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.CHARACTER, PhysicsCollisionLayer.OBSTACLES), collision -> onMovementCollisionStart(collision), collision -> onMovementCollisionEnd(collision)));
+        this.movementPhysicsComponent = this.add(new DynamicPhysicsComponent(
+                this,
+                hitBox,
+                PhysicsCollisionLayer.PLAYER_CHARACTER,
+                new PhysicsCollisionMask(PhysicsCollisionLayer.CHARACTER, PhysicsCollisionLayer.OBSTACLES),
+                collision -> onMovementCollisionStart(collision),
+                collision -> onMovementCollisionStay(collision),
+                collision -> onMovementCollisionEnd(collision)));
         this.damagePhysicsComponent = this.add(damagePhysicsFactory.apply(this));
         this.movementComponent = this.add(movementFactory.apply(this));
         this.lifeComponent = this.add(lifeFactory.apply(this));
@@ -62,6 +69,14 @@ public abstract class Character extends Entity {
      * @param collision The collision which started
      */
     protected abstract void onMovementCollisionStart(Collision collision);
+
+    /**
+     * Callback executed while a collision with another entity continues.
+     * Default is no-op; override in subclasses when needed.
+     */
+    protected void onMovementCollisionStay(Collision collision) {
+        // default: do nothing
+    }
 
     /**
      * The Callback function which gets executed if a collision with another entity ends

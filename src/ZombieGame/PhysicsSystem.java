@@ -108,6 +108,16 @@ public class PhysicsSystem {
 	 */
 	public void update() {
 		long start = System.currentTimeMillis();
+
+		// Ensure dynamic components keep their collisions updated even when they are
+		// "stuck" and no longer moving. This enables reliable collision callbacks
+		// like onStay (e.g., melee enemies attacking a standing player).
+		for (PhysicsComponent c : collisionBuffer.keySet()) {
+			if (c instanceof DynamicPhysicsComponent) {
+				invalidEntries.add(c);
+			}
+		}
+
 		if (InputSystem.getInstance().isPressed(Action.SHOW_HIT_BOXES)) {
 			PhysicsSystem.enableDebug = !PhysicsSystem.enableDebug;
 		}
@@ -123,13 +133,25 @@ public class PhysicsSystem {
 					}
 
 					CollisionResponse response = component.checkCollision(otherComponent);
+
+					// Look up the previous collision state to avoid firing onEnter every time
+					// the physics buffer is invalidated (e.g., when a character is moving).
+					CollisionResponse previous = this.collisionBuffer
+							.getOrDefault(component, new HashMap<>())
+							.getOrDefault(otherComponent, CollisionResponse.None);
+
 					if (response != CollisionResponse.None) {
 						this.collisionBuffer.get(component).put(otherComponent, response);
 						this.collisionBuffer.get(otherComponent).put(component, response);
 
-						// Trigger collision onEnter
-						((DynamicPhysicsComponent) component).onEnter.accept(new Collision(otherComponent.getEntity(), response));
-					} else if (response == CollisionResponse.None && this.collisionBuffer.getOrDefault(component, new HashMap<>()).getOrDefault(otherComponent, CollisionResponse.None) != CollisionResponse.None) {
+						// Trigger collision onEnter only when the collision really starts.
+						if (previous == CollisionResponse.None) {
+							((DynamicPhysicsComponent) component).onEnter.accept(new Collision(otherComponent.getEntity(), response));
+						} else {
+							// Collision continues: fire onStay so game logic can react (e.g. melee attacks)
+							((DynamicPhysicsComponent) component).onStay.accept(new Collision(otherComponent.getEntity(), response));
+						}
+					} else if (response == CollisionResponse.None && previous != CollisionResponse.None) {
 						this.collisionBuffer.get(component).remove(otherComponent);
 						this.collisionBuffer.get(otherComponent).remove(component);
 

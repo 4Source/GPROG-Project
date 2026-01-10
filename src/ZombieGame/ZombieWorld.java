@@ -7,10 +7,12 @@ import java.util.Optional;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Ammunition;
 import ZombieGame.Entities.AmmunitionCounter;
+import ZombieGame.Entities.HeartUI;
 import ZombieGame.Entities.HelpText;
 import ZombieGame.Entities.Tree;
 import ZombieGame.Entities.Zombie;
 import ZombieGame.Entities.ZombieCounter;
+import ZombieGame.Entities.ZombieType;
 
 public class ZombieWorld extends World {
 	private double timePassed = 0;
@@ -39,9 +41,11 @@ public class ZombieWorld extends World {
 		}
 
 		// add one zombie
-		this.spawnEntity(new Zombie(100, 100));
+		this.spawnEntity(new Zombie(100, 100, ZombieType.BIG));
 
-		this.addUIElement(new ZombieCounter(20, 40));
+		this.addUIElement(new ZombieCounter(345, 40));
+		// Player health bar (screen coordinates)
+		this.addUIElement(new HeartUI(20, 20));
 		this.addUIElement(new AmmunitionCounter(770, 40, 0));
 		this.addUIElement(new HelpText(100, 400, 10.0));
 	}
@@ -123,8 +127,19 @@ public class ZombieWorld extends World {
 				return;
 			}
 
+			// Pick a type: mostly BIG, some SMALL, few AXE
+			ZombieType type;
+			double r = Math.random();
+			if (r < 0.55) {
+				type = ZombieType.BIG;
+			} else if (r < 0.90) {
+				type = ZombieType.SMALL;
+			} else {
+				type = ZombieType.AXE;
+			}
+
 			// if collisions occur, cancel
-			Zombie zombie = new Zombie(x, y);
+			Zombie zombie = new Zombie(x, y, type);
 			if (PhysicsSystem.getInstance().testCollision(zombie)) {
 				this.timePassed = INTERVAL;
 				return;

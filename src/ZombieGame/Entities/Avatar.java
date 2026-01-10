@@ -31,7 +31,12 @@ public class Avatar extends Character {
 	 * @param startY The position in y of the avatar where is should be at game start
 	 */
 	public Avatar(double startX, double startY) {
-		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, 0, 20), e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 20, 30), PhysicsCollisionLayer.PLAYER_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.ZOMBIE)), e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 100) {
+		super(startX, startY, e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN,
+				CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, 0, 20),
+				e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 20, 30),
+						PhysicsCollisionLayer.PLAYER_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.ZOMBIE,
+						PhysicsCollisionLayer.OBSTACLES)),
+				e -> new PlayerMovementComponent(e, 200), e -> new LifeComponent(e, 10) {
 			@Override
 			public void kill() {
 				((Avatar) this.getEntity()).getVisualComponent().changeState(CharacterAction.DEATH);
@@ -123,6 +128,17 @@ public class Avatar extends Character {
 			}
 		}
 	}
+
+	@Override
+	protected void onMovementCollisionStay(Collision collision) {
+		// Nur echte Hindernisse blocken (Bäume etc.)
+		if (collision.collisionResponse() == CollisionResponse.Block
+				&& collision.entity().getType() == EntityType.TREE) {
+			this.getMovementComponent().moveBack();
+		}
+	}
+
+
 
 	@Override
 	protected void onMovementCollisionEnd(Collision collision) {

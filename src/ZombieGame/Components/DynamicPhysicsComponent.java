@@ -18,6 +18,7 @@ import ZombieGame.Entities.Entity;
 
 public class DynamicPhysicsComponent extends PhysicsComponent {
     public final Consumer<Collision> onEnter;
+    public final Consumer<Collision> onStay;
     public final Consumer<Collision> onExit;
 
     /**
@@ -29,12 +30,21 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
      * @param layer The layer on which the PhysicsComponent should belong
      * @param mask The layers which the PhysicsComponent could interact with
      * @param onEnter The function to execute if a collision with another component starts
+     * @param onStay The function to execute while a collision with another component continues
      * @param onExit The function to execute if a collision with another component ends
      */
-    public DynamicPhysicsComponent(Entity entity, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask, Consumer<Collision> onEnter, Consumer<Collision> onExit) {
+    public DynamicPhysicsComponent(Entity entity, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask, Consumer<Collision> onEnter, Consumer<Collision> onStay, Consumer<Collision> onExit) {
         super(entity, hitBox, layer, mask);
         this.onEnter = onEnter;
+        this.onStay = onStay;
         this.onExit = onExit;
+    }
+
+    /**
+     * Backwards-compatible constructor (no onStay callback).
+     */
+    public DynamicPhysicsComponent(Entity entity, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask, Consumer<Collision> onEnter, Consumer<Collision> onExit) {
+        this(entity, hitBox, layer, mask, onEnter, collision -> {}, onExit);
     }
 
     /**
@@ -46,6 +56,7 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
     public DynamicPhysicsComponent(Entity entity, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask) {
         super(entity, hitBox, layer, mask);
         this.onEnter = collision -> {};
+        this.onStay = collision -> {};
         this.onExit = collision -> {};
     }
 
