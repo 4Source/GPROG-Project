@@ -98,9 +98,8 @@ public class PhysicsSystem {
 	 * @return The distance between point 1 and point 2
 	 */
 	public static double distance(WorldPos pos1, WorldPos pos2) {
-		double xd = pos1.x() - pos2.x();
-		double yd = pos1.y() - pos2.y();
-		return Math.sqrt(xd * xd + yd * yd);
+		WorldPos d = pos1.sub(pos2).pow2();
+		return Math.sqrt(d.x() + d.y());
 	}
 
 	/**

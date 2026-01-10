@@ -36,9 +36,8 @@ public class TargetMovementComponent extends MovementComponent {
         // move if object has a destination
         if (this.hasDestination) {
             // stop if destination is reached
-            double diffX = Math.abs(this.getEntity().getPositionComponent().getWorldPos().x() - this.dest.x());
-            double diffY = Math.abs(this.getEntity().getPositionComponent().getWorldPos().y() - this.dest.y());
-            if (diffX < 3 && diffY < 3) {
+            WorldPos diff = this.getEntity().getPositionComponent().getWorldPos().sub(this.dest).abs();
+            if (diff.x() < 3 && diff.y() < 3) {
                 this.hasDestination = false;
                 return;
             }

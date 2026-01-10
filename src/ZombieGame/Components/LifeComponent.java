@@ -75,13 +75,12 @@ public class LifeComponent extends LivingComponent implements Drawable {
         this.life -= halfHeartsDamage;
         this.damageTextTimeout = INITIAL_TIMEOUT;
 
-        // schöner Text: -½ oder -1, -1½ etc.
         if (halfHeartsDamage == 1) {
-            this.damageText = "-½";
+            this.damageText = "-0.5";
         } else if (halfHeartsDamage % 2 == 0) {
             this.damageText = "-" + (halfHeartsDamage / 2);
         } else {
-            this.damageText = "-" + (halfHeartsDamage / 2) + "½";
+            this.damageText = "-" + (halfHeartsDamage / 2) + ".5";
         }
 
         if (this.life <= 0) {

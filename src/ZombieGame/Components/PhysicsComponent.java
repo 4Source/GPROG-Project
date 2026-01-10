@@ -54,9 +54,9 @@ public abstract class PhysicsComponent extends Component implements Drawable {
 
         if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof CircleHitBox) {
             double dist = ((CircleHitBox) this.hitBox).getRadius() + ((CircleHitBox) other.hitBox).getRadius();
-            WorldPos d = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset()).sub(other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset()));
+            WorldPos d2 = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset()).sub(other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset())).pow2();
 
-            if (d.x() * d.x() + d.y() * d.y() < dist * dist) {
+            if (d2.x() + d2.y() < dist * dist) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
@@ -77,9 +77,9 @@ public abstract class PhysicsComponent extends Component implements Drawable {
 
             WorldPos closes = new WorldPos(Math.max(rectMin.x(), Math.min(c.x(), rectMax.x())), Math.max(rectMin.y(), Math.min(c.y(), rectMax.y())));
 
-            WorldPos d = c.sub(closes);
+            WorldPos d2 = c.sub(closes).pow2();
 
-            if ((d.x() * d.x() + d.y() * d.y()) <= r * r) {
+            if ((d2.x() + d2.y()) <= r * r) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
@@ -91,9 +91,9 @@ public abstract class PhysicsComponent extends Component implements Drawable {
 
             WorldPos closes = new WorldPos(Math.max(rectMin.x(), Math.min(c.x(), rectMax.x())), Math.max(rectMin.y(), Math.min(c.y(), rectMax.y())));
 
-            WorldPos d = c.sub(closes);
+            WorldPos d2 = c.sub(closes).pow2();
 
-            if ((d.x() * d.x() + d.y() * d.y()) <= r * r) {
+            if ((d2.x() + d2.y()) <= r * r) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;

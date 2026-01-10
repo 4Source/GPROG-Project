@@ -24,11 +24,7 @@ public class ZombieWorld extends World {
 
 	protected void init() {
 		// add the Avatar
-		this.spawnEntity(new Avatar(new WorldPos(0, 0)));
-
-		// set WorldPart position
-		this.worldPartX = 0;
-		this.worldPartY = 0;
+		this.spawnEntity(new Avatar(Viewport.getCenter().toWorldPos(this)));
 
 		// add a little forrest
 		for (int x = 0; x < 5000; x += 1000) {
@@ -52,8 +48,8 @@ public class ZombieWorld extends World {
 
 		final int PREGENERATE_CHUNK_X = 16;
 		final int PREGENERATE_CHUNK_Y = 9;
-		for (int x = - (int) (PREGENERATE_CHUNK_X / 2); x < (int) (PREGENERATE_CHUNK_X / 2); x++) {
-			for (int y = - (int) (PREGENERATE_CHUNK_Y / 2); y < (int) (PREGENERATE_CHUNK_Y / 2); y++) {
+		for (int x = -(int) (PREGENERATE_CHUNK_X / 2); x < (int) (PREGENERATE_CHUNK_X / 2); x++) {
+			for (int y = -(int) (PREGENERATE_CHUNK_Y / 2); y < (int) (PREGENERATE_CHUNK_Y / 2); y++) {
 				this.addChunk(this.generateChunk(new ChunkIndex(x, y)));
 			}
 		}
@@ -72,8 +68,7 @@ public class ZombieWorld extends World {
 			this.spawnAmmunition -= INTERVAL;
 
 			// create new Ammunition
-			double x = this.worldPartX + Math.random() * Constants.WORLDPART_WIDTH;
-			double y = this.worldPartY + Math.random() * Constants.WORLDPART_HEIGHT;
+			WorldPos pos = this.getViewport().getWorldPart().add(Math.random() * Constants.WORLDPART_WIDTH, Math.random() * Constants.WORLDPART_HEIGHT);
 
 			Optional<Avatar> opt = this.getEntity(Avatar.class);
 			if (opt.isEmpty()) {
@@ -83,15 +78,14 @@ public class ZombieWorld extends World {
 			Avatar avatar = opt.get();
 
 			// if too close to Avatar, cancel
-			double dx = x - avatar.getPositionComponent().getWorldPos().x();
-			double dy = y - avatar.getPositionComponent().getWorldPos().y();
-			if (dx * dx + dy * dy < 200 * 200) {
+			WorldPos d2 = pos.sub(avatar.getPositionComponent().getWorldPos()).pow2();
+			if (d2.x() + d2.y() < 200 * 200) {
 				this.spawnAmmunition = INTERVAL;
 				return;
 			}
 
 			// if collisions occur, cancel
-			Ammunition grenade = new Ammunition(new WorldPos(x, y));
+			Ammunition grenade = new Ammunition(pos);
 			if (PhysicsSystem.getInstance().testCollision(grenade)) {
 				this.spawnAmmunition = INTERVAL;
 				return;
@@ -101,7 +95,6 @@ public class ZombieWorld extends World {
 			this.spawnEntity(grenade);
 			// this.counterG.setNumber(this.grenades);
 		}
-
 	}
 
 	private void createZombie(double deltaTime) {
@@ -112,13 +105,11 @@ public class ZombieWorld extends World {
 			this.timePassed -= INTERVAL;
 
 			// create new Zombie; preference to current screen
-			double x, y;
+			WorldPos pos;
 			if (Math.random() < 0.7) {
-				x = Math.random() * Constants.WORLD_WIDTH;
-				y = Math.random() * Constants.WORLD_HEIGHT;
+				pos = new WorldPos(Math.random() * Constants.WORLD_WIDTH, Math.random() * Constants.WORLD_HEIGHT);
 			} else {
-				x = this.worldPartX + Math.random() * Constants.WORLDPART_WIDTH;
-				y = this.worldPartY + Math.random() * Constants.WORLDPART_HEIGHT;
+				pos = this.getViewport().getWorldPart().add(Math.random() * Constants.WORLDPART_WIDTH, Math.random() * Constants.WORLDPART_HEIGHT);
 			}
 
 			Optional<Avatar> optA = this.getEntity(Avatar.class);
@@ -129,9 +120,8 @@ public class ZombieWorld extends World {
 			Avatar avatar = optA.get();
 
 			// if too close to Avatar, cancel
-			double dx = x - avatar.getPositionComponent().getWorldPos().x();
-			double dy = y - avatar.getPositionComponent().getWorldPos().y();
-			if (dx * dx + dy * dy < 400 * 400) {
+			WorldPos d2 = pos.sub(avatar.getPositionComponent().getWorldPos()).pow2();
+			if (d2.x() + d2.y() < 400 * 400) {
 				this.timePassed = INTERVAL;
 				return;
 			}
@@ -148,7 +138,7 @@ public class ZombieWorld extends World {
 			}
 
 			// if collisions occur, cancel
-			Zombie zombie = new Zombie(new WorldPos(x, y), type);
+			Zombie zombie = new Zombie(pos, type);
 			if (PhysicsSystem.getInstance().testCollision(zombie)) {
 				this.timePassed = INTERVAL;
 				return;
