@@ -92,11 +92,11 @@ public class PlayerMovementComponent extends MovementComponent implements Drawab
     @Override
     public void draw() {
         if (debugPos) {
-            ViewPos pos = new ViewPos(20, 140);
-            DrawStyle style = new DrawStyle().color(Color.RED);
+            ViewPos pos = new ViewPos(20, 150);
+            DrawStyle style = new DrawStyle().color(Color.WHITE);
             GraphicSystem.getInstance().drawString("Player Pos   " + this.getWorldPos().toString(), pos, style);
-            GraphicSystem.getInstance().drawString("Player Chunk " + this.getWorldPos().toChunkIndex().toString(), pos.add(0, 20), style);
-            GraphicSystem.getInstance().drawString("Center Chunk " + Viewport.getCenter().toWorldPos(Game.world).toChunkIndex().toString(), pos.add(0, 40), style);
+            GraphicSystem.getInstance().drawString("Player Chunk " + this.getWorldPos().toChunkIndex().toString(), pos.add(0, 25), style);
+            GraphicSystem.getInstance().drawString("Center Chunk " + Viewport.getCenter().toWorldPos(Game.world).toChunkIndex().toString(), pos.add(0, 50), style);
         }
     }
 

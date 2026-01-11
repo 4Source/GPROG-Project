@@ -138,7 +138,7 @@ public record ChunkIndex(int x, int y) implements Drawable {
         ViewPos viewPos = this.toWorldPos().toViewPos(world);
 
         if (debugBorders) {
-            ViewPos pos = new ViewPos(20, 200);
+            ViewPos pos = new ViewPos(20, 225);
             DrawStyle style = new DrawStyle();
 
             if (world.isChunkQueuedForGeneration(this)) {
@@ -151,9 +151,11 @@ public record ChunkIndex(int x, int y) implements Drawable {
             } else if (world.isChunkGenerated(this)) {
                 style.color(Color.BLUE);
             }
-            GraphicSystem.getInstance().drawString("Loaded: " + world.getLoadedChunksSize(), pos, new DrawStyle().color(Color.GREEN));
-            GraphicSystem.getInstance().drawString("Generated: " + world.getGeneratedChunksSize(), pos.add(0, 20), new DrawStyle().color(Color.GREEN));
-            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerationQueueSize(), pos.add(0, 40), new DrawStyle().color(Color.GREEN));
+
+            DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
+            GraphicSystem.getInstance().drawString("Loaded: " + world.getLoadedChunksSize(), pos, textStyle);
+            GraphicSystem.getInstance().drawString("Generated: " + world.getGeneratedChunksSize(), pos.add(0, 25), textStyle);
+            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerationQueueSize(), pos.add(0, 50), textStyle);
             GraphicSystem.getInstance().drawRect(viewPos.add((int) (Chunk.getChunkSize() / 2.0), (int) (Chunk.getChunkSize() / 2.0)), (int) Chunk.getChunkSize(), (int) Chunk.getChunkSize(), style);
         }
     }

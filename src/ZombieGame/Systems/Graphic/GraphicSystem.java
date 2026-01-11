@@ -225,9 +225,10 @@ public class GraphicSystem extends JPanel {
             long diff = currentTime - lastTime;
             lastTime = currentTime;
 
+            DrawStyle style = new DrawStyle().color(Color.WHITE);
             ViewPos pos = new ViewPos(20, 100);
-            this.drawString(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / diff)), pos, new DrawStyle().color(Color.MAGENTA));
-            this.drawString(String.format("Frame time: %.2f ms", diff / 1_000_000.0), pos.add(0, 20), new DrawStyle().color(Color.MAGENTA));
+            this.drawString(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / diff)), pos, style);
+            this.drawString(String.format("Frame time: %.2f ms", diff / 1_000_000.0), pos.add(0, 25), style);
         }
 
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);

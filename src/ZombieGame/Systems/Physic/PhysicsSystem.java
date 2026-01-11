@@ -332,16 +332,17 @@ public class PhysicsSystem implements Drawable {
 	@Override
 	public void draw() {
 		if (PhysicsSystem.enableDebug) {
-			ViewPos pos = new ViewPos(20, 260);
+			ViewPos pos = new ViewPos(20, 300);
 			int comp = PhysicsSystem.getInstance().collisionBuffer.size();
 			int coll = 0;
 			for (PhysicsComponent c : PhysicsSystem.getInstance().collisionBuffer.keySet()) {
 				coll += PhysicsSystem.getInstance().getCollisions(c).size();
 			}
 
-			GraphicSystem.getInstance().drawString("Components: " + comp, pos, new DrawStyle().color(Color.MAGENTA));
-			GraphicSystem.getInstance().drawString("Collisions: " + coll, pos.add(0, 20), new DrawStyle().color(Color.MAGENTA));
-			GraphicSystem.getInstance().drawString("Time: " + lastUpdateDuration, pos.add(0, 40), new DrawStyle().color(Color.MAGENTA));
+			DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
+			GraphicSystem.getInstance().drawString("Components: " + comp, pos, textStyle);
+			GraphicSystem.getInstance().drawString("Collisions: " + coll, pos.add(0, 25), textStyle);
+			GraphicSystem.getInstance().drawString("Time: " + lastUpdateDuration, pos.add(0, 50), textStyle);
 		}
 	}
 

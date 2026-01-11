@@ -6,6 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Constants;
 import ZombieGame.Viewport;
+import ZombieGame.ZombieType;
 import ZombieGame.Algorithms.GaussianBlur;
 import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Coordinates.ChunkLocalPos;
@@ -18,7 +19,6 @@ import ZombieGame.Entities.HelpText;
 import ZombieGame.Entities.Tree;
 import ZombieGame.Entities.Zombie;
 import ZombieGame.Entities.ZombieCounter;
-import ZombieGame.Entities.ZombieType;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class ZombieWorld extends World {
@@ -31,9 +31,9 @@ public class ZombieWorld extends World {
 		// add the Avatar
 		this.spawnEntity(new Avatar(Viewport.getCenter().toWorldPos(this)));
 
-		this.addUIElement(new ZombieCounter(Viewport.getTopRight()));
-		this.addUIElement(new HeartUI(Viewport.getBottomLeft()));
-		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(100, 0), 0));
+		this.addUIElement(new ZombieCounter(Viewport.getTopLeft()));
+		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -48)));
+		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(20, -68), 0));
 		this.addUIElement(new HelpText(new ViewPos(100, 400), 10.0));
 
 		// Pregenerate chunks
