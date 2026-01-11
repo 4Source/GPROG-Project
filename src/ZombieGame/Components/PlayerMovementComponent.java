@@ -18,7 +18,7 @@ import ZombieGame.Systems.Input.InputSystem;
 
 // TODO: Change drawable to Debugable
 public class PlayerMovementComponent extends MovementComponent implements Drawable {
-    private static boolean debugPos = true;
+    private static boolean debugPos = false;
 
     /**
      * A Component which can move the entity via the inputs of the user.

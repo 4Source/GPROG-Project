@@ -6,7 +6,7 @@ import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.Sprite;
 
 public class LifeComponent extends LivingComponent {
-    private static final double INITIAL_TIMEOUT = 0.15;
+    private static final double INITIAL_TIMEOUT = 0.1;
     private final int maxLife;
     private int life;
 
@@ -51,7 +51,7 @@ public class LifeComponent extends LivingComponent {
         this.damageFlashTimeout = INITIAL_TIMEOUT;
 
         for (SpriteComponent c : this.getEntity().getComponents(SpriteComponent.class)) {
-            for (Sprite s : c.getSprite()) {
+            for (Sprite s : c.getSprites()) {
                 s.setTint(new Color(200, 0, 0, 50));
             }
         }
@@ -87,7 +87,7 @@ public class LifeComponent extends LivingComponent {
             // Timeout expired remove the tint
             if (this.damageFlashTimeout <= 0.0) {
                 for (SpriteComponent c : this.getEntity().getComponents(SpriteComponent.class)) {
-                    for (Sprite s : c.getSprite()) {
+                    for (Sprite s : c.getSprites()) {
                         s.setTint(null);
                     }
                 }

@@ -1,6 +1,7 @@
 package ZombieGame.Systems.Graphic;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import javax.swing.JPanel;
 
 import ZombieGame.Constants;
 import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Coordinates.Rotation;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
@@ -204,14 +207,23 @@ public class GraphicSystem extends JPanel {
      * @param columnIndex The column at which the sprite is located on the sprite sheet
      * @param rowIndex The row at which the sprite is located on the sprite sheet
      * @param scale The scale which should be applied to the sprite
+     * @param rotation Rotation around the rotationCenter
+     * @param rotationCenter The center to rotate around
      * @param spriteWidth The original width of the of the sprite.
      * @param spriteHeight The original height of the of the sprite.
-     * @param tint A color which could be added only where the sprite is opaque. {@code null} is also valid if no tint should be applied prefer: {@link #drawSprite(BufferedImage, ViewPos, int, int, double, int, int) drawSprite}
+     * @param tint A color which could be added only where the sprite is opaque. {@code null} is also valid if no tint should be applied prefer: {@link #drawSprite(BufferedImage, ViewPos, int, int, double, Rotation, Offset, int, int) drawSprite}
      */
-    public void drawSprite(BufferedImage sprite, ViewPos pos, int columnIndex, int rowIndex, double scale, int spriteWidth, int spriteHeight, Color tint) {
+    public void drawSprite(BufferedImage sprite, ViewPos pos, int columnIndex, int rowIndex, double scale, Rotation rotation, Offset rotationCenter, int spriteWidth, int spriteHeight, Color tint) {
         int drawWidth = (int) (spriteWidth * scale);
         int drawHeight = (int) (spriteHeight * scale);
         ViewPos drawPos = pos.sub(drawWidth / 2, drawHeight / 2);
+        AffineTransform old = this.graphics.getTransform();
+
+        // Set rotation
+        if (!rotation.isZero()) {
+            ViewPos pivot = pos.sub(drawWidth / 2, drawHeight / 2).add(rotationCenter.mul(scale));
+            this.graphics.rotate(rotation.radians(), pivot.x(), pivot.y());
+        }
 
         if (tint != null) {
             BufferedImage temp = new BufferedImage(drawWidth, drawHeight, BufferedImage.TYPE_INT_ARGB);
@@ -228,6 +240,42 @@ public class GraphicSystem extends JPanel {
         } else {
             this.graphics.drawImage(sprite, drawPos.x(), drawPos.y(), drawPos.x() + drawWidth, drawPos.y() + drawHeight, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
         }
+
+        // Reset rotation
+        this.graphics.setTransform(old);
+    }
+
+    /**
+     * Draws as much of the specified image to fit inside the specified rectangle.
+     * 
+     * @param sprite The sprite to draw
+     * @param pos Coordinates of the center of the sprite to be drawn.
+     * @param columnIndex The column at which the sprite is located on the sprite sheet
+     * @param rowIndex The row at which the sprite is located on the sprite sheet
+     * @param scale The scale which should be applied to the sprite
+     * @param rotation Rotation around the rotationCenter
+     * @param rotationCenter The center to rotate around
+     * @param spriteWidth The original width of the of the sprite.
+     * @param spriteHeight The original height of the of the sprite.
+     */
+    public void drawSprite(BufferedImage sprite, ViewPos pos, int columnIndex, int rowIndex, double scale, Rotation rotation, Offset rotationCenter, int spriteWidth, int spriteHeight) {
+        this.drawSprite(sprite, pos, columnIndex, rowIndex, scale, rotation, rotationCenter, spriteWidth, spriteHeight, null);
+    }
+
+    /**
+     * Draws as much of the specified image to fit inside the specified rectangle.
+     * 
+     * @param sprite The sprite to draw
+     * @param pos Coordinates of the center of the sprite to be drawn.
+     * @param columnIndex The column at which the sprite is located on the sprite sheet
+     * @param rowIndex The row at which the sprite is located on the sprite sheet
+     * @param scale The scale which should be applied to the sprite
+     * @param spriteWidth The original width of the of the sprite.
+     * @param spriteHeight The original height of the of the sprite.
+     * @param tint A color which could be added only where the sprite is opaque. {@code null} is also valid if no tint should be applied prefer: {@link #drawSprite(BufferedImage, ViewPos, int, int, double, int, int) drawSprite}
+     */
+    public void drawSprite(BufferedImage sprite, ViewPos pos, int columnIndex, int rowIndex, double scale, int spriteWidth, int spriteHeight, Color tint) {
+        this.drawSprite(sprite, pos, columnIndex, rowIndex, scale, Rotation.ZERO, new Offset(), spriteWidth, spriteHeight, tint);
     }
 
     /**

@@ -16,7 +16,7 @@ import ZombieGame.World.World;
  * The origin of the chunk is at (0,0) top-left of chunk.
  */
 public record ChunkIndex(int x, int y) implements Drawable {
-    private static boolean debugBorders = true;
+    private static boolean debugBorders = false;
 
     public ChunkIndex() {
         this(0, 0);
@@ -138,7 +138,6 @@ public record ChunkIndex(int x, int y) implements Drawable {
         ViewPos viewPos = this.toWorldPos().toViewPos(world);
 
         if (debugBorders) {
-            ViewPos pos = new ViewPos(20, 225);
             DrawStyle style = new DrawStyle();
 
             if (world.isChunkQueuedForGeneration(this)) {

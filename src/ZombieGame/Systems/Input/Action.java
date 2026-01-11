@@ -30,10 +30,6 @@ public enum Action {
      */
     INTERACT("Interact"),
     /**
-     * Throw grenade
-     */
-    THROW_GRENADE("Throw grenade"),
-    /**
      * Game pause
      */
     GAME_PAUSE("Game pause"),

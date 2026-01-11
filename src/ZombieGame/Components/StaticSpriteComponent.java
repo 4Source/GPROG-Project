@@ -1,10 +1,12 @@
 package ZombieGame.Components;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Sprites.Sprite;
 import ZombieGame.Sprites.StaticSprite;
 import ZombieGame.Systems.Graphic.GraphicLayer;
 
@@ -35,7 +37,16 @@ public class StaticSpriteComponent extends SpriteComponent {
     }
 
     @Override
-    public Set<StaticSprite> getSprite() {
-        return Collections.singleton(this.sprite);
+    protected Collection<? extends Sprite> getSprites() {
+        throw new UnsupportedOperationException("StaticSpriteComponent does not support getSprites() use getSprite(index) instead");
+    }
+
+    @Override
+    public Sprite getSprite(int index) {
+        if (index != 0) {
+            throw new IndexOutOfBoundsException("StaticSpriteComponent only allows index 0");
+        }
+
+        return sprite;
     }
 }

@@ -11,5 +11,7 @@ public abstract class SpriteComponent extends VisualComponent {
         super(entity);
     }
 
-    public abstract Collection<? extends Sprite> getSprite();
+    protected abstract Sprite getSprite(int index);
+
+    protected abstract Collection<? extends Sprite> getSprites();
 }

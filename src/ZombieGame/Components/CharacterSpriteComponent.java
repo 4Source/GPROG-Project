@@ -181,7 +181,7 @@ public class CharacterSpriteComponent extends SpriteComponent {
      * @return A flattened variant of the sprites
      */
     @Override
-    public List<AnimatedSprite> getSprite() {
+    public List<AnimatedSprite> getSprites() {
         return this.sprites.values().stream().flatMap(m -> m.values().stream()).toList();
     }
 
@@ -201,5 +201,10 @@ public class CharacterSpriteComponent extends SpriteComponent {
         }
 
         return Collections.singleton(sprite);
+    }
+
+    @Override
+    public Sprite getSprite(int index) {
+        return getSprites().get(index);
     }
 }

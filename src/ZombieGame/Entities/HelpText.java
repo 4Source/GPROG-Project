@@ -17,7 +17,7 @@ public class HelpText extends TextElement {
      * @param visibilityLifetime The time how long the text should be visible before disappearing
      */
     public HelpText(ViewPos pos, double visibilityLifetime) {
-        super(pos, new Color(0, 120, 255, 60), new Font("Arial", Font.PLAIN, 24));
+        super(pos, new Color(255, 255, 255, 200), new Font("Arial", Font.PLAIN, 24));
         this.lifetimeComponent = this.add(new LifetimeComponent(this, visibilityLifetime));
     }
 

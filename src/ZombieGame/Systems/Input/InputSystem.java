@@ -30,7 +30,6 @@ public class InputSystem implements KeyListener, MouseListener, MouseMotionListe
 		// this.setKeyMapping(Action.INTERACT, DeviceType.KEYBOARD, KeyEvent.VK_E);
 		this.setKeyMapping(Action.SHOOT, DeviceType.MOUSE, MouseEvent.BUTTON1);
 		// this.setKeyMapping(Action.RELOAD, DeviceType.KEYBOARD, KeyEvent.VK_R);
-		this.setKeyMapping(Action.THROW_GRENADE, DeviceType.KEYBOARD, KeyEvent.VK_G);
 
 		this.setKeyMapping(Action.SHOW_FPS, DeviceType.KEYBOARD, KeyEvent.VK_F3);
 		this.setKeyMapping(Action.SHOW_HIT_BOXES, DeviceType.KEYBOARD, KeyEvent.VK_F4);
