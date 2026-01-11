@@ -1,10 +1,12 @@
-package ZombieGame;
+package ZombieGame.Systems.Input;
 
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import ZombieGame.Coordinates.ViewPos;
 
 enum DeviceType {
 	KEYBOARD, MOUSE,
@@ -28,7 +30,6 @@ public class InputSystem implements KeyListener, MouseListener, MouseMotionListe
 		// this.setKeyMapping(Action.INTERACT, DeviceType.KEYBOARD, KeyEvent.VK_E);
 		this.setKeyMapping(Action.SHOOT, DeviceType.MOUSE, MouseEvent.BUTTON1);
 		// this.setKeyMapping(Action.RELOAD, DeviceType.KEYBOARD, KeyEvent.VK_R);
-		this.setKeyMapping(Action.THROW_GRENADE, DeviceType.KEYBOARD, KeyEvent.VK_G);
 
 		this.setKeyMapping(Action.SHOW_FPS, DeviceType.KEYBOARD, KeyEvent.VK_F3);
 		this.setKeyMapping(Action.SHOW_HIT_BOXES, DeviceType.KEYBOARD, KeyEvent.VK_F4);
@@ -103,12 +104,8 @@ public class InputSystem implements KeyListener, MouseListener, MouseMotionListe
 		return this.actionPressed.getOrDefault(action, false);
 	}
 
-	public int getMousePositionX() {
-		return mousePositionX;
-	}
-
-	public int getMousePositionY() {
-		return mousePositionY;
+	public ViewPos getMousePosition() {
+		return new ViewPos(mousePositionX, mousePositionY);
 	}
 
 	/**

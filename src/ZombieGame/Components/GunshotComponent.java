@@ -3,12 +3,13 @@ package ZombieGame.Components;
 import java.util.EnumMap;
 import java.util.Optional;
 
-import ZombieGame.Action;
 import ZombieGame.ActionHandler;
-import ZombieGame.InputSystem;
+import ZombieGame.Game;
 import ZombieGame.Entities.AmmunitionCounter;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Gunshot;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
 
 public class GunshotComponent extends ActionComponent {
     private double timeSinceLastShot;
@@ -45,8 +46,8 @@ public class GunshotComponent extends ActionComponent {
             ammunitionCount--;
 
             InputSystem input = InputSystem.getInstance();
-            Gunshot shot = new Gunshot(this.getEntity().getPosX(), this.getEntity().getPosY(), input.getMousePositionX() + Entity.world.worldPartX, input.getMousePositionY() + Entity.world.worldPartY);
-            Entity.world.spawnEntity(shot);
+            Gunshot shot = new Gunshot(this.getEntity(), this.getEntity().getPositionComponent().getWorldPos(), input.getMousePosition().toWorldPos(Game.world));
+            Game.world.spawnEntity(shot);
 
         }
     }
@@ -64,7 +65,7 @@ public class GunshotComponent extends ActionComponent {
     public void update(double deltaTime) {
         super.update(deltaTime);
 
-        Optional<AmmunitionCounter> opt = Entity.world.getUIElement(AmmunitionCounter.class);
+        Optional<AmmunitionCounter> opt = Game.world.getUIElement(AmmunitionCounter.class);
         if (!opt.isEmpty()) {
             AmmunitionCounter ammunitionUI = opt.get();
             ammunitionUI.setNumber(ammunitionCount);

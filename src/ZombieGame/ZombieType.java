@@ -1,4 +1,4 @@
-package ZombieGame.Entities;
+package ZombieGame;
 
 /**
  * Different zombie variants with different sprites and stats.

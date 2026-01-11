@@ -4,17 +4,18 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.function.Consumer;
 
-import ZombieGame.CircleHitBox;
-import ZombieGame.Collision;
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicSystem;
-import ZombieGame.HitBox;
-import ZombieGame.HitBoxType;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.PhysicsSystem;
-import ZombieGame.RectangleHitBox;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.Collision;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.PhysicsSystem;
+import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class DynamicPhysicsComponent extends PhysicsComponent {
     public final Consumer<Collision> onEnter;
@@ -85,18 +86,16 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
 
             if (this.hitBox instanceof CircleHitBox) {
                 int radius = ((CircleHitBox) this.hitBox).getRadius();
-                int x = (int) (this.getEntity().getPosX() + this.hitBox.getOffsetX() - Entity.world.worldPartX);
-                int y = (int) (this.getEntity().getPosY() + this.hitBox.getOffsetY() - Entity.world.worldPartY);
+                ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
                 int d = (int) (radius * 2);
 
-                GraphicSystem.getInstance().drawOval(x, y, d, d, style);
+                GraphicSystem.getInstance().drawOval(view, d, d, style);
             } else if (this.hitBox instanceof RectangleHitBox) {
                 int width = ((RectangleHitBox) this.hitBox).getWidth();
                 int height = ((RectangleHitBox) this.hitBox).getHeight();
-                int x = (int) (this.getEntity().getPosX() + this.hitBox.getOffsetX() - Entity.world.worldPartX);
-                int y = (int) (this.getEntity().getPosY() + this.hitBox.getOffsetY() - Entity.world.worldPartY);
+                ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
 
-                GraphicSystem.getInstance().drawRect(x, y, width, height, style);
+                GraphicSystem.getInstance().drawRect(view, width, height, style);
             } else {
                 System.err.println("Unsupported hit box for debug visualization.");
             }

@@ -1,12 +1,16 @@
 package ZombieGame.Components;
 
-import ZombieGame.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+
+import java.util.Collection;
+
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.AnimatedSprite;
 import ZombieGame.Sprites.Sprite;
 
 /**
- * Draws a single sprite (static or animated) and updates it each frame.
+ * Draws a single sprite animated and updates it each frame.
  */
 public class AnimatedSpriteComponent extends SpriteComponent {
     private final AnimatedSprite sprite;
@@ -18,9 +22,8 @@ public class AnimatedSpriteComponent extends SpriteComponent {
 
     @Override
     public void draw() {
-        double posX = this.getEntity().getPosX() - Entity.world.worldPartX;
-        double posY = this.getEntity().getPosY() - Entity.world.worldPartY;
-        this.sprite.draw(posX, posY);
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
+        this.sprite.draw(view);
     }
 
     @Override
@@ -31,5 +34,19 @@ public class AnimatedSpriteComponent extends SpriteComponent {
     @Override
     public GraphicLayer getLayer() {
         return GraphicLayer.GAME;
+    }
+
+    @Override
+    protected Collection<? extends Sprite> getSprites() {
+        throw new UnsupportedOperationException("AnimatedSpriteComponent does not support getSprites() use getSprite(index) instead");
+    }
+
+    @Override
+    public Sprite getSprite(int index) {
+        if (index != 0) {
+            throw new IndexOutOfBoundsException("AnimatedSpriteComponent only allows index 0");
+        }
+
+        return sprite;
     }
 }

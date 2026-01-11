@@ -4,18 +4,19 @@ import java.util.function.Function;
 
 import ZombieGame.EntityType;
 import ZombieGame.Components.UIComponent;
+import ZombieGame.Components.ViewPositionComponent;
+import ZombieGame.Coordinates.ViewPos;
 
 public abstract class UIElement extends Entity {
-    private UIComponent uiComponent;
+    private final UIComponent uiComponent;
 
     /**
      * @param <U> The type of the component extending a UIComponent to create with factory method
-     * @param posX The position in x direction
-     * @param posY The position in y direction
+     * @param pos Position on screen
      * @param uiFactory A Factory method to create the component
      */
-    public <U extends UIComponent> UIElement(double posX, double posY, Function<Entity, U> uiFactory) {
-        super(posX, posY);
+    public <U extends UIComponent> UIElement(ViewPos pos, Function<Entity, U> uiFactory) {
+        super(e -> new ViewPositionComponent(e, pos));
         this.uiComponent = this.add(uiFactory.apply(this));
     }
 

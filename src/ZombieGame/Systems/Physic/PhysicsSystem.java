@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.Systems.Physic;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -9,19 +9,29 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.PhysicsComponent;
+import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
 
-public class PhysicsSystem {
+public class PhysicsSystem implements Drawable {
 	private static PhysicsSystem instance;
 	public static boolean enableDebug = false;
 	private Map<PhysicsComponent, Map<PhysicsComponent, CollisionResponse>> collisionBuffer;
 	private Set<PhysicsComponent> invalidEntries;
+	private long lastUpdateDuration = -1;
 
 	private PhysicsSystem() {
 		this.collisionBuffer = new HashMap<>();
 		this.invalidEntries = new HashSet<>();
+		GraphicSystem.getInstance().registerDrawable(this);
 	}
 
 	/**
@@ -91,16 +101,13 @@ public class PhysicsSystem {
 	/**
 	 * Calculates the distance between two points
 	 * 
-	 * @param x1 The x position of point 1
-	 * @param y1 The y position of point 1
-	 * @param x2 The x position of point 2
-	 * @param y2 The y position of point 2
+	 * @param pos1 The position of point 1
+	 * @param pos2 The position of point 2
 	 * @return The distance between point 1 and point 2
 	 */
-	public static double distance(double x1, double y1, double x2, double y2) {
-		double xd = x1 - x2;
-		double yd = y1 - y2;
-		return Math.sqrt(xd * xd + yd * yd);
+	public static double distance(WorldPos pos1, WorldPos pos2) {
+		WorldPos d = pos1.sub(pos2).pow2();
+		return Math.sqrt(d.x() + d.y());
 	}
 
 	/**
@@ -163,15 +170,7 @@ public class PhysicsSystem {
 
 			it.remove();
 		}
-
-		if (PhysicsSystem.enableDebug) {
-			int comp = PhysicsSystem.getInstance().collisionBuffer.size();
-			int coll = 0;
-			for (PhysicsComponent c : PhysicsSystem.getInstance().collisionBuffer.keySet()) {
-				coll += PhysicsSystem.getInstance().getCollisions(c).size();
-			}
-			GraphicSystem.getInstance().drawString("Components: " + comp + " Collisions: " + coll + " Time: " + (System.currentTimeMillis() - start), 20, 60, new DrawStyle().color(Color.MAGENTA));
-		}
+		lastUpdateDuration = (System.currentTimeMillis() - start);
 	}
 
 	/**
@@ -328,5 +327,32 @@ public class PhysicsSystem {
 		});
 
 		return result.get();
+	}
+
+	@Override
+	public void draw() {
+		if (PhysicsSystem.enableDebug) {
+			ViewPos pos = new ViewPos(20, 300);
+			int comp = PhysicsSystem.getInstance().collisionBuffer.size();
+			int coll = 0;
+			for (PhysicsComponent c : PhysicsSystem.getInstance().collisionBuffer.keySet()) {
+				coll += PhysicsSystem.getInstance().getCollisions(c).size();
+			}
+
+			DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
+			GraphicSystem.getInstance().drawString("Components: " + comp, pos, textStyle);
+			GraphicSystem.getInstance().drawString("Collisions: " + coll, pos.add(0, 25), textStyle);
+			GraphicSystem.getInstance().drawString("Time: " + lastUpdateDuration, pos.add(0, 50), textStyle);
+		}
+	}
+
+	@Override
+	public GraphicLayer getLayer() {
+		return GraphicLayer.UI;
+	}
+
+	@Override
+	public int getDepth() {
+		return 0;
 	}
 }

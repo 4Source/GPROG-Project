@@ -6,9 +6,15 @@ import ZombieGame.Components.LivingComponent;
 import ZombieGame.Components.VisualComponent;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
+import ZombieGame.Systems.Physic.PhysicsSystem;
+import ZombieGame.World.World;
+import ZombieGame.World.ZombieWorld;
 
-final class Game {
-	private World world = null;
+public final class Game {
+	public static World world;
 	// defines maximum frame rate
 	private static final int FRAME_MINIMUM_MILLIS = 5;
 
@@ -18,11 +24,9 @@ final class Game {
 		frame.displayOnScreen();
 
 		// Create a new world
-		this.world = new ZombieWorld();
+		Game.world = new ZombieWorld();
 
-		Entity.setWorld(this.world);
-
-		this.world.init();
+		Game.world.init();
 		// this.world.run();
 		long lastTick = System.currentTimeMillis();
 
@@ -46,7 +50,7 @@ final class Game {
 			double secondsDiff = millisDiff / 1000.0;
 			lastTick = currentTick;
 
-			this.world.update(secondsDiff);
+			Game.world.update(secondsDiff);
 
 			// Open Pause menu
 			if (InputSystem.getInstance().isPressed(Action.GAME_PAUSE)) {
@@ -54,8 +58,8 @@ final class Game {
 			}
 
 			// no actions if game is over
-			if (this.world.gameOver) {
-				Iterator<Entity> entityIt = this.world.entityIterator();
+			if (Game.world.gameOver) {
+				Iterator<Entity> entityIt = Game.world.entityIterator();
 				while (entityIt.hasNext()) {
 					Entity e = entityIt.next();
 
@@ -71,7 +75,7 @@ final class Game {
 			}
 
 			// Update all Entities
-			Iterator<Entity> entityIt = this.world.entityIterator();
+			Iterator<Entity> entityIt = Game.world.entityIterator();
 			while (entityIt.hasNext()) {
 				Entity e = entityIt.next();
 
@@ -80,7 +84,7 @@ final class Game {
 			}
 
 			// Update all UI Elements
-			Iterator<UIElement> uiIt = this.world.uiElementIterator();
+			Iterator<UIElement> uiIt = Game.world.uiElementIterator();
 			while (uiIt.hasNext()) {
 				UIElement ui = uiIt.next();
 
@@ -104,7 +108,7 @@ final class Game {
 			InputSystem.getInstance().clear();
 
 			// adjust displayed pane of the world
-			this.world.adjustWorldPart();
+			Game.world.adjustWorldPart();
 
 			// Draw everything
 			GraphicSystem.getInstance().draw();
@@ -113,7 +117,7 @@ final class Game {
 			GraphicSystem.getInstance().swapBuffers();
 
 			// Remove all dead Entities
-			entityIt = this.world.entityIterator();
+			entityIt = Game.world.entityIterator();
 			while (entityIt.hasNext()) {
 				Entity e = entityIt.next();
 
@@ -126,7 +130,9 @@ final class Game {
 
 			// TODO: Entities which can Spawn should implement spawnable
 			// create new objects if needed
-			this.world.createNewObjects(secondsDiff);
+			Game.world.UpdateEntityGeneration(secondsDiff);
+
+			Game.world.processGenerationQueue(1);
 		}
 	}
 
@@ -136,3 +142,9 @@ final class Game {
 		System.out.println("Game stopped...");
 	}
 }
+
+// BUG: #1 Zombies seem to not always get damage registered
+
+// BUG: #2 It could happen that the chunk generation generates an obstacle at the player spawn position in this case the player will be unable to move. The position the player is passed for creation should be tested with physics system for collision and than find closest not collision
+
+// BUG: #3 After 2 time hit by a zombie the zombie freezes

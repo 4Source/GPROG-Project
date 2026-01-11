@@ -1,28 +1,30 @@
 package ZombieGame.Components;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
-import ZombieGame.GraphicLayer;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Sprites.Sprite;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 
+/**
+ * Draws a single sprite static
+ */
 public class StaticSpriteComponent extends SpriteComponent {
-    private ArrayList<StaticSprite> sprites;
+    private final StaticSprite sprite;
 
-    public StaticSpriteComponent(Entity entity) {
+    public StaticSpriteComponent(Entity entity, StaticSprite sprite) {
         super(entity);
-
-        this.sprites = new ArrayList<>();
+        this.sprite = sprite;
     }
 
     @Override
     public void draw() {
-        double posX = this.getEntity().getPosX() - Entity.world.worldPartX;
-        double posY = this.getEntity().getPosY() - Entity.world.worldPartY;
-
-        this.sprites.forEach(s -> {
-            s.draw(posX, posY);
-        });
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
+        this.sprite.draw(view);
     }
 
     @Override
@@ -34,7 +36,17 @@ public class StaticSpriteComponent extends SpriteComponent {
     public void update(double deltaTime) {
     }
 
-    public void addSprite(StaticSprite sprite) {
-        this.sprites.add(sprite);
+    @Override
+    protected Collection<? extends Sprite> getSprites() {
+        throw new UnsupportedOperationException("StaticSpriteComponent does not support getSprites() use getSprite(index) instead");
+    }
+
+    @Override
+    public Sprite getSprite(int index) {
+        if (index != 0) {
+            throw new IndexOutOfBoundsException("StaticSpriteComponent only allows index 0");
+        }
+
+        return sprite;
     }
 }

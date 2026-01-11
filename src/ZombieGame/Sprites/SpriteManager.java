@@ -7,7 +7,7 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import ZombieGame.MissingTexture;
+import ZombieGame.Systems.Graphic.MissingTexture;
 
 public class SpriteManager {
     private static final Map<String, BufferedImage> cache = new HashMap<>();

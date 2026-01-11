@@ -4,17 +4,17 @@ import java.awt.Color;
 import java.awt.Font;
 
 import ZombieGame.Components.TextComponent;
-import ZombieGame.GraphicLayer;
+import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 
 public abstract class TextElement extends UIElement {
     /**
-     * @param posX The position in x direction
-     * @param posY The position in y direction
+     * @param pos The position in the world
      * @param color The color of the ui object
      * @param font The font to use to print the text to the screen
      */
-    public TextElement(double posX, double posY, Color color, Font font) {
-        super(posX, posY, e -> new TextComponent(e, color, font) {
+    public TextElement(ViewPos pos, Color color, Font font) {
+        super(pos, e -> new TextComponent((TextElement) e, color, font) {
 
             @Override
             public String toString() {

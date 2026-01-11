@@ -1,14 +1,16 @@
 package ZombieGame.Components;
 
-import ZombieGame.CircleHitBox;
-import ZombieGame.CollisionResponse;
-import ZombieGame.GraphicLayer;
-import ZombieGame.HitBox;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.RectangleHitBox;
 import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.CollisionResponse;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public abstract class PhysicsComponent extends Component implements Drawable {
     protected HitBox hitBox;
@@ -52,56 +54,46 @@ public abstract class PhysicsComponent extends Component implements Drawable {
 
         if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof CircleHitBox) {
             double dist = ((CircleHitBox) this.hitBox).getRadius() + ((CircleHitBox) other.hitBox).getRadius();
-            double dx = (this.getEntity().getPosX() + this.hitBox.getOffsetX()) - (other.getEntity().getPosX() + other.hitBox.getOffsetX());
-            double dy = (this.getEntity().getPosY() + this.hitBox.getOffsetY()) - (other.getEntity().getPosY() + other.hitBox.getOffsetY());
+            WorldPos d2 = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset()).sub(other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset())).pow2();
 
-            if (dx * dx + dy * dy < dist * dist) {
+            if (d2.x() + d2.y() < dist * dist) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof RectangleHitBox) {
-            if (this.getEntity().getPosX() + this.hitBox.getOffsetX() < other.getEntity().getPosX() + other.hitBox.getOffsetX() + ((RectangleHitBox) other.hitBox).getWidth() &&
-                    this.getEntity().getPosX() + this.hitBox.getOffsetX() + ((RectangleHitBox) this.hitBox).getWidth() > other.getEntity().getPosX() + other.hitBox.getOffsetX() &&
-                    this.getEntity().getPosY() + this.hitBox.getOffsetY() < other.getEntity().getPosY() + other.hitBox.getOffsetY() + ((RectangleHitBox) other.hitBox).getHeight() &&
-                    this.getEntity().getPosY() + this.hitBox.getOffsetY() + ((RectangleHitBox) this.hitBox).getHeight() > other.getEntity().getPosY() + other.hitBox.getOffsetY()) {
+            WorldPos thisPos = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset());
+            WorldPos otherPos = other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset());
+
+            if (thisPos.x() < otherPos.x() + ((RectangleHitBox) other.hitBox).getWidth() && thisPos.x() + ((RectangleHitBox) this.hitBox).getWidth() > otherPos.x() &&
+                    thisPos.y() < otherPos.y() + ((RectangleHitBox) other.hitBox).getHeight() && thisPos.y() + ((RectangleHitBox) this.hitBox).getHeight() > otherPos.y()) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof CircleHitBox) {
-            double rectMinX = this.getEntity().getPosX() + this.hitBox.getOffsetX() - ((RectangleHitBox) this.hitBox).getWidth() / 2;
-            double rectMinY = this.getEntity().getPosY() + this.hitBox.getOffsetY() - ((RectangleHitBox) this.hitBox).getHeight() / 2;
-            double rectMaxX = this.getEntity().getPosX() + this.hitBox.getOffsetX() + ((RectangleHitBox) this.hitBox).getWidth() / 2;
-            double rectMaxY = this.getEntity().getPosY() + this.hitBox.getOffsetY() + ((RectangleHitBox) this.hitBox).getHeight() / 2;
-            double cx = other.getEntity().getPosX() + other.hitBox.getOffsetX();
-            double cy = other.getEntity().getPosY() + other.hitBox.getOffsetY();
+            WorldPos rectMin = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset()).sub(new Offset(((RectangleHitBox) this.hitBox).getWidth() / 2, ((RectangleHitBox) this.hitBox).getHeight() / 2));
+            WorldPos rectMax = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset()).add(new Offset(((RectangleHitBox) this.hitBox).getWidth() / 2, ((RectangleHitBox) this.hitBox).getHeight() / 2));
+            WorldPos c = other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset());
             double r = ((CircleHitBox) other.hitBox).getRadius();
 
-            double closestX = Math.max(rectMinX, Math.min(cx, rectMaxX));
-            double closestY = Math.max(rectMinY, Math.min(cy, rectMaxY));
+            WorldPos closes = new WorldPos(Math.max(rectMin.x(), Math.min(c.x(), rectMax.x())), Math.max(rectMin.y(), Math.min(c.y(), rectMax.y())));
 
-            double dx = cx - closestX;
-            double dy = cy - closestY;
+            WorldPos d2 = c.sub(closes).pow2();
 
-            if ((dx * dx + dy * dy) <= r * r) {
+            if ((d2.x() + d2.y()) <= r * r) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof RectangleHitBox) {
-            double rectMinX = other.getEntity().getPosX() + other.hitBox.getOffsetX() - ((RectangleHitBox) other.hitBox).getWidth() / 2;
-            double rectMinY = other.getEntity().getPosY() + other.hitBox.getOffsetY() - ((RectangleHitBox) other.hitBox).getHeight() / 2;
-            double rectMaxX = other.getEntity().getPosX() + other.hitBox.getOffsetX() + ((RectangleHitBox) other.hitBox).getWidth() / 2;
-            double rectMaxY = other.getEntity().getPosY() + other.hitBox.getOffsetY() + ((RectangleHitBox) other.hitBox).getHeight() / 2;
-            double cx = this.getEntity().getPosX() + this.hitBox.getOffsetX();
-            double cy = this.getEntity().getPosY() + this.hitBox.getOffsetY();
+            WorldPos rectMin = other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset()).sub(new Offset(((RectangleHitBox) other.hitBox).getWidth() / 2, ((RectangleHitBox) other.hitBox).getHeight() / 2));
+            WorldPos rectMax = other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset()).add(new Offset(((RectangleHitBox) other.hitBox).getWidth() / 2, ((RectangleHitBox) other.hitBox).getHeight() / 2));
+            WorldPos c = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset());
             double r = ((CircleHitBox) this.hitBox).getRadius();
 
-            double closestX = Math.max(rectMinX, Math.min(cx, rectMaxX));
-            double closestY = Math.max(rectMinY, Math.min(cy, rectMaxY));
+            WorldPos closes = new WorldPos(Math.max(rectMin.x(), Math.min(c.x(), rectMax.x())), Math.max(rectMin.y(), Math.min(c.y(), rectMax.y())));
 
-            double dx = cx - closestX;
-            double dy = cy - closestY;
+            WorldPos d2 = c.sub(closes).pow2();
 
-            if ((dx * dx + dy * dy) <= r * r) {
+            if ((d2.x() + d2.y()) <= r * r) {
                 return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
             }
             return CollisionResponse.None;
@@ -123,6 +115,6 @@ public abstract class PhysicsComponent extends Component implements Drawable {
 
     @Override
     public int getDepth() {
-        return (int) this.getEntity().getPosY();
+        return (int) this.getEntity().getPositionComponent().getViewPos().y();
     }
 }

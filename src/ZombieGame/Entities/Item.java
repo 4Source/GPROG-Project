@@ -4,30 +4,31 @@ import java.awt.Color;
 import java.util.function.Function;
 
 import ZombieGame.EntityType;
-import ZombieGame.HitBox;
-import ZombieGame.PhysicsCollisionLayer;
-import ZombieGame.PhysicsCollisionMask;
-import ZombieGame.PhysicsSystem;
 import ZombieGame.Components.LivingComponent;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Components.StaticPhysicsComponent;
 import ZombieGame.Components.VisualComponent;
+import ZombieGame.Components.WorldPositionComponent;
+import ZombieGame.Coordinates.WorldPos;
+import ZombieGame.Systems.Physic.HitBox;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public abstract class Item extends Entity {
-    private VisualComponent visualComponent;
-    private PhysicsComponent physicsComponent;
-    private LivingComponent livingComponent;
+    private final VisualComponent visualComponent;
+    private final PhysicsComponent physicsComponent;
+    private final LivingComponent livingComponent;
 
     /**
      * @param <T> The type of the component to create with factory method
-     * @param posX The position in x direction
-     * @param posY The position in y direction
+     * @param pos The position in the world
      * @param hitBox The hit box against which the {@link PhysicsSystem physics system} checks for collisions
      * @param color The color of the Item
      * @param visualFactory A Factory method to create the component
      */
-    public <T extends VisualComponent> Item(double posX, double posY, HitBox hitBox, Color color, Function<Entity, T> visualFactory) {
-        super(posX, posY);
+    public <T extends VisualComponent> Item(WorldPos pos, HitBox hitBox, Color color, Function<Entity, T> visualFactory) {
+        super(e -> new WorldPositionComponent(e, pos));
         this.visualComponent = this.add(visualFactory.apply(this));
         this.physicsComponent = this.add(new StaticPhysicsComponent(this, hitBox, PhysicsCollisionLayer.ITEM, new PhysicsCollisionMask(PhysicsCollisionLayer.PLAYER)));
         this.livingComponent = this.add(new LivingComponent(this));

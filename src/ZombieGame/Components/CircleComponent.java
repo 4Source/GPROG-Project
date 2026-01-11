@@ -2,10 +2,11 @@ package ZombieGame.Components;
 
 import java.awt.Color;
 
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicLayer;
-import ZombieGame.GraphicSystem;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
 public class CircleComponent extends VisualComponent {
     protected int radius;
@@ -26,12 +27,11 @@ public class CircleComponent extends VisualComponent {
 
     @Override
     public void draw() {
-        int x = (int) (this.getEntity().getPosX() - Entity.world.worldPartX);
-        int y = (int) (this.getEntity().getPosY() - Entity.world.worldPartY);
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
         int d = (int) (this.radius * 2);
 
-        GraphicSystem.getInstance().drawFillOval(x, y, d, d, new DrawStyle().color(this.color));
-        GraphicSystem.getInstance().drawOval(x, y, d, d, new DrawStyle().color(Color.DARK_GRAY));
+        GraphicSystem.getInstance().drawFillOval(view, d, d, new DrawStyle().color(this.color));
+        GraphicSystem.getInstance().drawOval(view, d, d, new DrawStyle().color(Color.DARK_GRAY));
     }
 
     @Override

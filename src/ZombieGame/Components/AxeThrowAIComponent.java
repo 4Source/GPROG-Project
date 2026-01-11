@@ -2,9 +2,9 @@ package ZombieGame.Components;
 
 import java.util.Optional;
 
-import ZombieGame.PhysicsSystem;
+import ZombieGame.Systems.Physic.PhysicsSystem;
+import ZombieGame.Game;
 import ZombieGame.Entities.Avatar;
-import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Zombie;
 
 /**
@@ -33,13 +33,13 @@ public class AxeThrowAIComponent extends Component {
             return;
         }
 
-        Optional<Avatar> avatarOpt = Entity.world.getEntity(Avatar.class);
+        Optional<Avatar> avatarOpt = Game.world.getEntity(Avatar.class);
         if (avatarOpt.isEmpty()) {
             return;
         }
 
         Avatar avatar = avatarOpt.get();
-        double dist = PhysicsSystem.distance(zombie.getPosX(), zombie.getPosY(), avatar.getPosX(), avatar.getPosY());
+        double dist = PhysicsSystem.distance(zombie.getPositionComponent().getWorldPos(), avatar.getPositionComponent().getWorldPos());
 
         // Only throw if not too close (melee) and not too far.
         if (dist >= minThrowDistance && dist <= maxThrowDistance) {

@@ -1,4 +1,6 @@
-package ZombieGame;
+package ZombieGame.Systems.Physic;
+
+import ZombieGame.Coordinates.Offset;
 
 public class CircleHitBox extends HitBox {
     private int radius;
@@ -6,11 +8,10 @@ public class CircleHitBox extends HitBox {
     /**
      * @param type The type of collision the hit box can have
      * @param radius The size of the hit box
-     * @param offsetX The offset in x from the entity position to the hit box position
-     * @param offsetY The offset in y from the entity position to the hit box position
+     * @param offset The offset from the entity position to the hit box position
      */
-    public CircleHitBox(HitBoxType type, int radius, int offsetX, int offsetY) {
-        super(type, offsetX, offsetY);
+    public CircleHitBox(HitBoxType type, int radius, Offset offset) {
+        super(type, offset);
         this.radius = radius;
     }
 

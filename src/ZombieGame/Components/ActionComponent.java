@@ -4,10 +4,10 @@ import java.util.EnumMap;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import ZombieGame.Action;
 import ZombieGame.ActionHandler;
-import ZombieGame.InputSystem;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
 
 public abstract class ActionComponent extends Component {
     private final EnumMap<Action, ActionHandler> actionHandlers;

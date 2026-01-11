@@ -3,24 +3,27 @@ package ZombieGame.Entities;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import ZombieGame.EntityType;
-import ZombieGame.World;
 import ZombieGame.Capabilities.Capability;
 import ZombieGame.Components.Component;
+import ZombieGame.Components.PositionComponent;
 
 public abstract class Entity {
-    protected double posX, posY;
-    public static World world;
     private Map<Class<? extends Component>, ArrayList<Component>> components = new HashMap<>();
+    private final PositionComponent positionComponent;
 
     /**
-     * @param posX The position in x direction
-     * @param posY The position in y direction
+     * @param <U> The type of the component extending a PositionComponent to create with factory method
+     * @param posFactory A Factory method to create the component
      */
-    public Entity(double posX, double posY) {
-        this.posX = posX;
-        this.posY = posY;
+    public <T extends PositionComponent> Entity(Function<Entity, T> posFactory) {
+        this.positionComponent = this.add(posFactory.apply(this));
+    }
+
+    public PositionComponent getPositionComponent() {
+        return this.positionComponent;
     }
 
     /**
@@ -90,30 +93,5 @@ public abstract class Entity {
                 component.update(deltaTime);
             });
         });
-    }
-
-    public final double getPosX() {
-        return this.posX;
-    }
-
-    public final void setPosX(double x) {
-        this.posX = x;
-    }
-
-    public final double getPosY() {
-        return this.posY;
-    }
-
-    public final void setPosY(double y) {
-        this.posY = y;
-    }
-
-    /**
-     * Set the world where the game objects are belonging to
-     * 
-     * @param world The world to which it should be set
-     */
-    public static void setWorld(World world) {
-        Entity.world = world;
     }
 }

@@ -20,6 +20,6 @@ public abstract class VisualComponent extends Component implements Drawable {
 
     @Override
     public int getDepth() {
-        return (int) this.getEntity().getPosY();
+        return (int) this.getEntity().getPositionComponent().getViewPos().y();
     }
 }

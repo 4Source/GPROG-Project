@@ -5,10 +5,11 @@ import java.util.Optional;
 import ZombieGame.AIState;
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterDirection;
-import ZombieGame.PhysicsSystem;
+import ZombieGame.Game;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
-import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Zombie;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class AIMovementComponent extends TargetMovementComponent {
     protected AIState state;
@@ -19,11 +20,12 @@ public class AIMovementComponent extends TargetMovementComponent {
      * A movement component which provides "intelligent" movement by different states.
      * 
      * @param entity The entity to which the components belongs to
+     * @param pos The position in the world
      * @param alpha The angle of rotation in radian
      * @param speed The speed how fast to move
      */
-    public AIMovementComponent(Entity entity, double alpha, double speed) {
-        super(entity, alpha, speed);
+    public AIMovementComponent(Zombie entity, WorldPos pos, double alpha, double speed) {
+        super(entity, pos, alpha, speed);
         this.state = AIState.HUNTING;
 
         // turn left or right to clear
@@ -41,7 +43,7 @@ public class AIMovementComponent extends TargetMovementComponent {
             return;
         }
 
-        Optional<Avatar> opt = Entity.world.getEntity(Avatar.class);
+        Optional<Avatar> opt = Game.world.getEntity(Avatar.class);
         if (opt.isEmpty()) {
             System.err.println("No avatar found");
             return;
@@ -49,7 +51,7 @@ public class AIMovementComponent extends TargetMovementComponent {
         Avatar avatar = opt.get();
 
         // if avatar is too far away: stop
-        double dist = PhysicsSystem.distance(this.getEntity().getPosX(), this.getEntity().getPosY(), avatar.getPosX(), avatar.getPosY());
+        double dist = PhysicsSystem.distance(this.getWorldPos(), avatar.getPositionComponent().getWorldPos());
 
         if (dist > 1500) {
             this.hasDestination = false;

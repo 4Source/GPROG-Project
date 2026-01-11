@@ -2,10 +2,9 @@ package ZombieGame.Components;
 
 import java.awt.*;
 
-import ZombieGame.DrawStyle;
-import ZombieGame.GraphicSystem;
-import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.TextElement;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
 public abstract class TextComponent extends UIComponent {
     protected Font font;
@@ -15,13 +14,13 @@ public abstract class TextComponent extends UIComponent {
      * @param color The color of the ui object
      * @param font The font to use to print the text to the screen
      */
-    public TextComponent(Entity entity, Color color, Font font) {
+    public TextComponent(TextElement entity, Color color, Font font) {
         super(entity, color);
         this.font = font;
     }
 
     public void draw() {
-        GraphicSystem.getInstance().drawString(this.toString(), (int) this.getEntity().getPosX(), (int) this.getEntity().getPosY(), new DrawStyle().color(this.color).font(this.font));
+        GraphicSystem.getInstance().drawString(this.toString(), this.getEntity().getPositionComponent().getViewPos(), new DrawStyle().color(this.color).font(this.font));
     }
 
     /**

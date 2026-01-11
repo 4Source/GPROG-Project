@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.Systems.Graphic;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

@@ -1,4 +1,4 @@
-package ZombieGame;
+package ZombieGame.Systems.Physic;
 
 public final class PhysicsCollisionMask {
     public final int bit;

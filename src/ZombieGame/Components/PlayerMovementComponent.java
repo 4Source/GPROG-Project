@@ -1,22 +1,34 @@
 package ZombieGame.Components;
 
-import ZombieGame.Action;
+import java.awt.Color;
+
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterDirection;
-import ZombieGame.InputSystem;
+import ZombieGame.Game;
+import ZombieGame.Viewport;
+import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
-import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
+import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Input.InputSystem;
 
-public class PlayerMovementComponent extends MovementComponent {
+// TODO: Change drawable to Debugable
+public class PlayerMovementComponent extends MovementComponent implements Drawable {
+    private static boolean debugPos = false;
 
     /**
      * A Component which can move the entity via the inputs of the user.
      * 
      * @param entity The entity to which the components belongs to
+     * @param pos The position in the world
      * @param speed The speed how fast to move
      */
-    public PlayerMovementComponent(Entity entity, double speed) {
-        super(entity, 0, speed);
+    public PlayerMovementComponent(Avatar entity, WorldPos pos, double speed) {
+        super(entity, pos, 0, speed);
     }
 
     @Override
@@ -74,5 +86,26 @@ public class PlayerMovementComponent extends MovementComponent {
     @Override
     public Avatar getEntity() {
         return (Avatar) super.getEntity();
+    }
+
+    @Override
+    public void draw() {
+        if (debugPos) {
+            ViewPos pos = new ViewPos(20, 150);
+            DrawStyle style = new DrawStyle().color(Color.WHITE);
+            GraphicSystem.getInstance().drawString("Player Pos   " + this.getWorldPos().toString(), pos, style);
+            GraphicSystem.getInstance().drawString("Player Chunk " + this.getWorldPos().toChunkIndex().toString(), pos.add(0, 25), style);
+            GraphicSystem.getInstance().drawString("Center Chunk " + Viewport.getCenter().toWorldPos(Game.world).toChunkIndex().toString(), pos.add(0, 50), style);
+        }
+    }
+
+    @Override
+    public GraphicLayer getLayer() {
+        return GraphicLayer.UI;
+    }
+
+    @Override
+    public int getDepth() {
+        return 0;
     }
 }
