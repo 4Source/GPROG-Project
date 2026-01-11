@@ -197,23 +197,52 @@ public class GraphicSystem extends JPanel {
     }
 
     /**
-     * Draws as much of the specified image as has already been scaled to fit inside the specified rectangle.
+     * Draws as much of the specified image to fit inside the specified rectangle.
      * 
-     * @param sprite The specified image to be drawn. This method does nothing if img is null.
-     * @param spriteX The x coordinate.
-     * @param spriteY The y coordinate.
-     * @param spriteWidth The width of the rectangle.
-     * @param spriteHeight The height of the rectangle.
+     * @param sprite The sprite to draw
+     * @param pos Coordinates of the center of the sprite to be drawn.
+     * @param columnIndex The column at which the sprite is located on the sprite sheet
+     * @param rowIndex The row at which the sprite is located on the sprite sheet
+     * @param scale The scale which should be applied to the sprite
+     * @param spriteWidth The original width of the of the sprite.
+     * @param spriteHeight The original height of the of the sprite.
+     * @param tint A color which could be added only where the sprite is opaque. {@code null} is also valid if no tint should be applied prefer: {@link #drawSprite(BufferedImage, ViewPos, int, int, double, int, int) drawSprite}
      */
-    public void drawSprite(BufferedImage sprite, ViewPos drawPos, int drawWidth, int drawHeight, ViewPos spritePos, int spriteWidth, int spriteHeight) {
-        this.graphics.drawImage(sprite, drawPos.x(), drawPos.y(), drawPos.x() + drawWidth, drawPos.y() + drawHeight, spritePos.x(), spritePos.y(), spriteWidth, spriteHeight, null);
+    public void drawSprite(BufferedImage sprite, ViewPos pos, int columnIndex, int rowIndex, double scale, int spriteWidth, int spriteHeight, Color tint) {
+        int drawWidth = (int) (spriteWidth * scale);
+        int drawHeight = (int) (spriteHeight * scale);
+        ViewPos drawPos = pos.sub(drawWidth / 2, drawHeight / 2);
+
+        if (tint != null) {
+            BufferedImage temp = new BufferedImage(drawWidth, drawHeight, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D tempGraphics = temp.createGraphics();
+
+            tempGraphics.drawImage(sprite, 0, 0, drawWidth, drawHeight, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
+
+            tempGraphics.setComposite(AlphaComposite.SrcAtop);
+            tempGraphics.setColor(tint);
+            tempGraphics.fillRect(0, 0, drawWidth, drawHeight);
+            tempGraphics.dispose();
+
+            graphics.drawImage(temp, drawPos.x(), drawPos.y(), null);
+        } else {
+            this.graphics.drawImage(sprite, drawPos.x(), drawPos.y(), drawPos.x() + drawWidth, drawPos.y() + drawHeight, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
+        }
     }
 
+    /**
+     * Draws as much of the specified image to fit inside the specified rectangle.
+     * 
+     * @param sprite The sprite to draw
+     * @param pos Coordinates of the center of the sprite to be drawn.
+     * @param columnIndex The column at which the sprite is located on the sprite sheet
+     * @param rowIndex The row at which the sprite is located on the sprite sheet
+     * @param scale The scale which should be applied to the sprite
+     * @param spriteWidth The original width of the of the sprite.
+     * @param spriteHeight The original height of the of the sprite.
+     */
     public void drawSprite(BufferedImage sprite, ViewPos pos, int columnIndex, int rowIndex, double scale, int spriteWidth, int spriteHeight) {
-        int drawWidth_2 = (int) (spriteWidth * scale / 2);
-        int drawHeight_2 = (int) (spriteHeight * scale / 2);
-
-        this.graphics.drawImage(sprite, pos.x() - drawWidth_2, pos.y() - drawHeight_2, pos.x() + drawWidth_2, pos.y() + drawHeight_2, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
+        this.drawSprite(sprite, pos, columnIndex, rowIndex, scale, spriteWidth, spriteHeight, null);
     }
 
     /**

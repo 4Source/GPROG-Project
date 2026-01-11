@@ -1,5 +1,6 @@
 package ZombieGame.Sprites;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 import ZombieGame.Coordinates.Offset;
@@ -12,6 +13,7 @@ public abstract class Sprite {
     private final int height;
     private final Offset offset;
     private final double scale;
+    private Color tint;
 
     protected final int columnCount;
     protected int columnIndex;
@@ -25,8 +27,9 @@ public abstract class Sprite {
      * @param scale The Factor about what the Sprite should be scaled to display it
      * @param offsetX A positioning offset in x which gets added to the position were to draw the sprite
      * @param offsetY A positioning offset in y which gets added to the position were to draw the sprite
+     * @param tint A color to tint he Sprite with
      */
-    public Sprite(String spritePath, int columnCount, int rowCount, double scale, Offset offset) {
+    public Sprite(String spritePath, int columnCount, int rowCount, double scale, Offset offset, Color tint) {
         this.sprite = SpriteManager.getSprite(spritePath);
         this.columnCount = columnCount;
         this.rowCount = rowCount;
@@ -36,6 +39,19 @@ public abstract class Sprite {
         this.columnIndex = 0;
         this.rowIndex = 0;
         this.offset = offset;
+        this.tint = tint;
+    }
+
+    /**
+     * @param spritePath The path to the file which should be used as sprite
+     * @param columnCount The number of Sprites positioned side by side
+     * @param rowCount The number of Sprites positioned below each other
+     * @param scale The Factor about what the Sprite should be scaled to display it
+     * @param offsetX A positioning offset in x which gets added to the position were to draw the sprite
+     * @param offsetY A positioning offset in y which gets added to the position were to draw the sprite
+     */
+    public Sprite(String spritePath, int columnCount, int rowCount, double scale, Offset offset) {
+        this(spritePath, columnCount, rowCount, scale, offset, null);
     }
 
     /**
@@ -59,7 +75,7 @@ public abstract class Sprite {
      * Draw the sprite in the graphics system.
      */
     public void draw(ViewPos pos) {
-        GraphicSystem.getInstance().drawSprite(this.sprite, pos.add(offset), this.columnIndex, this.rowIndex, this.scale, this.width, this.height);
+        GraphicSystem.getInstance().drawSprite(this.sprite, pos.add(offset), this.columnIndex, this.rowIndex, this.scale, this.width, this.height, tint);
     }
 
     public void setColumnIndex(int index) {
@@ -76,5 +92,9 @@ public abstract class Sprite {
 
     public double getDrawWidth() {
         return this.scale * this.width;
+    }
+
+    public void setTint(Color color) {
+        this.tint = color;
     }
 }

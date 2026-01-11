@@ -21,7 +21,7 @@ public class HeartUI extends UIElement {
     private static final String HEART_HALF = "assets/PostApocalypse_AssetPack/UI/HP/Heart_Half.png";
     private static final String HEART_EMPTY = "assets/PostApocalypse_AssetPack/UI/HP/Heart_Empty.png";
 
-    private static final int HEART_SIZE = 28; // draw size in pixels
+    private static final int SCALE = 3; // draw size in pixels
     private static final int HEART_GAP = 6; // spacing in pixels
 
     public HeartUI(ViewPos pos) {
@@ -50,9 +50,10 @@ public class HeartUI extends UIElement {
                     return;
                 }
 
-                int halfHearts = life.getLife(); // current half-hearts
-                int maxHalfHearts = life.getMaxLife(); // max half-hearts
+                int halfHearts = life.getHalfHearts(); // current half-hearts
+                int maxHalfHearts = life.getMaxHalfHearts(); // max half-hearts
                 int hearts = (int) Math.ceil(maxHalfHearts / 2.0);
+                int heartSize = full.getWidth() * SCALE;
 
                 ViewPos base = this.getEntity().getPositionComponent().getViewPos();
 
@@ -69,9 +70,9 @@ public class HeartUI extends UIElement {
 
                     GraphicSystem.getInstance().drawSprite(
                             img,
-                            base.add(i * (HEART_SIZE + HEART_GAP), 0),
-                            HEART_SIZE, HEART_SIZE,
-                            new ViewPos(),
+                            base.add(i * (heartSize + HEART_GAP) + (heartSize / 2), (heartSize / 2)),
+                            0, 0,
+                            SCALE,
                             img.getWidth(), img.getHeight());
                 }
             }

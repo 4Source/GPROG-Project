@@ -61,7 +61,7 @@ public class CharacterSpriteComponent extends SpriteComponent {
 
                 if (sprite == null) {
                     int size = MissingTexture.getSize();
-                    GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), view, size, size, new ViewPos(), size, size);
+                    GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), view.add(size / 2, size / 2), 0, 0, 1, size * 2, size * 2);
                     return;
                 }
 

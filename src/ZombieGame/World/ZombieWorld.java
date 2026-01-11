@@ -32,7 +32,7 @@ public class ZombieWorld extends World {
 		this.spawnEntity(new Avatar(Viewport.getCenter().toWorldPos(this)));
 
 		this.addUIElement(new ZombieCounter(Viewport.getTopLeft()));
-		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -48)));
+		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -56)));
 		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(20, -68), 0));
 		this.addUIElement(new HelpText(new ViewPos(100, 400), 10.0));
 
