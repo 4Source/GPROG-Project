@@ -6,7 +6,7 @@ import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.AnimatedSprite;
 
 /**
- * Draws a single sprite (static or animated) and updates it each frame.
+ * Draws a single sprite animated and updates it each frame.
  */
 public class AnimatedSpriteComponent extends SpriteComponent {
     private final AnimatedSprite sprite;

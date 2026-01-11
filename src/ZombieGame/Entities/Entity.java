@@ -12,8 +12,7 @@ import ZombieGame.Components.PositionComponent;
 
 public abstract class Entity {
     private Map<Class<? extends Component>, ArrayList<Component>> components = new HashMap<>();
-    // TODO: make all components to final this ensures there are in constructor
-    private PositionComponent positionComponent;
+    private final PositionComponent positionComponent;
 
     /**
      * @param <U> The type of the component extending a PositionComponent to create with factory method

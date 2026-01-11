@@ -12,8 +12,8 @@ import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
 import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 
 public abstract class Obstacle extends Entity {
-    private VisualComponent visualComponent;
-    private StaticPhysicsComponent physicsComponent;
+    private final VisualComponent visualComponent;
+    private final StaticPhysicsComponent physicsComponent;
 
     /**
      * @param <P> The type of the component extending a PhysicsComponent to create with factory method

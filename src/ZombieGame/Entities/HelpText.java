@@ -10,7 +10,7 @@ import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
 
 public class HelpText extends TextElement {
-    private LifetimeComponent lifetimeComponent;
+    private final LifetimeComponent lifetimeComponent;
 
     /**
      * @param pos The position in the world

@@ -12,10 +12,10 @@ import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
 import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 
 public abstract class Character extends Entity {
-    private VisualComponent visualComponent;
-    private DynamicPhysicsComponent movementPhysicsComponent;
-    private DynamicPhysicsComponent damagePhysicsComponent;
-    private LifeComponent lifeComponent;
+    private final VisualComponent visualComponent;
+    private final DynamicPhysicsComponent movementPhysicsComponent;
+    private final DynamicPhysicsComponent damagePhysicsComponent;
+    private final LifeComponent lifeComponent;
 
     /**
      * @param pos The position in the world

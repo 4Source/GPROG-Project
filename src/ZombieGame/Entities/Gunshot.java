@@ -17,9 +17,9 @@ import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
 import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 
 public class Gunshot extends Entity {
-	private CircleComponent circleComponent;
-	private LifetimeComponent lifetimeComponent;
-	private PhysicsComponent physicsComponent;
+	private final CircleComponent circleComponent;
+	private final LifetimeComponent lifetimeComponent;
+	private final PhysicsComponent physicsComponent;
 
 	/**
 	 * @param pos The position in the world

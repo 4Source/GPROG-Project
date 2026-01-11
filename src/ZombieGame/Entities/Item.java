@@ -16,9 +16,9 @@ import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public abstract class Item extends Entity {
-    private VisualComponent visualComponent;
-    private PhysicsComponent physicsComponent;
-    private LivingComponent livingComponent;
+    private final VisualComponent visualComponent;
+    private final PhysicsComponent physicsComponent;
+    private final LivingComponent livingComponent;
 
     /**
      * @param <T> The type of the component to create with factory method

@@ -12,15 +12,14 @@ import ZombieGame.Systems.Physic.HitBoxType;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class Ammunition extends Item {
-	private LifetimeComponent lifetimeComponent;
+	private final LifetimeComponent lifetimeComponent;
 
 	/**
 	 * @param pos The initial position of the ammunition
 	 */
 	public Ammunition(WorldPos pos) {
-		super(pos, new RectangleHitBox(HitBoxType.Overlap, 21, 16), Color.ORANGE, e -> new StaticSpriteComponent(e));
+		super(pos, new RectangleHitBox(HitBoxType.Overlap, 21, 16), Color.ORANGE, e -> new StaticSpriteComponent(e, new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Ammo-crate_Blue.png", 1, 1, 3, 0, 0)));
 		this.lifetimeComponent = this.add(new LifetimeComponent(this, Constants.DESPAWN_COOL_DOWN));
-		this.getVisualComponent().addSprite(new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Ammo-crate_Blue.png", 1, 1, 3, 0, 0));
 	}
 
 	public LifetimeComponent getLifetimeComponent() {

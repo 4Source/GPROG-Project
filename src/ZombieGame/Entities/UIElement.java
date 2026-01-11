@@ -8,7 +8,7 @@ import ZombieGame.Components.ViewPositionComponent;
 import ZombieGame.Coordinates.ViewPos;
 
 public abstract class UIElement extends Entity {
-    private UIComponent uiComponent;
+    private final UIComponent uiComponent;
 
     /**
      * @param <U> The type of the component extending a UIComponent to create with factory method

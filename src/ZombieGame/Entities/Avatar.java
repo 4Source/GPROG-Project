@@ -25,7 +25,7 @@ import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class Avatar extends Character {
-	private GunshotComponent gunshotComponent;
+	private final GunshotComponent gunshotComponent;
 
 	/**
 	 * Spawns an avatar
