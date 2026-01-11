@@ -131,6 +131,7 @@ public final class Game {
 			// TODO: Entities which can Spawn should implement spawnable
 			// create new objects if needed
 			Game.world.UpdateEntityGeneration(secondsDiff);
+
 			Game.world.processGenerationQueue(1);
 		}
 	}
@@ -141,3 +142,5 @@ public final class Game {
 		System.out.println("Game stopped...");
 	}
 }
+
+// BUG: Zombies seem to not always get damage registered

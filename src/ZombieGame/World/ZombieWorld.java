@@ -51,7 +51,7 @@ public class ZombieWorld extends World {
 	public void UpdateEntityGeneration(double deltaTime) {
 		this.ammunitionTime += deltaTime;
 		this.zombieTime += deltaTime;
-		// this.spawnZombies();
+		this.spawnZombies();
 	}
 
 	private void spawnZombies() {

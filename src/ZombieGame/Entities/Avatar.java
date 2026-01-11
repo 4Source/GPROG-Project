@@ -131,15 +131,13 @@ public class Avatar extends Character {
 		}
 	}
 
-	// TODO: REMOVE
-	// @Override
-	// protected void onMovementCollisionStay(Collision collision) {
-	// // Nur echte Hindernisse blocken (Bäume etc.)
-	// if (collision.collisionResponse() == CollisionResponse.Block
-	// && collision.entity().getType() == EntityType.TREE) {
-	// this.getPositionComponent().moveBack();
-	// }
-	// }
+	@Override
+	protected void onMovementCollisionStay(Collision collision) {
+		// if Object is a tree, move back one step
+		if (collision.collisionResponse() == CollisionResponse.Block) {
+			this.getPositionComponent().moveBack();
+		}
+	}
 
 	@Override
 	protected void onMovementCollisionEnd(Collision collision) {

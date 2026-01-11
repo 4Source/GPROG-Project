@@ -69,12 +69,11 @@ public abstract class Character extends Entity {
     protected abstract void onMovementCollisionStart(Collision collision);
 
     /**
-     * Callback executed while a collision with another entity continues.
-     * Default is no-op; override in subclasses when needed.
+     * The Callback function which gets executed if a collision with another entity continues
+     * 
+     * @param collision The collision which started
      */
-    protected void onMovementCollisionStay(Collision collision) {
-        // default: do nothing
-    }
+    protected abstract void onMovementCollisionStay(Collision collision);
 
     /**
      * The Callback function which gets executed if a collision with another entity ends
