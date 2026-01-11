@@ -36,7 +36,7 @@ public class Avatar extends Character {
 		super(e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, new Offset(0, 20)),
 				e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 20, 30),
 						PhysicsCollisionLayer.PLAYER_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.ZOMBIE, PhysicsCollisionLayer.OBSTACLES)),
-				e -> new PlayerMovementComponent(e, start, 200),
+				e -> new PlayerMovementComponent((Avatar) e, start, 200),
 				e -> new LifeComponent(e, 10) {
 					@Override
 					public void kill() {
@@ -45,8 +45,8 @@ public class Avatar extends Character {
 						Game.world.gameOver = true;
 					}
 				});
-		// HACK: Unlimmited Ammo
-		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2, Integer.MAX_VALUE));
+				
+		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2, 20));
 
 		double animationFrameTime = 0.1;
 		double scale = 3;

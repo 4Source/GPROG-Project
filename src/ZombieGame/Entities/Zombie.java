@@ -27,6 +27,7 @@ import ZombieGame.Systems.Physic.RectangleHitBox;
 import ZombieGame.Sprites.OneShotSprite;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
+// BUG: #1 Check LifeComponent of Zombie if it uses Hearts
 public class Zombie extends Character {
 	private final ZombieType type;
 	private final ZombieAttackComponent attackComponent;
@@ -36,13 +37,11 @@ public class Zombie extends Character {
 	 * Spawns a zombie with a specific type (BIG / SMALL / AXE).
 	 */
 	public Zombie(WorldPos start, ZombieType type) {
-		super(e -> new CharacterSpriteComponent(e,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)),
+		super(e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)),
 				bodyCircleHitBoxFor(type),
 				e -> new DynamicPhysicsComponent(e, physicsRectHitBoxFor(type), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
-				e -> new AIMovementComponent(e, start, 0, movementSpeedFor(type)),
+				e -> new AIMovementComponent((Zombie) e, start, 0, movementSpeedFor(type)),
 				e -> new LifeComponent(e, maxHealthFor(type)));
-
 		this.type = type;
 
 		// Attack params depend on the type
@@ -50,7 +49,6 @@ public class Zombie extends Character {
 		long cooldownMs = attackCooldownFor(type);
 		double range = attackRangeFor(type);
 		double hitTime = attackHitTimeFor(type);
-		double duration = attackDurationFor(type);
 
 		if (type == ZombieType.AXE) {
 			this.hasAxe = true;
@@ -74,7 +72,6 @@ public class Zombie extends Character {
 					cooldownMs,
 					range,
 					hitTime,
-					duration,
 					(z, target) -> {
 						double dist = PhysicsSystem.distance(z.getPositionComponent().getWorldPos(), target.getPositionComponent().getWorldPos());
 
@@ -82,9 +79,9 @@ public class Zombie extends Character {
 						if (z.hasAxe) {
 							if (dist >= minThrowDistance && dist <= maxThrowDistance) {
 								Game.world.spawnEntity(new AxeProjectile(
+										this,
 										z.getPositionComponent().getWorldPos(),
-										target.getPositionComponent().getWorldPos(),
-										axeThrowDamageFor()));
+										target.getPositionComponent().getWorldPos()));
 								z.hasAxe = false;
 								z.replaceAxeSpritesNoAxe();
 								return;
@@ -104,7 +101,7 @@ public class Zombie extends Character {
 			// Start ranged throws when the player is in mid range.
 			this.add(new AxeThrowAIComponent(this, minThrowDistance, maxThrowDistance));
 		} else {
-			this.attackComponent = this.add(new ZombieAttackComponent(this, contactDamage, cooldownMs, range, hitTime, duration));
+			this.attackComponent = this.add(new ZombieAttackComponent(this, contactDamage, cooldownMs, range, hitTime));
 		}
 
 		addSpritesForType(type);
@@ -113,9 +110,9 @@ public class Zombie extends Character {
 	private static int maxHealthFor(ZombieType type) {
 		switch (type) {
 			case SMALL:
-				return 50; // low life
+				return 50;
 			case AXE:
-				return 70; // less than BIG
+				return 70;
 			case BIG:
 			default:
 				return 100;
@@ -125,12 +122,12 @@ public class Zombie extends Character {
 	private static int movementSpeedFor(ZombieType type) {
 		switch (type) {
 			case SMALL:
-				return 92; // faster (as requested), still below the player
+				return 92;
 			case AXE:
-				return 62; // slightly faster than BIG, still heavy
+				return 62;
 			case BIG:
 			default:
-				return 60;
+				return 50;
 		}
 	}
 
@@ -139,17 +136,17 @@ public class Zombie extends Character {
 			case SMALL:
 				return 1;
 			case AXE:
-				return 2; // more damage
+				return 1;
 			case BIG:
 			default:
-				return 1;
+				return 2;
 		}
 	}
 
 	private static long attackCooldownFor(ZombieType type) {
 		switch (type) {
 			case SMALL:
-				return 950; // small attacks slower (but moves faster)
+				return 950;
 			case AXE:
 				return 900;
 			case BIG:
@@ -158,11 +155,7 @@ public class Zombie extends Character {
 		}
 	}
 
-	private static int axeThrowDamageFor() {
-		// Avatar has 10 HP → 3 feels "scary" but not instant death.
-		return 3;
-	}
-
+	// TODO: Maybe make axes drop at some point an axe zombies will try to get to nearby axes if they do not have any
 	public boolean isAxeZombie() {
 		return this.type == ZombieType.AXE;
 	}
@@ -188,19 +181,6 @@ public class Zombie extends Character {
 			case BIG:
 			default:
 				return 65;
-		}
-	}
-
-	private static double attackDurationFor(ZombieType type) {
-		// duration = frames * 0.1
-		switch (type) {
-			case SMALL:
-				return 0.4; // 4 frames
-			case AXE:
-				return 0.7; // 7 frames
-			case BIG:
-			default:
-				return 0.8; // 8 frames
 		}
 	}
 
@@ -314,16 +294,16 @@ public class Zombie extends Character {
 		// ATTACK (One-shot) - "First Attack" sheets
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, null),
-				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, null),
-				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, null),
-				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, null),
-				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 	}
 
 	/**
@@ -373,16 +353,16 @@ public class Zombie extends Character {
 		// ATTACK
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, null),
-				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, null),
-				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, null),
-				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
 				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, null),
-				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime));
+				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 	}
 
 	@Override
@@ -393,6 +373,10 @@ public class Zombie extends Character {
 	@Override
 	public AIMovementComponent getPositionComponent() {
 		return (AIMovementComponent) super.getPositionComponent();
+	}
+
+	public ZombieAttackComponent getAttackComponent() {
+		return this.attackComponent;
 	}
 
 	@Override
@@ -438,5 +422,11 @@ public class Zombie extends Character {
 
 	@Override
 	protected void onMovementCollisionEnd(Collision collision) {
+	}
+
+	protected void onAttackEnd() {
+		this.getAttackComponent().stopAttack();
+		this.getVisualComponent().changeState(CharacterAction.IDLE);
+		this.getPositionComponent().setState(AIState.HUNTING);
 	}
 }

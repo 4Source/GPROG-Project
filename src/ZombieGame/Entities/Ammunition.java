@@ -11,6 +11,10 @@ import ZombieGame.Sprites.StaticSprite;
 import ZombieGame.Systems.Physic.HitBoxType;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
+// TODO: Make Ammunition abstract and split into different Ammunition types (Shotgun, Pistol, Rifle)
+// TODO: Make Ammunition pickup only work when matching the gun type
+// TODO: Make Ammunition drop in packs when the gun is changed
+// TODO: Add abstract class Gun extends Item and different implementations for Shotgun, Pistol, Rifle
 public class Ammunition extends Item {
 	private final LifetimeComponent lifetimeComponent;
 

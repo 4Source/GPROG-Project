@@ -10,7 +10,6 @@ import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
-import ZombieGame.Entities.Entity;
 import ZombieGame.Systems.Graphic.DrawStyle;
 import ZombieGame.Systems.Graphic.GraphicLayer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
@@ -28,7 +27,7 @@ public class PlayerMovementComponent extends MovementComponent implements Drawab
      * @param pos The position in the world
      * @param speed The speed how fast to move
      */
-    public PlayerMovementComponent(Entity entity, WorldPos pos, double speed) {
+    public PlayerMovementComponent(Avatar entity, WorldPos pos, double speed) {
         super(entity, pos, 0, speed);
     }
 

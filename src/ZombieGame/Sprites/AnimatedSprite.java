@@ -42,4 +42,9 @@ public abstract class AnimatedSprite extends Sprite {
             this.columnIndex++;
         }
     }
+
+    /**
+     * @return {@code true} if the animation is finished
+     */
+    public abstract boolean isAnimationFinished();
 }

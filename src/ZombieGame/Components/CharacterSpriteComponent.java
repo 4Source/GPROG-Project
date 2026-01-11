@@ -1,10 +1,14 @@
 package ZombieGame.Components;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterAnimationKey;
@@ -13,13 +17,14 @@ import ZombieGame.CharacterEquipment;
 import ZombieGame.CharacterPart;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Sprites.AnimatedSprite;
 import ZombieGame.Sprites.Sprite;
 import ZombieGame.Systems.Graphic.GraphicLayer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Graphic.MissingTexture;
 
 public class CharacterSpriteComponent extends SpriteComponent {
-    private EnumMap<CharacterPart, Map<CharacterAnimationKey, Sprite>> sprites;
+    private EnumMap<CharacterPart, Map<CharacterAnimationKey, AnimatedSprite>> sprites;
     private CharacterAnimationKey state;
 
     public CharacterSpriteComponent(Entity entity, CharacterAnimationKey initialState) {
@@ -130,7 +135,7 @@ public class CharacterSpriteComponent extends SpriteComponent {
     }
 
     public Optional<CharacterAnimationKey> getState(CharacterPart part) {
-        Map<CharacterAnimationKey, Sprite> s = this.sprites.get(part);
+        Map<CharacterAnimationKey, AnimatedSprite> s = this.sprites.get(part);
         if (s == null) {
             return Optional.empty();
         }
@@ -167,8 +172,34 @@ public class CharacterSpriteComponent extends SpriteComponent {
         return Optional.empty();
     }
 
-    public void addSprite(CharacterPart part, CharacterAnimationKey state, Sprite sprite) {
+    public void addSprite(CharacterPart part, CharacterAnimationKey state, AnimatedSprite sprite) {
         this.sprites.putIfAbsent(part, new HashMap<>());
         this.sprites.get(part).put(state, sprite);
+    }
+
+    /**
+     * @return A flattened variant of the sprites
+     */
+    @Override
+    public List<AnimatedSprite> getSprite() {
+        return this.sprites.values().stream().flatMap(m -> m.values().stream()).toList();
+    }
+
+    /**
+     * @return A set containing the sprite or an empty sprite if no matching sprite found
+     */
+    public Set<AnimatedSprite> getSprite(CharacterPart part, CharacterAnimationKey animationKey) {
+        Map<CharacterAnimationKey, AnimatedSprite> map = this.sprites.get(part);
+        if (map == null) {
+            return new HashSet<>();
+        }
+
+        AnimatedSprite sprite = map.get(animationKey);
+
+        if (sprite == null) {
+            return new HashSet<>();
+        }
+
+        return Collections.singleton(sprite);
     }
 }

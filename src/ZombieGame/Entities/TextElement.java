@@ -14,7 +14,7 @@ public abstract class TextElement extends UIElement {
      * @param font The font to use to print the text to the screen
      */
     public TextElement(ViewPos pos, Color color, Font font) {
-        super(pos, e -> new TextComponent(e, color, font) {
+        super(pos, e -> new TextComponent((TextElement) e, color, font) {
 
             @Override
             public String toString() {

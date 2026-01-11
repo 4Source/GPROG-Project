@@ -1,12 +1,15 @@
 package ZombieGame.Components;
 
+import java.util.Collections;
+import java.util.Set;
+
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.StaticSprite;
 import ZombieGame.Systems.Graphic.GraphicLayer;
 
 /**
- * Draws a single sprite static 
+ * Draws a single sprite static
  */
 public class StaticSpriteComponent extends SpriteComponent {
     private final StaticSprite sprite;
@@ -29,5 +32,10 @@ public class StaticSpriteComponent extends SpriteComponent {
 
     @Override
     public void update(double deltaTime) {
+    }
+
+    @Override
+    public Set<StaticSprite> getSprite() {
+        return Collections.singleton(this.sprite);
     }
 }

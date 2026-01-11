@@ -8,7 +8,6 @@ import ZombieGame.CharacterDirection;
 import ZombieGame.Game;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
-import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Zombie;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
@@ -25,7 +24,7 @@ public class AIMovementComponent extends TargetMovementComponent {
      * @param alpha The angle of rotation in radian
      * @param speed The speed how fast to move
      */
-    public AIMovementComponent(Entity entity, WorldPos pos, double alpha, double speed) {
+    public AIMovementComponent(Zombie entity, WorldPos pos, double alpha, double speed) {
         super(entity, pos, alpha, speed);
         this.state = AIState.HUNTING;
 

@@ -119,7 +119,7 @@ public class ZombieWorld extends World {
 		// Fill with random values
 		for (int y = 0; y < map.length; y++) {
 			for (int x = 0; x < map[y].length; x++) {
-				// TODO: Try getting chunks to the side to fill the current values in
+				// TODO: Getting chunks to the side to fill the current values in
 				map[y][x] = ThreadLocalRandom.current().nextDouble();
 			}
 		}

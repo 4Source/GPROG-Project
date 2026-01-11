@@ -143,4 +143,4 @@ public final class Game {
 	}
 }
 
-// BUG: Zombies seem to not always get damage registered
+// BUG: #1 Zombies seem to not always get damage registered

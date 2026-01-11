@@ -3,6 +3,7 @@ package ZombieGame.Sprites;
 import ZombieGame.Coordinates.Offset;
 
 public class LoopingSprite extends AnimatedSprite {
+
     /**
      * An animated sprite which will loop over the sprites and start from first sprite if come to the end.
      * 
@@ -37,5 +38,13 @@ public class LoopingSprite extends AnimatedSprite {
         if (this.columnIndex >= this.columnCount) {
             this.columnIndex = 0;
         }
+    }
+
+    /**
+     * @return always {@code true} because animation never finish for looping
+     */
+    @Override
+    public boolean isAnimationFinished() {
+        return true;
     }
 }

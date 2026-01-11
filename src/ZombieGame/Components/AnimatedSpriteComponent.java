@@ -1,6 +1,10 @@
 package ZombieGame.Components;
 
 import ZombieGame.Systems.Graphic.GraphicLayer;
+
+import java.util.Collections;
+import java.util.Set;
+
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.AnimatedSprite;
@@ -30,5 +34,10 @@ public class AnimatedSpriteComponent extends SpriteComponent {
     @Override
     public GraphicLayer getLayer() {
         return GraphicLayer.GAME;
+    }
+
+    @Override
+    public Set<AnimatedSprite> getSprite() {
+        return Collections.singleton(this.sprite);
     }
 }
