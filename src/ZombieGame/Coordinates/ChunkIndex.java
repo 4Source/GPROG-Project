@@ -152,10 +152,6 @@ public record ChunkIndex(int x, int y) implements Drawable {
                 style.color(Color.BLUE);
             }
 
-            DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
-            GraphicSystem.getInstance().drawString("Loaded: " + world.getLoadedChunksSize(), pos, textStyle);
-            GraphicSystem.getInstance().drawString("Generated: " + world.getGeneratedChunksSize(), pos.add(0, 25), textStyle);
-            GraphicSystem.getInstance().drawString("Queued: " + world.getGenerationQueueSize(), pos.add(0, 50), textStyle);
             GraphicSystem.getInstance().drawRect(viewPos.add((int) (Chunk.getChunkSize() / 2.0), (int) (Chunk.getChunkSize() / 2.0)), (int) Chunk.getChunkSize(), (int) Chunk.getChunkSize(), style);
         }
     }

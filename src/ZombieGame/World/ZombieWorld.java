@@ -107,8 +107,6 @@ public class ZombieWorld extends World {
 
 	@Override
 	public Chunk generateChunk(ChunkIndex index) {
-		long start = System.currentTimeMillis();
-
 		final int CHUNK_SIZE = Chunk.SIZE;
 		// radius ≤ CHUNK_SIZE / 6
 		final int BLUR_RADIUS = 1;
@@ -196,7 +194,6 @@ public class ZombieWorld extends World {
 
 		// TODO: Add zombie spawnpoints
 
-		System.out.println("Chunk generation time (ms): " + (System.currentTimeMillis() - start));
 		return new Chunk(this, index, tiles);
 	}
 }

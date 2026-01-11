@@ -1,5 +1,6 @@
 package ZombieGame.World;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,12 +20,16 @@ import ZombieGame.DataStructures.UniquePriorityQueue;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
-public abstract class World {
+public abstract class World implements Drawable {
 	// if game is over
 	public boolean gameOver = false;
+	private static boolean debugChunkGeneration = false;
+	private long lastChunkGenerationTime = -1;
 
 	private Viewport viewport = new Viewport();
 
@@ -38,8 +43,7 @@ public abstract class World {
 	private final UniquePriorityQueue<ChunkIndex> generationQueue = new UniquePriorityQueue<>(new ChunkDistanceComparator(this));
 
 	protected World() {
-		// // Ensure at least on chunk is generated + TILE_SIZE is set for queuing new chunks
-		// registerChunk(generateChunk(new ChunkIndex()));
+		GraphicSystem.getInstance().registerDrawable(this);
 	}
 
 	public final void spawnEntity(Entity entity) {
@@ -514,10 +518,13 @@ public abstract class World {
 		int minLoadY = (int) Math.floor(-(chunkCountY + Chunk.CHUNK_LOADING) / 2.0) - 1;
 		int maxLoadY = (int) Math.ceil((chunkCountY + Chunk.CHUNK_LOADING) / 2.0) + 1;
 
+		long start;
 		for (int i = 0; i < maxChunks && !generationQueue.isEmpty(); i++) {
 			ChunkIndex index = generationQueue.poll();
 			if (index != null && !generatedChunks.containsKey(index)) {
+				start = System.currentTimeMillis();
 				Chunk chunk = generateChunk(index);
+				this.lastChunkGenerationTime = (System.currentTimeMillis() - start);
 				registerChunk(chunk);
 				if (minLoadX < index.x() && index.x() <= maxLoadX && minLoadY < index.y() && index.y() <= maxLoadY) {
 					loadChunk(index);
@@ -606,4 +613,25 @@ public abstract class World {
 	 */
 	public abstract void UpdateEntityGeneration(double deltaTime);
 
+	@Override
+	public void draw() {
+		if (debugChunkGeneration) {
+			ViewPos pos = new ViewPos(20, 225);
+			DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
+			GraphicSystem.getInstance().drawString("Loaded: " + this.getLoadedChunksSize(), pos, textStyle);
+			GraphicSystem.getInstance().drawString("Generated: " + this.getGeneratedChunksSize(), pos.add(0, 25), textStyle);
+			GraphicSystem.getInstance().drawString("Queued: " + this.getGenerationQueueSize(), pos.add(0, 50), textStyle);
+			GraphicSystem.getInstance().drawString(String.format("Generation time: %d ms", this.lastChunkGenerationTime), pos.add(0, 75), textStyle);
+		}
+	}
+
+	@Override
+	public GraphicLayer getLayer() {
+		return GraphicLayer.UI;
+	}
+
+	@Override
+	public int getDepth() {
+		return 0;
+	}
 }
