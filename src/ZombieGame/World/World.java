@@ -437,7 +437,7 @@ public abstract class World {
 		// if avatar is too much right in display
 		if (!avatarPos.isInsideScrollBoundMaxX()) {
 			Offset o = new Offset(avatarPos.x(), 0);
-			o = o.sub(Viewport.getTopRight().x() - Viewport.SCROLL_BOUNDS, 0);
+			o = o.sub(Viewport.getBottomRight().x() - Viewport.SCROLL_BOUNDS, 0);
 
 			viewport.move(o);
 			updateLoadedChunks();
@@ -454,7 +454,7 @@ public abstract class World {
 		// if avatar is too much bottom in display
 		if (!avatarPos.isInsideScrollBoundMaxY()) {
 			Offset o = new Offset(0, avatarPos.y());
-			o = o.sub(0, Viewport.getTopRight().y() - Viewport.SCROLL_BOUNDS);
+			o = o.sub(0, Viewport.getBottomRight().y() - Viewport.SCROLL_BOUNDS);
 
 			viewport.move(o);
 			updateLoadedChunks();

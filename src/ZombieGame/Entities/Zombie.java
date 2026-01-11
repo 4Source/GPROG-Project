@@ -7,6 +7,7 @@ import ZombieGame.CharacterDirection;
 import ZombieGame.CharacterPart;
 import ZombieGame.EntityType;
 import ZombieGame.Game;
+import ZombieGame.ZombieType;
 import ZombieGame.Components.AIMovementComponent;
 import ZombieGame.Components.AxeThrowAIComponent;
 import ZombieGame.Components.CharacterSpriteComponent;

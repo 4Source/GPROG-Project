@@ -141,5 +141,3 @@ public final class Game {
 		System.out.println("Game stopped...");
 	}
 }
-
-// BUG: When moving to bottom/right the viewport jumps
