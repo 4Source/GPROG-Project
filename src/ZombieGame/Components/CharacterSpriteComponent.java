@@ -122,6 +122,16 @@ public class CharacterSpriteComponent extends SpriteComponent {
         this.changeState(new CharacterAnimationKey(this.state.action(), this.state.direction(), equipment));
     }
 
+    public void changeState(CharacterPart part, CharacterAnimationKey state) {
+
+        Optional<CharacterAnimationKey> existingState = getState(part);
+        if (existingState.isPresent()) {
+            CharacterAnimationKey newState = state;
+            this.sprites.get(part).put(newState, this.sprites.get(part).get(newState));
+            this.state = newState;
+        }
+    }
+
     public CharacterAction getCharacterAction() {
         return this.state.action();
     }

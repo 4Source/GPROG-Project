@@ -2,6 +2,11 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 
+import ZombieGame.Components.PlayerWeaponComponent;
+import ZombieGame.Constants;
+import ZombieGame.HitBoxType;
+import ZombieGame.RectangleHitBox;
+import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Components.GunshotComponent;
 import ZombieGame.Components.StaticSpriteComponent;
 import ZombieGame.Coordinates.WorldPos;
@@ -30,7 +35,7 @@ public class Ammunition extends Item {
 	@Override
 	public void pickUp(Entity entity) {
 		super.pickUp(entity);
-		for (GunshotComponent c : entity.getComponents(GunshotComponent.class)) {
+		for (PlayerWeaponComponent c : entity.getComponents(PlayerWeaponComponent.class)) {
 			c.restockAmmunition(20);
 		}
 	}

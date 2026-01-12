@@ -5,7 +5,15 @@ import ZombieGame.CharacterAnimationKey;
 import ZombieGame.CharacterDirection;
 import ZombieGame.CharacterEquipment;
 import ZombieGame.CharacterPart;
+import ZombieGame.CircleHitBox;
+import ZombieGame.Collision;
+import ZombieGame.CollisionResponse;
+import ZombieGame.Components.*;
 import ZombieGame.EntityType;
+import ZombieGame.HitBoxType;
+import ZombieGame.PhysicsCollisionLayer;
+import ZombieGame.PhysicsCollisionMask;
+import ZombieGame.RectangleHitBox;
 import ZombieGame.Game;
 import ZombieGame.Components.CharacterSpriteComponent;
 import ZombieGame.Components.DynamicPhysicsComponent;
@@ -25,15 +33,14 @@ import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class Avatar extends Character {
-	private final GunshotComponent gunshotComponent;
-
+	private PlayerWeaponComponent weaponComponent;
 	/**
 	 * Spawns an avatar
 	 * 
 	 * @param start The position in the world of the avatar where is should be at game start
 	 */
 	public Avatar(WorldPos start) {
-		super(e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN)), new CircleHitBox(HitBoxType.Block, 12, new Offset(0, 20)),
+		super(e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.HANDS)), new CircleHitBox(HitBoxType.Block, 12, new Offset(0, 20)),
 				e -> new DynamicPhysicsComponent(e, new RectangleHitBox(HitBoxType.Block, 20, 30),
 						PhysicsCollisionLayer.PLAYER_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.ZOMBIE, PhysicsCollisionLayer.OBSTACLES)),
 				e -> new PlayerMovementComponent((Avatar) e, start, 200),
@@ -46,7 +53,7 @@ public class Avatar extends Character {
 					}
 				});
 
-		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2, 20));
+        this.weaponComponent = this.add(new PlayerWeaponComponent(this));
 
 		double animationFrameTime = 0.1;
 		double scale = 3;
@@ -61,15 +68,34 @@ public class Avatar extends Character {
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, CharacterEquipment.HANDS), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Idle\\Hands_side-left_idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, CharacterEquipment.HANDS), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Idle\\Hands_up_idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		// Bat
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
 
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset(0, (int) (7 * scale))));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset((int) (4 * scale), (int) (3 * scale))));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset((int) (-4 * scale), (int) (3 * scale))));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset(0, (int) (-4 * scale))));
+		// Pistol
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+
+		// Gun
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
+
+		// Shotgun
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
+
 
 		// MOVE
 		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, null), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Run\\Character_down_run_no-hands-Sheet6.png", 6, 1, scale, animationFrameTime));
@@ -81,20 +107,67 @@ public class Avatar extends Character {
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, CharacterEquipment.HANDS), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Run\\Hands_side-left_run-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, CharacterEquipment.HANDS), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Run\\Hands_up_run-Sheet6.png", 6, 1, scale, animationFrameTime));
 
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
-		// this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		// Bat
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
 
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset(0, (int) (7 * scale))));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset((int) (4 * scale), (int) (3 * scale))));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset((int) (-4 * scale), (int) (3 * scale))));
 		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, new Offset(0, (int) (-4 * scale))));
+		// Pistol
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime));
+
+		// Gun
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
+
+		// Shotgun
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_down_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_side_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_side-left_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_up_idle-and-run-Sheet6.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
+
 
 		// DEATH
 		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.DEATH, null, null), new OneShotSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Death\\Character_side_death1-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.DEATH, CharacterDirection.RIGHT, null), new OneShotSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Death\\Character_side_death1-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY, new CharacterAnimationKey(CharacterAction.DEATH, CharacterDirection.LEFT, null), new OneShotSprite("assets\\PostApocalypse_AssetPack\\Character\\Main\\Death\\Character_side-left_death1-Sheet6.png", 6, 1, scale, animationFrameTime));
+
+
+		// Attack
+		// Bat
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_down_attack-Sheet4.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_side_attack-Sheet4.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_side-left_attack-Sheet4.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, CharacterEquipment.BAT), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Bat\\Bat_up_attack-Sheet4.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
+
+		// Pistol
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_down_shoot-Sheet3.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side_shoot-Sheet3.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_side-left_shoot-Sheet3.png", 6, 1, scale, animationFrameTime));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, CharacterEquipment.PISTOL), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Pistol\\Pistol_up_shoot-Sheet3.png", 6, 1, scale, animationFrameTime));
+
+		// Gun
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_side-left_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, CharacterEquipment.GUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Gun\\Gun_up_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+
+		// Shotgun
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_down_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, 0, (int) (7 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_side_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, (int) (4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_side-left_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, (int) (-4 * scale), (int) (3 * scale)));
+		this.getVisualComponent().addSprite(CharacterPart.HANDS, new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, CharacterEquipment.SHOTGUN), new LoopingSprite("assets\\PostApocalypse_AssetPack\\Character\\Guns\\Shotgun\\Shotgun_up_shoot-Sheet3.png", 6, 1, scale, animationFrameTime, 0, (int) (-4 * scale)));
+
+
 	}
 
 	@Override
@@ -107,8 +180,8 @@ public class Avatar extends Character {
 		return (PlayerMovementComponent) super.getPositionComponent();
 	}
 
-	public GunshotComponent getGunshotComponent() {
-		return this.gunshotComponent;
+	public PlayerWeaponComponent getWeaponComponent() {
+		return this.weaponComponent;
 	}
 
 	@Override

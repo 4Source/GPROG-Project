@@ -62,6 +62,8 @@ public class PlayerMovementComponent extends MovementComponent implements Debugg
 
             this.alpha = Math.atan2(dy, dx); // range: [-PI, PI]
 
+            // no direction by w,a,s,d
+            /*
             // RIGHT: include ±45°
             if (alpha >= -Math.PI / 4 && alpha <= Math.PI / 4) {
                 this.getEntity().getVisualComponent().changeState(CharacterDirection.RIGHT);
@@ -78,6 +80,8 @@ public class PlayerMovementComponent extends MovementComponent implements Debugg
             else {
                 this.getEntity().getVisualComponent().changeState(CharacterDirection.LEFT);
             }
+
+             */
 
             super.update(deltaTime);
         } else if (this.getEntity().getVisualComponent().getCharacterAction() == CharacterAction.MOVE) {
