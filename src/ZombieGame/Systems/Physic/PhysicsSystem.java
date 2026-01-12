@@ -378,7 +378,7 @@ public class PhysicsSystem implements Drawable {
 	@Override
 	public void draw() {
 		if (PhysicsSystem.enableDebug) {
-			ViewPos pos = new ViewPos(20, 300);
+			ViewPos pos = new ViewPos(20, 325);
 			int comp = this.collisionBuffer.size();
 			int coll = 0;
 			for (PhysicsComponent c : this.collisionBuffer.keySet()) {

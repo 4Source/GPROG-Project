@@ -53,6 +53,13 @@ public class LoopingSprite extends AnimatedSprite {
         this(spritePath, columnCount, rowCount, scale, frameTime, new Offset());
     }
 
+    /**
+     * Sprite with missing texture
+     */
+    public LoopingSprite() {
+        this("", 1, 1, 1, 0);
+    }
+
     @Override
     public void update(double deltaTime) {
         super.update(deltaTime);

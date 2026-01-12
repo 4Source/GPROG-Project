@@ -114,29 +114,47 @@ public class ZombieWorld extends World {
 	public Chunk generateChunk(ChunkIndex index) {
 		final int CHUNK_SIZE = Chunk.SIZE;
 		// radius ≤ CHUNK_SIZE / 6
-		final int BLUR_RADIUS = 1;
+		final int BLUR_RADIUS = 2;
 		// sigma ≈ radius × 0.7
-		final float SIGMA = 0.55f;
+		final float SIGMA = 1.2f;
 
 		int W = CHUNK_SIZE + 2 * BLUR_RADIUS;
 		double[][] map = new double[W][W];
+		Chunk currentTempChunk = new Chunk(this, index);
 
 		// Fill with random values
 		for (int y = 0; y < map.length; y++) {
+			boolean isTopChunk = y < BLUR_RADIUS;
+			boolean isBottomChunk = y >= CHUNK_SIZE + BLUR_RADIUS;
+
 			for (int x = 0; x < map[y].length; x++) {
-				// TODO: Getting chunks to the side to fill the current values in
+				boolean isLeftChunk = x < BLUR_RADIUS;
+				boolean isRightChunk = x >= CHUNK_SIZE + BLUR_RADIUS;
+
+				// Getting the tile from chunk to the side to fill the existing values in
+				if (isTopChunk || isBottomChunk || isLeftChunk || isRightChunk) {
+					TileType tileType = currentTempChunk.getTile(x - BLUR_RADIUS, y - BLUR_RADIUS).orElse(null);
+
+					if (tileType != null) {
+						map[y][x] = tileType.getValue();
+						continue;
+					}
+				}
+
 				map[y][x] = ThreadLocalRandom.current().nextDouble();
 			}
 		}
 
-		if (debugGeneration)
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, "chunk.png");
+		if (debugGeneration) {
+			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/rng/%d_%d_chunk_rng.png", index.x(), index.y()));
+		}
 
 		// Smooth the random values
 		map = GaussianBlur.blur(map, BLUR_RADIUS, SIGMA);
 
-		if (debugGeneration)
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, "chunk_blur.png");
+		if (debugGeneration) {
+			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/blur/%d_%d_chunk_blur.png", index.x(), index.y()));
+		}
 
 		// Find min and max of the blurred map
 		double min = Double.POSITIVE_INFINITY;
@@ -162,16 +180,16 @@ public class ZombieWorld extends World {
 				tiles[y][x] = TileType.select(map[y + BLUR_RADIUS][x + BLUR_RADIUS]);
 				t[y][x] = tiles[y][x].getValue();
 
-				// System.out.print(tiles[y][x].toString().charAt(0));
 			}
-			// System.out.println();
 		}
 
-		if (debugGeneration)
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, "chunk_normalized.png");
+		if (debugGeneration) {
+			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/normalized/%d_%d_chunk_normalized.png", index.x(), index.y()));
+		}
 
-		if (debugGeneration)
-			GraphicSystem.getInstance().saveAsGreyScaleImage(t, t.length, t[0].length, "chunk_tiles.png");
+		if (debugGeneration) {
+			GraphicSystem.getInstance().saveAsGreyScaleImage(t, t.length, t[0].length, String.format("ChunkGeneration/tiles/%d_%d_chunk_tiles.png", index.x(), index.y()));
+		}
 
 		// Generate tree in chunk
 		this.generateEntity(index, 2.5, pos -> new Tree(pos));

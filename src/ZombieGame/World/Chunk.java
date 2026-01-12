@@ -12,7 +12,7 @@ import ZombieGame.Systems.Graphic.GraphicLayer;
 
 public class Chunk implements Drawable {
     public static double TILE_SIZE = 0;
-    public static final int SIZE = 8;
+    public static final int SIZE = 16;
     /**
      * Additional chunks around the visible viewport to load
      */
@@ -45,6 +45,21 @@ public class Chunk implements Drawable {
             }
         }
         this.sprites = sprites;
+    }
+
+    
+
+    public Chunk(World world, ChunkIndex index) {
+        this.world = world;
+        this.index = index;
+
+        this.tiles = new TileType[SIZE][SIZE];
+        this.sprites = new StaticSprite[SIZE][SIZE];
+        for (int y = 0; y < SIZE; y++) {
+            for (int x = 0; x < SIZE; x++) {
+                this.sprites[y][x] = new StaticSprite();
+            }
+        }
     }
 
     @Override
@@ -125,183 +140,116 @@ public class Chunk implements Drawable {
         return this.world.getChunk(this.index.atTopLeft());
     }
 
-    private Optional<TileType> getTileToTop(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToTop(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX;
-        int y = currentY - 1;
-        if (y < 0) {
-            y = this.tilesCountY();
-            Optional<Chunk> chunk = this.getChunkToTop();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToTop(x, y);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(this.tiles[y][x]);
+        return getTile(currentX, currentY - 1);
     }
 
-    private Optional<TileType> getTileToTopRight(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToTopRight(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX + 1;
-        int y = currentY - 1;
-        if (y < 0 || x >= this.tilesCountX()) {
-            if (y < 0) {
-                y = this.tilesCountY();
-            }
-            if (x >= this.tilesCountX()) {
-                x = -1;
-            }
-            Optional<Chunk> chunk = this.getChunkToTopRight();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToTopRight(x, y);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(this.tiles[y][x]);
+        return getTile(currentX + 1, currentY - 1);
     }
 
-    private Optional<TileType> getTileToRight(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToRight(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX + 1;
-        int y = currentY;
-        if (x >= this.tilesCountX()) {
-            x = -1;
-            Optional<Chunk> chunk = this.getChunkToRight();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToRight(x, y);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(this.tiles[y][x]);
+        return getTile(currentX + 1, currentY);
     }
 
-    private Optional<TileType> getTileToBottomRight(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToBottomRight(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX + 1;
-        int y = currentY + 1;
-        if (y >= this.tilesCountY() || x >= this.tilesCountX()) {
-            if (y >= this.tilesCountY()) {
-                y = -1;
-            }
-            if (x >= this.tilesCountX()) {
-                x = -1;
-            }
-            Optional<Chunk> chunk = this.getChunkToBottomRight();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToBottomRight(x, y);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(this.tiles[y][x]);
+        return getTile(currentX + 1, currentY + 1);
     }
 
-    private Optional<TileType> getTileToBottom(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToBottom(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX;
-        int y = currentY + 1;
-        if (y >= this.tilesCountY()) {
-            y = -1;
-            Optional<Chunk> chunk = this.getChunkToBottom();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToBottom(x, y);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(this.tiles[y][x]);
+        return getTile(currentX, currentY + 1);
     }
 
-    private Optional<TileType> getTileToBottomLeft(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToBottomLeft(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX - 1;
-        int y = currentY + 1;
-        if (y >= this.tilesCountY() || x < 0) {
-            if (y >= this.tilesCountY()) {
-                y = -1;
-            }
-            if (x < 0) {
-                x = this.tilesCountX();
-            }
-            Optional<Chunk> chunk = this.getChunkToBottomLeft();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToBottomLeft(x, y);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(this.tiles[y][x]);
+        return getTile(currentX - 1, currentY + 1);
     }
 
-    private Optional<TileType> getTileToLeft(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToLeft(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX - 1;
-        int y = currentY;
-        if (x < 0) {
-            x = this.tilesCountX();
-            Optional<Chunk> chunk = this.getChunkToLeft();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToLeft(x, y);
-            } else {
-                return Optional.empty();
-            }
-        }
-
-        return Optional.of(this.tiles[y][x]);
+        return getTile(currentX - 1, currentY);
     }
 
-    private Optional<TileType> getTileToTopLeft(int currentX, int currentY) {
-        if (currentY + 1 < 0 || currentY - 1 >= this.tilesCountY() || currentX + 1 < 0 || currentX - 1 >= this.tilesCountX()) {
+    public Optional<TileType> getTileToTopLeft(int currentX, int currentY) {
+        if (currentX < 0 || currentX >= this.tilesCountX() || currentY < 0 || currentY >= this.tilesCountY()) {
             throw new InvalidParameterException("Current tile of chunk is not inside boundaries");
         }
 
-        int x = currentX - 1;
-        int y = currentY - 1;
-        if (y < 0 || x < 0) {
-            if (y < 0) {
-                y = this.tilesCountY();
-            }
-            if (x < 0) {
-                x = this.tilesCountX();
-            }
-            Optional<Chunk> chunk = this.getChunkToTopLeft();
-            if (chunk.isPresent()) {
-                return chunk.get().getTileToTopLeft(x, y);
-            } else {
-                return Optional.empty();
-            }
+        return getTile(currentX - 1, currentY - 1);
+    }
+
+    public Optional<TileType> getTile(int indexX, int indexY) {
+        boolean isTopChunk = indexY < 0;
+        boolean isBottomChunk = indexY >= this.tilesCountY();
+        boolean isLeftChunk = indexX < 0;
+        boolean isRightChunk = indexX >= this.tilesCountX();
+
+        int x = indexX;
+        int y = indexY;
+
+        // Update positions to new chunk when not in this chunk
+        if (isTopChunk) {
+            y = this.tilesCountY() - 1;
+        } else if (isBottomChunk) {
+            y = 0;
+        }
+        if (isLeftChunk) {
+            x = this.tilesCountX() - 1;
+        } else if (isRightChunk) {
+            x = 0;
         }
 
-        return Optional.of(this.tiles[y][x]);
+        // Select the chunk where the tile is in
+        Chunk chunk = this;
+        if (isTopChunk && isLeftChunk) {
+            chunk = this.getChunkToTopLeft().orElse(null);
+        } else if (isTopChunk && isRightChunk) {
+            chunk = this.getChunkToTopRight().orElse(null);
+        } else if (isBottomChunk && isLeftChunk) {
+            chunk = this.getChunkToBottomLeft().orElse(null);
+        } else if (isBottomChunk && isRightChunk) {
+            chunk = this.getChunkToBottomRight().orElse(null);
+        } else if (isTopChunk) {
+            chunk = this.getChunkToTop().orElse(null);
+        } else if (isBottomChunk) {
+            chunk = this.getChunkToBottom().orElse(null);
+        } else if (isLeftChunk) {
+            chunk = this.getChunkToLeft().orElse(null);
+        } else if (isRightChunk) {
+            chunk = this.getChunkToRight().orElse(null);
+        }
+
+        // Chunk not found
+        if (chunk == null) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(chunk.tiles[y][x]);
     }
 }

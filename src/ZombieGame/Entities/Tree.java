@@ -13,7 +13,6 @@ public class Tree extends Obstacle {
 	 * @param pos The position of the tree
 	 */
 	public Tree(WorldPos pos) {
-		// this.circleComponent = this.add(new CircleComponent(this, radius, color));
 		super(pos, new CircleHitBox(HitBoxType.Block, 18, new Offset(0, 30)), e -> new StaticSpriteComponent(e, new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Nature\\Dark-Green\\Tree_3_Normal_Dark-Green.png", 1, 1, 3, 0, 0)));
 	}
 

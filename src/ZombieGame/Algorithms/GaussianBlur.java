@@ -23,32 +23,32 @@ public class GaussianBlur {
     }
 
     private static double[][] convolveHorizontal(double[][] src, int width, int height, double[] kernel, int radius) {
-        double[][] dst = new double[width][height];
+        double[][] dst = new double[height][width];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 double sum = 0;
                 for (int i = -radius; i <= radius; i++) {
                     int xi = Math.max(0, Math.min(x + i, width - 1));
-                    sum += src[xi][y] * kernel[i + radius];
+                    sum += src[y][xi] * kernel[i + radius];
                 }
-                dst[x][y] = sum;
+                dst[y][x] = sum;
             }
         }
         return dst;
     }
 
     private static double[][] convolveVertical(double[][] src, int width, int height, double[] kernel, int radius) {
-        double[][] dst = new double[width][height];
+        double[][] dst = new double[height][width];
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 double sum = 0;
                 for (int i = -radius; i <= radius; i++) {
                     int yi = Math.max(0, Math.min(y + i, height - 1));
-                    sum += src[x][yi] * kernel[i + radius];
+                    sum += src[yi][x] * kernel[i + radius];
                 }
-                dst[x][y] = sum;
+                dst[y][x] = sum;
             }
         }
         return dst;

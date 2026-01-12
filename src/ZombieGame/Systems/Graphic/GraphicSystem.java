@@ -314,20 +314,28 @@ public class GraphicSystem extends JPanel {
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);
     }
 
-    public void saveAsGreyScaleImage(double[][] map, int w, int h, String file) {
+    public void saveAsGreyScaleImage(double[][] map, int w, int h, String filePath) {
         try {
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
             for (int y = 0; y < h; y++) {
                 for (int x = 0; x < w; x++) {
-                    double v = map[x][y]; // 0..1
+                    double v = map[y][x]; // 0..1
                     int g = (int) (v * 255.0); // 0..255
                     int rgb = (g << 16) | (g << 8) | g; // grayscale
                     img.setRGB(x, y, rgb);
                 }
             }
 
-            ImageIO.write(img, "png", new File(file));
+            File file = new File(filePath);
+            // Ensure parent directories exist
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            // Save image at path
+            ImageIO.write(img, "png", file);
         } catch (Exception e) {
             System.err.println("Failed saving grey scale image with: " + e.getMessage());
         }

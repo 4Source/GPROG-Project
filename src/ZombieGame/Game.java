@@ -145,6 +145,11 @@ public final class Game {
 
 // BUG: #1 Zombies seem to not always get damage registered
 
-// BUG: #2 It could happen that the chunk generation generates an obstacle at the player spawn position in this case the player will be unable to move. The position the player is passed for creation should be tested with physics system for collision and than find closest not collision
-
 // BUG: #3 After 2 time hit by a zombie the zombie freezes
+
+// BUG: #4 BABY Zombies can bug into player
+
+// BUG: #5 Entities outside of loaded chunks are rendered/collision test
+// TODO: Debug information for registered entites  
+// TODO: Debug information for loaded entites  
+// TODO: Debug information for rendered entites  
