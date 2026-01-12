@@ -174,7 +174,7 @@ public class PhysicsSystem implements Drawable {
 	}
 
 	/**
-	 * Checks for collisions of the entity
+	 * Get collisions of the entity with another registered entity.
 	 * 
 	 * @param entity The entity for which the collisions should be checked
 	 * @return A list of {@link Collision collisions} the entities has collisions with
@@ -190,7 +190,7 @@ public class PhysicsSystem implements Drawable {
 	}
 
 	/**
-	 * Checks for collisions of the component
+	 * Get collisions of the component with another registered physics component.
 	 * 
 	 * @param component The component for which the collisions should be checked
 	 * @return A list of {@link Collision collisions} the component has collisions with
@@ -220,10 +220,10 @@ public class PhysicsSystem implements Drawable {
 	}
 
 	/**
-	 * Check if entity has a collision with another entity. Returns early if collision found.
+	 * Check if entity has a collision with another registered entity. Returns early if collision found.
 	 * 
-	 * @param entity The entity to check if it has collision
-	 * @return True when the first collision was found
+	 * @param entity The entity for which the collisions should be checked
+	 * @return {@code true} when the first collision was found
 	 */
 	public boolean hasCollision(Entity entity) {
 		AtomicBoolean result = new AtomicBoolean(false);
@@ -238,10 +238,10 @@ public class PhysicsSystem implements Drawable {
 	}
 
 	/**
-	 * Check if entity has a collision with another entity. Returns early if collision found.
+	 * Check if component has a collision with another registered physics component. Returns early if collision found.
 	 * 
 	 * @param component The component for which the collisions should be checked
-	 * @return True when the first collision was found
+	 * @return {@code true} when the first collision was found
 	 */
 	public boolean hasCollision(PhysicsComponent component) {
 		AtomicBoolean result = new AtomicBoolean(false);
@@ -269,18 +269,20 @@ public class PhysicsSystem implements Drawable {
 	}
 
 	/**
-	 * Check for an entity which is not registered in the physics system if it has a collision with another entity. Returns early if collision found.
-	 * This is useful to test placement of new entities in world.
+	 * Check if entity has a collision with the other entity. Returns early if collision found.
 	 * 
-	 * @param entity The entity to check if it has collision
-	 * @return True when the first collision was found
+	 * @param entity The entity for which the collisions should be checked
+	 * @param otherEntity The entity against which collisions should be checked
+	 * @return {@code true} when the first collision was found
 	 */
-	public boolean testCollision(Entity entity) {
+	public static boolean hasCollisionWith(Entity entity, Entity otherEntity) {
 		AtomicBoolean result = new AtomicBoolean(false);
 
 		for (PhysicsComponent component : entity.getComponents(PhysicsComponent.class)) {
-			if (testCollision(component)) {
-				result.set(true);
+			for (PhysicsComponent otherComponent : otherEntity.getComponents(PhysicsComponent.class)) {
+				if (hasCollisionWith(component, otherComponent)) {
+					result.set(true);
+				}
 			}
 		}
 
@@ -288,11 +290,54 @@ public class PhysicsSystem implements Drawable {
 	}
 
 	/**
+	 * Check if component has a collision with the other physics component. Returns early if collision found.
+	 * 
+	 * @param component The component for which the collisions should be checked
+	 * @param otherComponent The component against which collisions should be checked
+	 * @return {@code true} when the first collision was found
+	 */
+	public static boolean hasCollisionWith(PhysicsComponent component, PhysicsComponent otherComponent) {
+		AtomicBoolean result = new AtomicBoolean(false);
+
+		if (otherComponent == component) {
+			System.err.println("Tried to check collision with it self");
+			return false;
+		}
+
+		CollisionResponse response = component.checkCollision(otherComponent);
+		if (response != CollisionResponse.None) {
+			result.set(true);
+		}
+
+		return result.get();
+
+	}
+
+	/**
+	 * Check for an entity which is not registered in the physics system if it has a collision with another entity. Returns early if collision found.
+	 * This is useful to test placement of new entities in world.
+	 * 
+	 * @param entity The entity for which the collisions should be checked
+	 * @return {@code true} when the first collision was found
+	 */
+	public boolean testCollision(Entity entity) {
+		boolean result = false;
+
+		for (PhysicsComponent component : entity.getComponents(PhysicsComponent.class)) {
+			if (testCollision(component)) {
+				result = true;
+			}
+		}
+
+		return result;
+	}
+
+	/**
 	 * Check for an entity which is not registered in the physics system if it has a collision with another entity. Returns early if collision found.
 	 * This is useful to test placement of new entities in world.
 	 * 
 	 * @param component The component for which the collisions should be checked
-	 * @return True when the first collision was found
+	 * @return {@code true} when the first collision was found
 	 */
 	public boolean testCollision(PhysicsComponent component) {
 		AtomicBoolean result = new AtomicBoolean(false);
@@ -323,6 +368,7 @@ public class PhysicsSystem implements Drawable {
 			CollisionResponse response = component.checkCollision(otherComponent);
 			if (response != CollisionResponse.None) {
 				result.set(true);
+				return;
 			}
 		});
 
@@ -333,10 +379,10 @@ public class PhysicsSystem implements Drawable {
 	public void draw() {
 		if (PhysicsSystem.enableDebug) {
 			ViewPos pos = new ViewPos(20, 300);
-			int comp = PhysicsSystem.getInstance().collisionBuffer.size();
+			int comp = this.collisionBuffer.size();
 			int coll = 0;
-			for (PhysicsComponent c : PhysicsSystem.getInstance().collisionBuffer.keySet()) {
-				coll += PhysicsSystem.getInstance().getCollisions(c).size();
+			for (PhysicsComponent c : this.collisionBuffer.keySet()) {
+				coll += this.getCollisions(c).size();
 			}
 
 			DrawStyle textStyle = new DrawStyle().color(Color.WHITE);

@@ -148,6 +148,10 @@ public record ChunkLocalPos(double x, double y) {
         return new ChunkLocalPos(Math.abs(this.x), Math.abs(this.y));
     }
 
+    public double length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
     public boolean isInsideChunk() {
         return x >= 0 && x < Chunk.SIZE && y >= 0 && y < Chunk.SIZE;
     }

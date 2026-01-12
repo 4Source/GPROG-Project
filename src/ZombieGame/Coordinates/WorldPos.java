@@ -148,6 +148,10 @@ public record WorldPos(double x, double y) {
         return new WorldPos(Math.abs(this.x), Math.abs(this.y));
     }
 
+    public double length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
     /**
      * @return The chunk index containing this world position.
      */

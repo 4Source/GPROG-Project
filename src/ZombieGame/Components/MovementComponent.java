@@ -39,30 +39,35 @@ public abstract class MovementComponent extends WorldPositionComponent {
         this.setWorldPos(this.getWorldPos().add(Math.cos(this.alpha) * this.speed * deltaTime, Math.sin(this.alpha) * this.speed * deltaTime));
     }
 
-    // TODO: There is possible a better way
     /**
-     * Move back to the position before the move Method was called
-     */
-    public void moveBack() {
-        this.setWorldPos(this.old);
-    }
-
-    /**
-     * Move object "back" reverse alpha until it just does not collide
+     * Move back to a position between current position and old position where not colliding with the other entity
      * 
-     * @param entity The object to move
+     * @param otherEntity The object with which the collision occurred
      */
-    // public void moveBack() {
-    // double dx = Math.cos(this.alpha);
-    // double dy = Math.sin(this.alpha);
+    public void resolveCollision(Entity otherEntity) {
+        double lo = 0.0;
+        double hi = 1.0;
 
-    // while (true) {
-    // entity.posX -= dx;
-    // entity.posY -= dy;
+        for (int i = 0; i < 10; i++) {
+            double mid = (lo + hi) * 0.5;
 
-    // if (!PhysicsSystem.getInstance().hasCollision(entity)) {
-    // break;
-    // }
-    // }
-    // }
+            WorldPos newPos = this.old.add(this.pos.sub(this.old).mul(mid));
+            this.setWorldPos(newPos);
+
+            if (PhysicsSystem.hasCollisionWith(this.getEntity(), otherEntity)) {
+                // Still colliding -> go backwards
+                hi = mid;
+            } else {
+                // Not colliding -> go forwards
+                lo = mid;
+
+                // Exit early because of minimal change only when not colliding to prevent creeping-into-collision problem
+                if (hi - lo < 0.0001) {
+                    break;
+                }
+            }
+        }
+
+        this.old = this.pos;
+    }
 }
