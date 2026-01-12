@@ -3,9 +3,12 @@ package ZombieGame.Systems.Graphic;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 import ZombieGame.Constants;
@@ -309,5 +312,24 @@ public class GraphicSystem extends JPanel {
         }
 
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);
+    }
+
+    public void saveAsGreyScaleImage(double[][] map, int w, int h, String file) {
+        try {
+            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    double v = map[x][y]; // 0..1
+                    int g = (int) (v * 255.0); // 0..255
+                    int rgb = (g << 16) | (g << 8) | g; // grayscale
+                    img.setRGB(x, y, rgb);
+                }
+            }
+
+            ImageIO.write(img, "png", new File(file));
+        } catch (Exception e) {
+            System.err.println("Failed saving grey scale image with: " + e.getMessage());
+        }
     }
 }

@@ -37,6 +37,34 @@ public final class Viewport {
     }
 
     /**
+     * @return The center of the screen in view-space coordinates.
+     */
+    public static ViewPos getTopCenter() {
+        return new ViewPos(Viewport.screenWidth / 2, 0);
+    }
+
+    /**
+     * @return The center of the screen in view-space coordinates.
+     */
+    public static ViewPos getBottomCenter() {
+        return new ViewPos(Viewport.screenWidth / 2, Viewport.screenHeight);
+    }
+
+    /**
+     * @return The center of the screen in view-space coordinates.
+     */
+    public static ViewPos getCenterLeft() {
+        return new ViewPos(0, Viewport.screenHeight / 2);
+    }
+
+    /**
+     * @return The center of the screen in view-space coordinates.
+     */
+    public static ViewPos getCenterRight() {
+        return new ViewPos(Viewport.screenWidth, Viewport.screenHeight / 2);
+    }
+
+    /**
      * @return The top-left corner of the screen in view-space coordinates.
      */
     public static ViewPos getTopLeft() {

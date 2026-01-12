@@ -5,17 +5,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 import ZombieGame.Viewport;
+import ZombieGame.Algorithms.PoissonSampling;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Components.Component;
 import ZombieGame.Components.PhysicsComponent;
 import ZombieGame.Coordinates.ChunkIndex;
+import ZombieGame.Coordinates.ChunkLocalPos;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.DataStructures.UniquePriorityQueue;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
@@ -30,6 +37,7 @@ public abstract class World implements Drawable {
 	public boolean gameOver = false;
 	private static boolean debugChunkGeneration = false;
 	private long lastChunkGenerationTime = -1;
+	private double worldTimeSeconds = 0;
 
 	private Viewport viewport = new Viewport();
 
@@ -48,10 +56,12 @@ public abstract class World implements Drawable {
 
 	public final void spawnEntity(Entity entity) {
 		pendingAdditions.add(entity);
+		this.registerEntityComponents(entity);
 	}
 
 	public final void despawnEntity(Entity entity) {
 		pendingRemovals.add(entity);
+		this.unregisterEntityComponents(entity);
 	}
 
 	/**
@@ -71,6 +81,11 @@ public abstract class World implements Drawable {
 			removeEntity(e);
 		}
 		pendingRemovals.clear();
+		this.worldTimeSeconds += deltaTime;
+	}
+
+	public final double getWorldTimeSeconds() {
+		return this.worldTimeSeconds;
 	}
 
 	private final void registerEntityComponents(Entity entity) {
@@ -95,7 +110,6 @@ public abstract class World implements Drawable {
 	 */
 	private final void addEntity(Entity entity) {
 		this.entities.add(entity);
-		this.registerEntityComponents(entity);
 	}
 
 	private final void unregisterEntityComponents(Entity entity) {
@@ -120,7 +134,6 @@ public abstract class World implements Drawable {
 	 */
 	private final void removeEntity(Entity entity) {
 		this.entities.remove(entity);
-		this.unregisterEntityComponents(entity);
 	}
 
 	/**
@@ -209,6 +222,27 @@ public abstract class World implements Drawable {
 	 */
 	public final <T extends Entity> Optional<T> getEntity(Class<T> type) {
 		for (Entity e : this.entities) {
+			if (type.isInstance(e)) {
+				return Optional.of(type.cast(e));
+			}
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#getUIElement(Class)}
+	 * 
+	 * @param <T> A Class which extends the Entity Class
+	 * @param type The type of Entity which should be returned
+	 */
+	public final <T extends Entity> Optional<T> getEntityOrPending(Class<T> type) {
+		for (Entity e : this.entities) {
+			if (type.isInstance(e)) {
+				return Optional.of(type.cast(e));
+			}
+		}
+		for (Entity e : this.pendingAdditions) {
 			if (type.isInstance(e)) {
 				return Optional.of(type.cast(e));
 			}
@@ -479,6 +513,68 @@ public abstract class World implements Drawable {
 
 	public abstract Chunk generateChunk(ChunkIndex index);
 
+	/**
+	 * Generates number of entities based on the size of the chunks and density
+	 * 
+	 * @param <T> A Type of Entity
+	 * @param index The index of the chunk where the entities should be spawned
+	 * @param density The density determines how many entities should be spawned in average for a chunk size of 8 scales with chunk size
+	 * @param createCallback A callback to create a instance of the entity. Return the entity to spawn or {@code null} if the current spawn should be abort
+	 * @return The amount of generated entities
+	 */
+	protected final <T extends Entity> int generateEntity(ChunkIndex index, double density, Function<WorldPos, T> createCallback) {
+		double lambda = Chunk.SIZE / 8 * density;
+
+		String className = "Unknown";
+
+		int spawnCount = PoissonSampling.sample(lambda);
+
+		// Retry for 1/4 of the requested entity count but at least once, prevents infinity loops
+		int retry = Math.max(1, spawnCount / 4);
+		int amount = 0;
+
+		for (int i = 0; i < spawnCount; i++) {
+			ChunkLocalPos pos = new ChunkLocalPos(ThreadLocalRandom.current().nextDouble() * Chunk.getChunkSize(), ThreadLocalRandom.current().nextDouble() * Chunk.getChunkSize());
+
+			T entity = createCallback.apply(pos.toWorldPos(index));
+
+			// Spawn canceled by caller
+			if (entity == null) {
+				continue;
+			}
+
+			// Retrieve class name for logging
+			if (className == "Unknown") {
+				className = entity.getClass().getName();
+			}
+
+			// if collisions occur, cancel
+			if (PhysicsSystem.getInstance().testCollision(entity)) {
+				i--;
+				retry--;
+				if (retry > 0) {
+					continue;
+				} else {
+					break;
+				}
+			}
+
+			this.spawnEntity(entity);
+			amount++;
+		}
+
+		// Retrieve class name for logging
+		if (className == "Unknown") {
+			T entity = createCallback.apply(new WorldPos());
+			if (entity != null) {
+				className = entity.getClass().getName();
+			}
+		}
+
+		System.out.println(String.format("Generate %s with density %f (%d/%d) in chunk %s", className, density, amount, spawnCount, index.toString()));
+		return amount;
+	}
+
 	public final Optional<Chunk> getChunk(ChunkIndex coord) {
 		return Optional.ofNullable(this.generatedChunks.get(coord));
 	}
@@ -487,12 +583,30 @@ public abstract class World implements Drawable {
 		return this.generatedChunks.containsKey(index);
 	}
 
+	public final Set<ChunkIndex> getGeneratedChunks() {
+		return this.generatedChunks.keySet();
+	}
+
 	public final boolean isChunkLoaded(ChunkIndex index) {
 		return this.loadedChunks.getOrDefault(index, false);
 	}
 
+	public final Set<ChunkIndex> getLoadedChunks() {
+		return this.loadedChunks.keySet();
+	}
+
 	public final boolean isChunkQueuedForGeneration(ChunkIndex index) {
 		return this.generationQueue.contains(index);
+	}
+
+	public final Set<ChunkIndex> getGenerationQueue() {
+		ChunkIndex[] t = new ChunkIndex[1];
+		ChunkIndex[] q = this.generationQueue.toArray(t);
+		HashSet<ChunkIndex> res = new HashSet<>();
+		for (ChunkIndex i : q) {
+			res.add(i);
+		}
+		return res;
 	}
 
 	/**
