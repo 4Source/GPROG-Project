@@ -1,6 +1,5 @@
 package ZombieGame.World;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +14,8 @@ import java.util.function.Function;
 
 import ZombieGame.Viewport;
 import ZombieGame.Algorithms.PoissonSampling;
+import ZombieGame.Capabilities.DebuggableGeometry;
+import ZombieGame.Capabilities.DebuggableText;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Components.Component;
 import ZombieGame.Components.PhysicsComponent;
@@ -27,15 +28,15 @@ import ZombieGame.DataStructures.UniquePriorityQueue;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
-import ZombieGame.Systems.Graphic.DrawStyle;
-import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
+import ZombieGame.Systems.Debug.DebugSystem;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
-public abstract class World implements Drawable {
+public abstract class World implements DebuggableText {
 	// if game is over
 	public boolean gameOver = false;
-	private static boolean debugChunkGeneration = false;
 	private long lastChunkGenerationTime = -1;
 	private double worldTimeSeconds = 0;
 
@@ -51,7 +52,9 @@ public abstract class World implements Drawable {
 	private final UniquePriorityQueue<ChunkIndex> generationQueue = new UniquePriorityQueue<>(new ChunkDistanceComparator(this));
 
 	protected World() {
-		GraphicSystem.getInstance().registerDrawable(this);
+		if (!DebugSystem.getInstance().registerDebuggable(this)) {
+			System.err.println("Failed to register World to debug system");
+		}
 	}
 
 	public final void spawnEntity(Entity entity) {
@@ -88,11 +91,6 @@ public abstract class World implements Drawable {
 		return this.worldTimeSeconds;
 	}
 
-	private final void registerEntityComponents(Entity entity) {
-		entity.getComponents(PhysicsComponent.class).forEach(c -> PhysicsSystem.getInstance().registerComponent(c));
-		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().registerDrawable(c));
-	}
-
 	/**
 	 * Add an entity to the world.
 	 * <p>
@@ -102,6 +100,8 @@ public abstract class World implements Drawable {
 	 * <ul>
 	 * <li>PhysicsComponent → PhysicsSystem</li>
 	 * <li>Drawable → GraphicSystem</li>
+	 * <li>DebuggableGeometry → DebugSystem</li>
+	 * <li>DebuggableText → DebugSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -110,11 +110,6 @@ public abstract class World implements Drawable {
 	 */
 	private final void addEntity(Entity entity) {
 		this.entities.add(entity);
-	}
-
-	private final void unregisterEntityComponents(Entity entity) {
-		entity.getComponents(PhysicsComponent.class).forEach(c -> PhysicsSystem.getInstance().unregisterComponent(c));
-		entity.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().unregisterDrawable(c));
 	}
 
 	/**
@@ -126,6 +121,8 @@ public abstract class World implements Drawable {
 	 * <ul>
 	 * <li>PhysicsComponent → PhysicsSystem</li>
 	 * <li>Drawable → GraphicSystem</li>
+	 * <li>DebuggableGeometry → DebugSystem</li>
+	 * <li>DebuggableText → DebugSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -136,24 +133,50 @@ public abstract class World implements Drawable {
 		this.entities.remove(entity);
 	}
 
-	/**
-	 * Remove an entity from the world.
-	 * <p>
-	 * For {@link UIElement UIElements} use {@link World#removeUIElement(int)}
-	 * <ul>
-	 * <li><b>Unregister components of entity from systems:</b>
-	 * <ul>
-	 * <li>PhysicsComponent → PhysicsSystem</li>
-	 * <li>Drawable → GraphicSystem</li>
-	 * </ul>
-	 * </li>
-	 * </ul>
-	 * 
-	 * @param index The index of the entity which should be removed from the world
-	 */
-	private final void removeEntity(int index) {
-		Entity entity = this.getEntity(index);
-		this.removeEntity(entity);
+	private final void registerEntityComponents(Entity entity) {
+		entity.getComponents(PhysicsComponent.class).forEach(c -> {
+			if (!PhysicsSystem.getInstance().registerComponent(c)) {
+				System.err.println(String.format("Failed to register %s to physics system", entity.toString()));
+			}
+		});
+		entity.getComponentsByCapability(Drawable.class).forEach(c -> {
+			if (!GraphicSystem.getInstance().registerDrawable(c)) {
+				System.err.println(String.format("Failed to register %s to graphics system", entity.toString()));
+			}
+		});
+		entity.getComponentsByCapability(DebuggableGeometry.class).forEach(c -> {
+			if (!DebugSystem.getInstance().registerDebuggable(c)) {
+				System.err.println(String.format("Failed to register %s to debug system", entity.toString()));
+			}
+		});
+		entity.getComponentsByCapability(DebuggableText.class).forEach(c -> {
+			if (!DebugSystem.getInstance().registerDebuggable(c)) {
+				System.err.println(String.format("Failed to register %s to debug system", entity.toString()));
+			}
+		});
+	}
+
+	private final void unregisterEntityComponents(Entity entity) {
+		entity.getComponents(PhysicsComponent.class).forEach(c -> {
+			if (!PhysicsSystem.getInstance().unregisterComponent(c)) {
+				System.err.println(String.format("Failed to unregister %s from physics system", entity.toString()));
+			}
+		});
+		entity.getComponentsByCapability(Drawable.class).forEach(c -> {
+			if (!GraphicSystem.getInstance().unregisterDrawable(c)) {
+				System.err.println(String.format("Failed to unregister %s from graphics system", entity.toString()));
+			}
+		});
+		entity.getComponentsByCapability(DebuggableGeometry.class).forEach(c -> {
+			if (!DebugSystem.getInstance().unregisterDebuggable(c)) {
+				System.err.println(String.format("Failed to unregister %s from debug system", entity.toString()));
+			}
+		});
+		entity.getComponentsByCapability(DebuggableText.class).forEach(c -> {
+			if (!DebugSystem.getInstance().unregisterDebuggable(c)) {
+				System.err.println(String.format("Failed to unregister %s from debug system", entity.toString()));
+			}
+		});
 	}
 
 	/**
@@ -287,7 +310,39 @@ public abstract class World implements Drawable {
 	}
 
 	private final void registerUIElementComponents(UIElement uiElement) {
-		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().registerDrawable(c));
+		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> {
+			if (!GraphicSystem.getInstance().registerDrawable(c)) {
+				System.err.println(String.format("Failed to register %s to graphics system", uiElement.toString()));
+			}
+		});
+		uiElement.getComponentsByCapability(DebuggableGeometry.class).forEach(c -> {
+			if (!DebugSystem.getInstance().registerDebuggable(c)) {
+				System.err.println(String.format("Failed to register %s to debug system", uiElement.toString()));
+			}
+		});
+		uiElement.getComponentsByCapability(DebuggableText.class).forEach(c -> {
+			if (!DebugSystem.getInstance().registerDebuggable(c)) {
+				System.err.println(String.format("Failed to register %s to debug system", uiElement.toString()));
+			}
+		});
+	}
+
+	private final void unregisterUIElementComponents(UIElement uiElement) {
+		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> {
+			if (!GraphicSystem.getInstance().unregisterDrawable(c)) {
+				System.err.println(String.format("Failed to unregister %s from graphics system", uiElement.toString()));
+			}
+		});
+		uiElement.getComponentsByCapability(DebuggableGeometry.class).forEach(c -> {
+			if (!DebugSystem.getInstance().unregisterDebuggable(c)) {
+				System.err.println(String.format("Failed to unregister %s from debug system", uiElement.toString()));
+			}
+		});
+		uiElement.getComponentsByCapability(DebuggableText.class).forEach(c -> {
+			if (!DebugSystem.getInstance().unregisterDebuggable(c)) {
+				System.err.println(String.format("Failed to unregister %s from debug system", uiElement.toString()));
+			}
+		});
 	}
 
 	/**
@@ -309,10 +364,6 @@ public abstract class World implements Drawable {
 		this.registerUIElementComponents(uiElement);
 	}
 
-	private final void unregisterUIElementComponents(UIElement uiElement) {
-		uiElement.getComponentsByCapability(Drawable.class).forEach(c -> GraphicSystem.getInstance().unregisterDrawable(c));
-	}
-
 	/**
 	 * Remove an ui element from the world.
 	 * <p>
@@ -321,6 +372,7 @@ public abstract class World implements Drawable {
 	 * <li><b>Unregister components of ui element from systems:</b>
 	 * <ul>
 	 * <li>Drawable → GraphicSystem</li>
+	 * <li>DebuggableGeometry → DebugSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -340,6 +392,7 @@ public abstract class World implements Drawable {
 	 * <li><b>Unregister components of ui element from systems:</b>
 	 * <ul>
 	 * <li>Drawable → GraphicSystem</li>
+	 * <li>DebuggableText → DebugSystem</li>
 	 * </ul>
 	 * </li>
 	 * </ul>
@@ -571,7 +624,7 @@ public abstract class World implements Drawable {
 			}
 		}
 
-		System.out.println(String.format("Generate %s with density %f (%d/%d) in chunk %s", className, density, amount, spawnCount, index.toString()));
+		// System.out.println(String.format("Generate %s with density %f (%d/%d) in chunk %s", className, density, amount, spawnCount, index.toString()));
 		return amount;
 	}
 
@@ -616,7 +669,9 @@ public abstract class World implements Drawable {
 	 */
 	public final void enqueueChunkForGeneration(ChunkIndex index) {
 		this.generationQueue.add(index);
-		// loadChunk(index);
+		if (!DebugSystem.getInstance().registerDebuggable(index)) {
+			System.err.println(String.format("Failed to register chunk %s to debug system", index.toString()));
+		}
 	}
 
 	/**
@@ -639,7 +694,9 @@ public abstract class World implements Drawable {
 				start = System.currentTimeMillis();
 				Chunk chunk = generateChunk(index);
 				this.lastChunkGenerationTime = (System.currentTimeMillis() - start);
-				registerChunk(chunk);
+				if (!registerChunk(chunk)) {
+					System.err.println(String.format("Failed to register chunk %s to world", index.toString()));
+				}
 				if (minLoadX < index.x() && index.x() <= maxLoadX && minLoadY < index.y() && index.y() <= maxLoadY) {
 					loadChunk(index);
 				} else {
@@ -649,19 +706,38 @@ public abstract class World implements Drawable {
 		}
 	}
 
-	private final void registerChunk(Chunk chunk) {
-		this.generatedChunks.put(chunk.getIndex(), chunk);
+	/**
+	 * Register the chunk to the generated chunks
+	 * 
+	 * @param chunk The chunk to register
+	 * @return {@code true} if the registration was successful or if it was already registered
+	 */
+	private final boolean registerChunk(Chunk chunk) {
+		Chunk existing = generatedChunks.putIfAbsent(chunk.getIndex(), chunk);
+		return existing == null || existing == chunk;
 	}
 
 	private final void loadChunk(ChunkIndex index) {
-		GraphicSystem.getInstance().registerDrawable(index);
-		getChunk(index).ifPresent(chunk -> GraphicSystem.getInstance().registerDrawable(chunk));
+		if (!DebugSystem.getInstance().registerDebuggable(index)) {
+			System.err.println(String.format("Failed to register chunk %s to debug system", index.toString()));
+		}
+		getChunk(index).ifPresent(chunk -> {
+			if (!GraphicSystem.getInstance().registerDrawable(chunk)) {
+				System.err.println(String.format("Failed to register chunk %s to graphic system", index.toString()));
+			}
+		});
 		loadedChunks.put(index, true);
 	}
 
 	private final void unloadChunk(ChunkIndex index) {
-		GraphicSystem.getInstance().unregisterDrawable(index);
-		getChunk(index).ifPresent(chunk -> GraphicSystem.getInstance().unregisterDrawable(chunk));
+		if (!DebugSystem.getInstance().unregisterDebuggable(index)) {
+			System.err.println(String.format("Failed to unregister chunk %s from debug system", index.toString()));
+		}
+		getChunk(index).ifPresent(chunk -> {
+			if (!GraphicSystem.getInstance().unregisterDrawable(chunk)) {
+				System.err.println(String.format("Failed to unregister chunk %s from graphic system", index.toString()));
+			}
+		});
 		loadedChunks.put(index, false);
 	}
 
@@ -728,24 +804,18 @@ public abstract class World implements Drawable {
 	public abstract void UpdateEntityGeneration(double deltaTime);
 
 	@Override
-	public void draw() {
-		if (debugChunkGeneration) {
-			ViewPos pos = new ViewPos(20, 225);
-			DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
-			GraphicSystem.getInstance().drawString("Loaded: " + this.getLoadedChunksSize(), pos, textStyle);
-			GraphicSystem.getInstance().drawString("Generated: " + this.getGeneratedChunksSize(), pos.add(0, 25), textStyle);
-			GraphicSystem.getInstance().drawString("Queued: " + this.getGenerationQueueSize(), pos.add(0, 50), textStyle);
-			GraphicSystem.getInstance().drawString(String.format("Generation time: %d ms", this.lastChunkGenerationTime), pos.add(0, 75), textStyle);
-		}
+	public DebugCategoryMask getCategoryMask() {
+		return new DebugCategoryMask(DebugCategory.PERFORMANCE);
 	}
 
 	@Override
-	public GraphicLayer getLayer() {
-		return GraphicLayer.UI;
-	}
+	public ArrayList<String> getTextElements() {
+		ArrayList<String> elements = new ArrayList<>();
 
-	@Override
-	public int getDepth() {
-		return 0;
+		elements.add(String.format("Loaded: %d", this.getLoadedChunksSize()));
+		elements.add(String.format("Generated: %d", this.getGeneratedChunksSize()));
+		elements.add(String.format("Queued: %d", this.getGenerationQueueSize()));
+		elements.add(String.format("Generation time: %d ms", this.lastChunkGenerationTime));
+		return elements;
 	}
 }

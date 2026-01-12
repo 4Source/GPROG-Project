@@ -1,24 +1,26 @@
 package ZombieGame.Components;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.util.ArrayList;
 
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterDirection;
 import ZombieGame.Game;
 import ZombieGame.Viewport;
-import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Capabilities.DebuggableGeometry;
+import ZombieGame.Capabilities.DebuggableText;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
 import ZombieGame.Systems.Graphic.DrawStyle;
-import ZombieGame.Systems.Graphic.GraphicLayer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
 
-// TODO: Change drawable to Debugable
-public class PlayerMovementComponent extends MovementComponent implements Drawable {
-    private static boolean debugPos = false;
+public class PlayerMovementComponent extends MovementComponent implements DebuggableText, DebuggableGeometry {
 
     /**
      * A Component which can move the entity via the inputs of the user.
@@ -89,23 +91,23 @@ public class PlayerMovementComponent extends MovementComponent implements Drawab
     }
 
     @Override
-    public void draw() {
-        if (debugPos) {
-            ViewPos pos = new ViewPos(20, 150);
-            DrawStyle style = new DrawStyle().color(Color.WHITE);
-            GraphicSystem.getInstance().drawString("Player Pos   " + this.getWorldPos().toString(), pos, style);
-            GraphicSystem.getInstance().drawString("Player Chunk " + this.getWorldPos().toChunkIndex().toString(), pos.add(0, 25), style);
-            GraphicSystem.getInstance().drawString("Center Chunk " + Viewport.getCenter().toWorldPos(Game.world).toChunkIndex().toString(), pos.add(0, 50), style);
-        }
+    public DebugCategoryMask getCategoryMask() {
+        return new DebugCategoryMask(DebugCategory.WORLD);
     }
 
     @Override
-    public GraphicLayer getLayer() {
-        return GraphicLayer.UI;
+    public ArrayList<String> getTextElements() {
+        ArrayList<String> elements = new ArrayList<>();
+        elements.add(String.format("Player Pos %s", this.getWorldPos().toString()));
+        elements.add(String.format("Player Chunk %s", this.getWorldPos().toChunkIndex().toString()));
+        elements.add(String.format("Center Chunk %s", Viewport.getCenter().toWorldPos(Game.world).toChunkIndex().toString()));
+        return elements;
     }
 
     @Override
-    public int getDepth() {
-        return 0;
+    public void drawDebug() {
+        DrawStyle style = new DrawStyle().color(new Color(0, 36, 153)).stroke(new BasicStroke(2.0f));
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
+        GraphicSystem.getInstance().drawLine(view, alpha, (int) (speed / 2), style);
     }
 }

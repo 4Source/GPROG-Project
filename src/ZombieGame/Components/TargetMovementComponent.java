@@ -1,9 +1,18 @@
 package ZombieGame.Components;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+
+import ZombieGame.Capabilities.DebuggableGeometry;
+import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
+import ZombieGame.Systems.Graphic.DrawStyle;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
-public class TargetMovementComponent extends MovementComponent {
+public class TargetMovementComponent extends MovementComponent implements DebuggableGeometry {
     protected WorldPos dest;
     protected boolean hasDestination;
 
@@ -65,5 +74,17 @@ public class TargetMovementComponent extends MovementComponent {
      */
     public void setDestination(Entity destination) {
         setDestination(destination.getPositionComponent().getWorldPos());
+    }
+
+    @Override
+    public DebugCategoryMask getCategoryMask() {
+        return new DebugCategoryMask(DebugCategory.AI);
+    }
+
+    @Override
+    public void drawDebug() {
+        DrawStyle style = new DrawStyle().color(new Color(153, 0, 0)).stroke(new BasicStroke(2.0f));
+        ViewPos view = this.getEntity().getPositionComponent().getViewPos();
+        GraphicSystem.getInstance().drawLine(view, alpha, (int) (speed / 2), style);
     }
 }

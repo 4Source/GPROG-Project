@@ -66,39 +66,37 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
     }
 
     @Override
-    public void draw() {
-        if (PhysicsSystem.enableDebug) {
-            DrawStyle style = new DrawStyle();
-            if (PhysicsSystem.getInstance().hasCollision(this)) {
-                // #00ff00
-                style.color(new Color(0, 255, 0));
-            } else {
-                // #009900
-                style.color(new Color(0, 153, 0));
-            }
+    public void drawDebug() {
+        DrawStyle style = new DrawStyle();
+        if (PhysicsSystem.getInstance().hasCollision(this)) {
+            // #00ff00
+            style.color(new Color(0, 255, 0));
+        } else {
+            // #009900
+            style.color(new Color(0, 153, 0));
+        }
 
-            if (this.hitBox.getCollisionType() == HitBoxType.Overlap) {
-                float[] dashPattern = { 6.0f, 3.0f };
-                style.stroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
-            } else {
-                style.stroke(new BasicStroke(2.0f));
-            }
+        if (this.hitBox.getCollisionType() == HitBoxType.Overlap) {
+            float[] dashPattern = { 6.0f, 3.0f };
+            style.stroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+        } else {
+            style.stroke(new BasicStroke(2.0f));
+        }
 
-            if (this.hitBox instanceof CircleHitBox) {
-                int radius = ((CircleHitBox) this.hitBox).getRadius();
-                ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
-                int d = (int) (radius * 2);
+        if (this.hitBox instanceof CircleHitBox) {
+            int radius = ((CircleHitBox) this.hitBox).getRadius();
+            ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
+            int d = (int) (radius * 2);
 
-                GraphicSystem.getInstance().drawOval(view, d, d, style);
-            } else if (this.hitBox instanceof RectangleHitBox) {
-                int width = ((RectangleHitBox) this.hitBox).getWidth();
-                int height = ((RectangleHitBox) this.hitBox).getHeight();
-                ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
+            GraphicSystem.getInstance().drawOval(view, d, d, style);
+        } else if (this.hitBox instanceof RectangleHitBox) {
+            int width = ((RectangleHitBox) this.hitBox).getWidth();
+            int height = ((RectangleHitBox) this.hitBox).getHeight();
+            ViewPos view = this.getEntity().getPositionComponent().getViewPos().add(this.hitBox.getOffset());
 
-                GraphicSystem.getInstance().drawRect(view, width, height, style);
-            } else {
-                System.err.println("Unsupported hit box for debug visualization.");
-            }
+            GraphicSystem.getInstance().drawRect(view, width, height, style);
+        } else {
+            System.err.println("Unsupported hit box for debug visualization.");
         }
     }
 }

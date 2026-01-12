@@ -1,6 +1,5 @@
 package ZombieGame.Systems.Physic;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,29 +8,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Capabilities.DebuggableText;
 import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.PhysicsComponent;
-import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Components.StaticPhysicsComponent;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
-import ZombieGame.Systems.Graphic.DrawStyle;
-import ZombieGame.Systems.Graphic.GraphicLayer;
-import ZombieGame.Systems.Graphic.GraphicSystem;
-import ZombieGame.Systems.Input.Action;
-import ZombieGame.Systems.Input.InputSystem;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
+import ZombieGame.Systems.Debug.DebugSystem;
 
-public class PhysicsSystem implements Drawable {
+public class PhysicsSystem implements DebuggableText {
 	private static PhysicsSystem instance;
-	public static boolean enableDebug = false;
 	private Map<PhysicsComponent, Map<PhysicsComponent, CollisionResponse>> collisionBuffer;
-	private Set<PhysicsComponent> invalidEntries;
+	private Set<PhysicsComponent> invalidComponents;
 	private long lastUpdateDuration = -1;
 
 	private PhysicsSystem() {
 		this.collisionBuffer = new HashMap<>();
-		this.invalidEntries = new HashSet<>();
-		GraphicSystem.getInstance().registerDrawable(this);
+		this.invalidComponents = new HashSet<>();
+		if (!DebugSystem.getInstance().registerDebuggable(this)) {
+			System.err.println("Failed to register PhysicsSystem to debug system");
+		}
 	}
 
 	/**
@@ -49,24 +47,42 @@ public class PhysicsSystem implements Drawable {
 	 * Register a physics component for the physics calculation
 	 * 
 	 * @param component The component to register
+	 * @return {@code true} if the registration was successful or if it was already registered
 	 */
-	public void registerComponent(PhysicsComponent component) {
-		collisionBuffer.putIfAbsent(component, new HashMap<>());
+	public boolean registerComponent(PhysicsComponent component) {
+		AtomicBoolean changed = new AtomicBoolean(false);
+		if (this.collisionBuffer.containsKey(component)) {
+			changed.set(true);
+		} else {
+			this.collisionBuffer.computeIfAbsent(component, c -> {
+				changed.set(true);
+				return new HashMap<>();
+			});
+		}
 		invalidateBufferFor(component);
+		return changed.get();
 	}
 
 	/**
 	 * Unregister a physics component from the physics calculation
 	 * 
 	 * @param component The component to unregister
+	 * @return {@code true} if unregistering was successful, {@code false} if not successful or not contained
 	 */
-	public void unregisterComponent(PhysicsComponent component) {
-		invalidEntries.remove(component);
-		collisionBuffer.remove(component);
+	public boolean unregisterComponent(PhysicsComponent component) {
+		boolean changed = false;
+		this.invalidComponents.remove(component);
+		if (this.collisionBuffer.remove(component) != null) {
+			changed = true;
+		}
 
 		for (Map<PhysicsComponent, CollisionResponse> inner : collisionBuffer.values()) {
-			inner.remove(component);
+			if (inner.remove(component) != null) {
+				changed = true;
+			}
 		}
+
+		return changed;
 	}
 
 	/**
@@ -76,7 +92,7 @@ public class PhysicsSystem implements Drawable {
 	 * @param component The component to invalidate the collisions for
 	 */
 	public void invalidateBufferFor(PhysicsComponent component) {
-		invalidEntries.add(component);
+		invalidComponents.add(component);
 
 		Map<PhysicsComponent, CollisionResponse> colliding = collisionBuffer.get(component);
 		if (colliding != null) {
@@ -87,7 +103,7 @@ public class PhysicsSystem implements Drawable {
 						break;
 					case Block:
 					case Overlap:
-						invalidEntries.add(entry.getKey());
+						invalidComponents.add(entry.getKey());
 						break;
 
 					default:
@@ -121,15 +137,11 @@ public class PhysicsSystem implements Drawable {
 		// like onStay (e.g., melee enemies attacking a standing player).
 		for (PhysicsComponent c : collisionBuffer.keySet()) {
 			if (c instanceof DynamicPhysicsComponent) {
-				invalidEntries.add(c);
+				invalidComponents.add(c);
 			}
 		}
 
-		if (InputSystem.getInstance().isPressed(Action.SHOW_HIT_BOXES)) {
-			PhysicsSystem.enableDebug = !PhysicsSystem.enableDebug;
-		}
-
-		Iterator<PhysicsComponent> it = invalidEntries.iterator();
+		Iterator<PhysicsComponent> it = invalidComponents.iterator();
 		while (it.hasNext()) {
 			PhysicsComponent component = it.next();
 
@@ -205,7 +217,7 @@ public class PhysicsSystem implements Drawable {
 		}
 
 		// Physics component not up to date
-		if (invalidEntries.contains(component)) {
+		if (invalidComponents.contains(component)) {
 			System.out.println("Unplanned update of PhysicsSystem!");
 			update();
 		}
@@ -253,7 +265,7 @@ public class PhysicsSystem implements Drawable {
 		}
 
 		// Physics component not up to date
-		if (invalidEntries.contains(component)) {
+		if (invalidComponents.contains(component)) {
 			System.out.println("Unplanned update of PhysicsSystem!");
 			update();
 		}
@@ -347,7 +359,7 @@ public class PhysicsSystem implements Drawable {
 			System.err.println("PhysicsComponent of Entity is registered, use 'hasCollision' instead if this is expected!");
 
 			// Physics component not up to date
-			if (invalidEntries.contains(component)) {
+			if (invalidComponents.contains(component)) {
 				System.out.println("Unplanned update of PhysicsSystem!");
 				update();
 			}
@@ -376,29 +388,32 @@ public class PhysicsSystem implements Drawable {
 	}
 
 	@Override
-	public void draw() {
-		if (PhysicsSystem.enableDebug) {
-			ViewPos pos = new ViewPos(20, 325);
-			int comp = this.collisionBuffer.size();
-			int coll = 0;
-			for (PhysicsComponent c : this.collisionBuffer.keySet()) {
-				coll += this.getCollisions(c).size();
+	public DebugCategoryMask getCategoryMask() {
+		return new DebugCategoryMask(DebugCategory.PERFORMANCE, DebugCategory.PHYSICS);
+	}
+
+	@Override
+	public ArrayList<String> getTextElements() {
+		ArrayList<String> elements = new ArrayList<>();
+
+		int staticCount = 0;
+		int dynamicCount = 0;
+		int coll = 0;
+		for (PhysicsComponent c : this.collisionBuffer.keySet()) {
+			coll += this.getCollisions(c).size();
+			if (c instanceof DynamicPhysicsComponent) {
+				dynamicCount++;
 			}
-
-			DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
-			GraphicSystem.getInstance().drawString("Components: " + comp, pos, textStyle);
-			GraphicSystem.getInstance().drawString("Collisions: " + coll, pos.add(0, 25), textStyle);
-			GraphicSystem.getInstance().drawString("Time: " + lastUpdateDuration, pos.add(0, 50), textStyle);
+			if (c instanceof StaticPhysicsComponent) {
+				staticCount++;
+			}
 		}
-	}
-
-	@Override
-	public GraphicLayer getLayer() {
-		return GraphicLayer.UI;
-	}
-
-	@Override
-	public int getDepth() {
-		return 0;
+		elements.add(String.format("Physics Components: %d", this.collisionBuffer.size()));
+		elements.add(String.format("Physics Static Components: %d", staticCount));
+		elements.add(String.format("Physics Dynamic Components: %d", dynamicCount));
+		elements.add(String.format("Physics Collisions: %d", coll));
+		elements.add(String.format("Physics invalid Components: %d", invalidComponents.size()));
+		elements.add(String.format("Physics update time: %d", lastUpdateDuration));
+		return elements;
 	}
 }

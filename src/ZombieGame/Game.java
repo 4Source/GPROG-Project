@@ -6,6 +6,7 @@ import ZombieGame.Components.LivingComponent;
 import ZombieGame.Components.VisualComponent;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
+import ZombieGame.Systems.Debug.DebugSystem;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
@@ -98,7 +99,8 @@ public final class Game {
 				}
 			}
 
-			GraphicSystem.getInstance().update();
+			DebugSystem.getInstance().update();
+
 			GraphicSystem.getInstance().clear();
 
 			// Update changed collisions
@@ -150,6 +152,3 @@ public final class Game {
 // BUG: #4 BABY Zombies can bug into player
 
 // BUG: #5 Entities outside of loaded chunks are rendered/collision test
-// TODO: Debug information for registered entites  
-// TODO: Debug information for loaded entites  
-// TODO: Debug information for rendered entites  
