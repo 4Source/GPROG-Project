@@ -2,6 +2,7 @@ package ZombieGame.World;
 
 import java.security.InvalidParameterException;
 import java.util.Optional;
+import java.util.UUID;
 
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ChunkIndex;
@@ -11,6 +12,7 @@ import ZombieGame.Sprites.StaticSprite;
 import ZombieGame.Systems.Graphic.GraphicLayer;
 
 public class Chunk implements Drawable {
+    private final UUID uuid = UUID.randomUUID();
     public static double TILE_SIZE = 0;
     public static final int SIZE = 16;
     /**
@@ -46,8 +48,6 @@ public class Chunk implements Drawable {
         }
         this.sprites = sprites;
     }
-
-    
 
     public Chunk(World world, ChunkIndex index) {
         this.world = world;
@@ -251,5 +251,20 @@ public class Chunk implements Drawable {
         }
 
         return Optional.ofNullable(chunk.tiles[y][x]);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        Chunk chunk = (Chunk) object;
+        return this.uuid.equals(chunk.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uuid.hashCode();
     }
 }

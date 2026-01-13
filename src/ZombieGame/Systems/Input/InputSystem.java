@@ -2,9 +2,8 @@ package ZombieGame.Systems.Input;
 
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 
 import ZombieGame.Coordinates.ViewPos;
 
@@ -14,10 +13,10 @@ enum DeviceType {
 
 public class InputSystem implements KeyListener, MouseListener, MouseMotionListener {
 	private static InputSystem instance;
-	private final Map<Action, Map<DeviceType, Integer>> keyMapping = new HashMap<>();
+	private final EnumMap<Action, EnumMap<DeviceType, Integer>> keyMapping = new EnumMap<>(Action.class);
 
-	private final Map<Action, Boolean> actionDown = new HashMap<>();
-	private final Map<Action, Boolean> actionPressed = new HashMap<>();
+	private final EnumMap<Action, Boolean> actionDown = new EnumMap<>(Action.class);
+	private final EnumMap<Action, Boolean> actionPressed = new EnumMap<>(Action.class);
 	private int mousePositionX;
 	private int mousePositionY;
 
@@ -52,12 +51,12 @@ public class InputSystem implements KeyListener, MouseListener, MouseMotionListe
 	}
 
 	private void setKeyMapping(Action action, DeviceType type, int key) {
-		this.keyMapping.putIfAbsent(action, new HashMap<>());
+		this.keyMapping.putIfAbsent(action, new EnumMap<>(DeviceType.class));
 		this.keyMapping.get(action).put(type, key);
 	}
 
 	private int getKeyMapping(Action action, DeviceType type) {
-		Map<DeviceType, Integer> actionMap = this.keyMapping.get(action);
+		EnumMap<DeviceType, Integer> actionMap = this.keyMapping.get(action);
 		if (actionMap == null) {
 			return -1;
 		}
@@ -71,7 +70,7 @@ public class InputSystem implements KeyListener, MouseListener, MouseMotionListe
 	 */
 	public List<String> getKeyMapping(Action action) {
 		ArrayList<String> keys = new ArrayList<>();
-		Map<DeviceType, Integer> actionMap = this.keyMapping.get(action);
+		EnumMap<DeviceType, Integer> actionMap = this.keyMapping.get(action);
 		if (actionMap == null) {
 			return keys;
 		}

@@ -5,8 +5,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EnumMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
@@ -24,7 +23,7 @@ import ZombieGame.Systems.Input.InputSystem;
 
 public class GraphicSystem extends JPanel implements DebuggableText {
     private static final GraphicSystem instance = new GraphicSystem();
-    private Map<GraphicLayer, ArrayList<Drawable>> drawables;
+    private EnumMap<GraphicLayer, ArrayList<Drawable>> drawables;
     private long lastTime;
     private long lastdiff;
 
@@ -44,7 +43,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
         this.addMouseMotionListener(InputSystem.getInstance());
         this.addKeyListener(InputSystem.getInstance());
 
-        this.drawables = new HashMap<>();
+        this.drawables = new EnumMap<>(GraphicLayer.class);
         this.lastTime = System.currentTimeMillis();
         this.lastdiff = 0;
 

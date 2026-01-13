@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import ZombieGame.Viewport;
 import ZombieGame.Capabilities.Debuggable;
@@ -18,9 +17,9 @@ import ZombieGame.Systems.Input.InputSystem;
 
 public class DebugSystem {
     private static final DebugSystem instance = new DebugSystem();
-    private Map<DebugCategory, ArrayList<DebuggableGeometry>> debuggablesGeometry;
-    private Map<DebugCategory, ArrayList<DebuggableText>> debuggablesText;
-    private Map<DebugCategory, Boolean> enabledCategories;
+    private EnumMap<DebugCategory, ArrayList<DebuggableGeometry>> debuggablesGeometry;
+    private EnumMap<DebugCategory, ArrayList<DebuggableText>> debuggablesText;
+    private EnumMap<DebugCategory, Boolean> enabledCategories;
 
     private DebugSystem() {
         this.debuggablesGeometry = new EnumMap<>(DebugCategory.class);
@@ -35,7 +34,7 @@ public class DebugSystem {
         return instance;
     }
 
-    private <T extends Debuggable> boolean registerDebuggable(T debuggable, Map<DebugCategory, ArrayList<T>> debuggables) {
+    private <T extends Debuggable> boolean registerDebuggable(T debuggable, EnumMap<DebugCategory, ArrayList<T>> debuggables) {
         boolean success = true;
 
         for (DebugCategory category : debuggable.getCategories()) {
@@ -73,7 +72,7 @@ public class DebugSystem {
         return registerDebuggable(debuggable, this.debuggablesGeometry);
     }
 
-    private <T extends Debuggable> boolean unregisterDebuggable(T debuggable, Map<DebugCategory, ArrayList<T>> debuggables) {
+    private <T extends Debuggable> boolean unregisterDebuggable(T debuggable, EnumMap<DebugCategory, ArrayList<T>> debuggables) {
         boolean success = true;
 
         for (DebugCategory category : debuggable.getCategories()) {

@@ -1,6 +1,7 @@
 package ZombieGame.World;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
@@ -34,6 +37,9 @@ import ZombieGame.Systems.Debug.DebugSystem;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
+record ChunkMove(Entity entity, ChunkIndex oldChunk) {
+}
+
 public abstract class World implements DebuggableText {
 	// if game is over
 	public boolean gameOver = false;
@@ -43,12 +49,13 @@ public abstract class World implements DebuggableText {
 	private Viewport viewport = new Viewport();
 
 	// all objects in the game, including the Avatar
-	private ArrayList<Entity> entities = new ArrayList<Entity>();
-	private ArrayList<UIElement> uiElements = new ArrayList<UIElement>();
+	private HashMap<ChunkIndex, Set<Entity>> entities = new HashMap<>();
+	private ArrayList<UIElement> uiElements = new ArrayList<>();
 	private ArrayList<Entity> pendingAdditions = new ArrayList<>();
 	private ArrayList<Entity> pendingRemovals = new ArrayList<>();
-	private final Map<ChunkIndex, Chunk> generatedChunks = new HashMap<>();
-	private final Map<ChunkIndex, Boolean> loadedChunks = new HashMap<>();
+	private ArrayList<ChunkMove> pendingChunkMoves = new ArrayList<>();
+	private final HashMap<ChunkIndex, Chunk> generatedChunks = new HashMap<>();
+	private final HashMap<ChunkIndex, Boolean> loadedChunks = new HashMap<>();
 	private final UniquePriorityQueue<ChunkIndex> generationQueue = new UniquePriorityQueue<>(new ChunkDistanceComparator(this));
 
 	protected World() {
@@ -57,44 +64,8 @@ public abstract class World implements DebuggableText {
 		}
 	}
 
-	public final void spawnEntity(Entity entity) {
-		pendingAdditions.add(entity);
-		this.registerEntityComponents(entity);
-	}
-
-	public final void despawnEntity(Entity entity) {
-		pendingRemovals.add(entity);
-		this.unregisterEntityComponents(entity);
-	}
-
-	/**
-	 * Update the world using delta time to get constant change with varying fps
-	 * 
-	 * @param deltaTime The time since last frame in seconds
-	 */
-	public final void update(double deltaTime) {
-		// Add new entities
-		for (Entity e : pendingAdditions) {
-			addEntity(e);
-		}
-		pendingAdditions.clear();
-
-		// Remove entities
-		for (Entity e : pendingRemovals) {
-			removeEntity(e);
-		}
-		pendingRemovals.clear();
-		this.worldTimeSeconds += deltaTime;
-	}
-
-	public final double getWorldTimeSeconds() {
-		return this.worldTimeSeconds;
-	}
-
 	/**
 	 * Add an entity to the world.
-	 * <p>
-	 * For {@link UIElement UIElements} use {@link World#addUIElement(UIElement)}
 	 * <ul>
 	 * <li><b>Register components of entity to systems:</b>
 	 * <ul>
@@ -108,14 +79,12 @@ public abstract class World implements DebuggableText {
 	 * 
 	 * @param entity The entity which should be added to the world
 	 */
-	private final void addEntity(Entity entity) {
-		this.entities.add(entity);
+	public final void spawnEntity(Entity entity) {
+		pendingAdditions.add(entity);
 	}
 
 	/**
 	 * Remove an entity from the world.
-	 * <p>
-	 * For {@link UIElement UIElements} use {@link World#removeUIElement(UIElement)}
 	 * <ul>
 	 * <li><b>Unregister components of entity from systems:</b>
 	 * <ul>
@@ -129,8 +98,61 @@ public abstract class World implements DebuggableText {
 	 * 
 	 * @param entity The entity which should be removed from the world
 	 */
-	private final void removeEntity(Entity entity) {
-		this.entities.remove(entity);
+	public final void despawnEntity(Entity entity) {
+		pendingRemovals.add(entity);
+	}
+
+	/**
+	 * Update the world using delta time to get constant change with varying fps
+	 * 
+	 * @param deltaTime The time since last frame in seconds
+	 */
+	public final void update(double deltaTime) {
+		// Add new entities
+		Iterator<Entity> additionsIterator = pendingAdditions.iterator();
+		while (additionsIterator.hasNext()) {
+			Entity e = additionsIterator.next();
+
+			this.entities.computeIfAbsent(e.getPositionComponent().getWorldPos().toChunkIndex(), s -> new HashSet<>()).add(e);
+			this.registerEntityComponents(e);
+			additionsIterator.remove();
+		}
+
+		// Remove entities
+		Iterator<Entity> removalsIterator = pendingRemovals.iterator();
+		while (removalsIterator.hasNext()) {
+			Entity e = removalsIterator.next();
+
+			Set<Entity> set = this.entities.get(e.getPositionComponent().getWorldPos().toChunkIndex());
+			if (set != null) {
+				set.remove(e);
+			}
+
+			removalsIterator.remove();
+		}
+
+		// Chunk switches of entities
+		Iterator<ChunkMove> chunkMovesIterator = pendingChunkMoves.iterator();
+		while (chunkMovesIterator.hasNext()) {
+			ChunkMove move = chunkMovesIterator.next();
+
+			if (move.oldChunk() != null) {
+				Set<Entity> oldSet = this.entities.get(move.oldChunk());
+				if (oldSet != null) {
+					oldSet.remove(move.entity());
+				}
+			}
+
+			this.entities.computeIfAbsent(move.entity().getPositionComponent().getWorldPos().toChunkIndex(), s -> new HashSet<>()).add(move.entity());
+
+			chunkMovesIterator.remove();
+		}
+
+		this.worldTimeSeconds += deltaTime;
+	}
+
+	public final double getWorldTimeSeconds() {
+		return this.worldTimeSeconds;
 	}
 
 	private final void registerEntityComponents(Entity entity) {
@@ -180,34 +202,6 @@ public abstract class World implements DebuggableText {
 	}
 
 	/**
-	 * Returns all entities.
-	 * <p>
-	 * For {@link UIElement UIElements} use {@link World#getUIElements()}
-	 */
-	public final Collection<Entity> getEntities() {
-		return Collections.unmodifiableCollection(this.entities);
-	}
-
-	/**
-	 * Returns all entities matching the Class.
-	 * <p>
-	 * For {@link UIElement UIElements} use {@link World#getUIElements(Class)}
-	 * 
-	 * @param <T> A Class which extends the Entity Class
-	 * @param type The type of Entity which should be returned
-	 */
-	public final <T extends Entity> Collection<Entity> getEntities(Class<T> type) {
-		ArrayList<Entity> elements = new ArrayList<>();
-		for (Entity e : this.entities) {
-			if (type.isInstance(e)) {
-				elements.add(e);
-			}
-		}
-
-		return Collections.unmodifiableCollection(elements);
-	}
-
-	/**
 	 * Returns all entities having the component.
 	 * <p>
 	 * For {@link UIElement UIElements} use {@link World#getUIElementsWithComponent(Class)}
@@ -217,9 +211,12 @@ public abstract class World implements DebuggableText {
 	 */
 	public final <T extends Component> Collection<Entity> getEntitiesWithComponent(Class<T> type) {
 		ArrayList<Entity> elements = new ArrayList<>();
-		for (Entity e : this.entities) {
-			if (!e.getComponents(type).isEmpty()) {
-				elements.add(e);
+		for (Entry<ChunkIndex, Set<Entity>> entry : this.entities.entrySet()) {
+			Set<Entity> entitiesInChunk = entry.getValue();
+			for (Entity entity : entitiesInChunk) {
+				if (!entity.getComponents(type).isEmpty()) {
+					elements.add(entity);
+				}
 			}
 		}
 
@@ -227,13 +224,30 @@ public abstract class World implements DebuggableText {
 	}
 
 	/**
-	 * <p>
-	 * For {@link UIElement UIElements} use {@link World#getUIElement(int)}
+	 * Returns all entities which are contained inside the chunks
 	 * 
-	 * @param index The index of the entity.
+	 * @param <T> A Class which extends the Component Class
+	 * @param index At least one chunk index to look for entities
+	 * @param more More chunks indices to look for entities
 	 */
-	public final Entity getEntity(int index) {
-		return this.entities.get(index);
+	public final <T extends Component> Collection<Entity> getEntitiesInChunk(ChunkIndex index, ChunkIndex... more) {
+		ArrayList<ChunkIndex> searchedChunks = new ArrayList<>();
+		searchedChunks.add(index);
+		searchedChunks.addAll(Arrays.asList(more));
+
+		ArrayList<Entity> elements = new ArrayList<>();
+		for (Entry<ChunkIndex, Set<Entity>> entry : this.entities.entrySet()) {
+			ChunkIndex i = entry.getKey();
+			if (searchedChunks.contains(i)) {
+				elements.addAll(entry.getValue());
+			}
+		}
+
+		return Collections.unmodifiableCollection(elements);
+	}
+
+	public final void onEntityChunkChanged(Entity entity, ChunkIndex oldChunkIndex) {
+		this.pendingChunkMoves.add(new ChunkMove(entity, oldChunkIndex));
 	}
 
 	/**
@@ -244,9 +258,12 @@ public abstract class World implements DebuggableText {
 	 * @param type The type of Entity which should be returned
 	 */
 	public final <T extends Entity> Optional<T> getEntity(Class<T> type) {
-		for (Entity e : this.entities) {
-			if (type.isInstance(e)) {
-				return Optional.of(type.cast(e));
+		for (Entry<ChunkIndex, Set<Entity>> entry : this.entities.entrySet()) {
+			Set<Entity> entitiesInChunk = entry.getValue();
+			for (Entity entity : entitiesInChunk) {
+				if (type.isInstance(entity)) {
+					return Optional.of(type.cast(entity));
+				}
 			}
 		}
 		return Optional.empty();
@@ -260,9 +277,12 @@ public abstract class World implements DebuggableText {
 	 * @param type The type of Entity which should be returned
 	 */
 	public final <T extends Entity> Optional<T> getEntityOrPending(Class<T> type) {
-		for (Entity e : this.entities) {
-			if (type.isInstance(e)) {
-				return Optional.of(type.cast(e));
+		for (Entry<ChunkIndex, Set<Entity>> entry : this.entities.entrySet()) {
+			Set<Entity> entitiesInChunk = entry.getValue();
+			for (Entity entity : entitiesInChunk) {
+				if (type.isInstance(entity)) {
+					return Optional.of(type.cast(entity));
+				}
 			}
 		}
 		for (Entity e : this.pendingAdditions) {
@@ -282,17 +302,25 @@ public abstract class World implements DebuggableText {
 	 */
 	public Iterator<Entity> entityIterator() {
 		return new Iterator<>() {
-			private final Iterator<Entity> it = entities.iterator();
+			private final Iterator<Set<Entity>> chunksIt = entities.values().iterator();
+			private Iterator<Entity> entitiesInChunkIt = null;
 			private Entity last = null;
 
 			@Override
 			public boolean hasNext() {
-				return it.hasNext();
+				// Loop until we find a chunk with remaining entities
+				while ((entitiesInChunkIt == null || !entitiesInChunkIt.hasNext()) && chunksIt.hasNext()) {
+					entitiesInChunkIt = chunksIt.next().iterator();
+				}
+				return entitiesInChunkIt != null && entitiesInChunkIt.hasNext();
 			}
 
 			@Override
 			public Entity next() {
-				last = it.next();
+				if (!hasNext()) {
+					throw new NoSuchElementException();
+				}
+				last = entitiesInChunkIt.next();
 				return last;
 			}
 
@@ -301,9 +329,57 @@ public abstract class World implements DebuggableText {
 				if (last == null) {
 					throw new IllegalStateException("remove() called before next()");
 				}
-
-				it.remove();
 				unregisterEntityComponents(last);
+				entitiesInChunkIt.remove();
+				last = null;
+			}
+		};
+	}
+
+	/**
+	 * Returns an iterator over the entities in the loaded chunks only.
+	 * <p>
+	 * Ensure side effects.
+	 * <p>
+	 * For {@link UIElement UIElements} use {@link World#uiElementIterator()}
+	 */
+	public Iterator<Entity> loadedEntityIterator() {
+		return new Iterator<>() {
+			private final Iterator<Map.Entry<ChunkIndex, Set<Entity>>> chunkIt = entities.entrySet().iterator();
+			private Iterator<Entity> entitiesInChunkIt = null;
+			private Entity last = null;
+
+			@Override
+			public boolean hasNext() {
+				// Loop until we find a loaded chunk with remaining entities
+				while ((entitiesInChunkIt == null || !entitiesInChunkIt.hasNext()) && chunkIt.hasNext()) {
+					Map.Entry<ChunkIndex, Set<Entity>> entry = chunkIt.next();
+					ChunkIndex chunk = entry.getKey();
+					if (Boolean.TRUE.equals(loadedChunks.get(chunk))) {
+						entitiesInChunkIt = entry.getValue().iterator();
+					} else {
+						entitiesInChunkIt = null;
+					}
+				}
+				return entitiesInChunkIt != null && entitiesInChunkIt.hasNext();
+			}
+
+			@Override
+			public Entity next() {
+				if (!hasNext()) {
+					throw new NoSuchElementException();
+				}
+				last = entitiesInChunkIt.next();
+				return last;
+			}
+
+			@Override
+			public void remove() {
+				if (last == null) {
+					throw new IllegalStateException("remove() called before next()");
+				}
+				unregisterEntityComponents(last);
+				entitiesInChunkIt.remove();
 				last = null;
 			}
 		};
@@ -347,8 +423,6 @@ public abstract class World implements DebuggableText {
 
 	/**
 	 * Add an ui element to the world.
-	 * <p>
-	 * For {@link Entity Entities} use {@link World#addEntity(Entity)}
 	 * <ul>
 	 * <li><b>Register components of ui element to systems:</b>
 	 * <ul>
@@ -452,9 +526,6 @@ public abstract class World implements DebuggableText {
 	}
 
 	/**
-	 * <p>
-	 * For {@link Entity Entities} use {@link World#getEntity(int)}
-	 * 
 	 * @param index The index of the ui element.
 	 */
 	public final UIElement getUIElement(int index) {
@@ -506,8 +577,8 @@ public abstract class World implements DebuggableText {
 					throw new IllegalStateException("remove() called before next()");
 				}
 
-				it.remove();
 				unregisterUIElementComponents(last);
+				it.remove();
 				last = null;
 			}
 		};
@@ -700,7 +771,9 @@ public abstract class World implements DebuggableText {
 				if (minLoadX < index.x() && index.x() <= maxLoadX && minLoadY < index.y() && index.y() <= maxLoadY) {
 					loadChunk(index);
 				} else {
-					unloadChunk(index);
+					if (!DebugSystem.getInstance().unregisterDebuggable(index)) {
+						System.err.println(String.format("Failed to unregister chunk %s from debug system", index.toString()));
+					}
 				}
 			}
 		}
@@ -727,6 +800,10 @@ public abstract class World implements DebuggableText {
 			}
 		});
 		loadedChunks.put(index, true);
+
+		getEntitiesInChunk(index).forEach(entity -> {
+			registerEntityComponents(entity);
+		});
 	}
 
 	private final void unloadChunk(ChunkIndex index) {
@@ -739,6 +816,10 @@ public abstract class World implements DebuggableText {
 			}
 		});
 		loadedChunks.put(index, false);
+
+		getEntitiesInChunk(index).forEach(entity -> {
+			unregisterEntityComponents(entity);
+		});
 	}
 
 	public final int getGeneratedChunksSize() {
@@ -764,12 +845,6 @@ public abstract class World implements DebuggableText {
 		int chunkCountX = (int) Math.ceil(Viewport.getScreenWidth() / Chunk.getChunkSize());
 		int chunkCountY = (int) Math.ceil(Viewport.getScreenHeight() / Chunk.getChunkSize());
 
-		loadedChunks.forEach((chunk, loaded) -> {
-			if (loaded) {
-				unloadChunk(chunk);
-			}
-		});
-
 		int minGenX = (int) Math.floor(-(chunkCountX + Chunk.CHUNK_GENERATING) / 2.0) - 1;
 		int maxGenX = (int) Math.ceil((chunkCountX + Chunk.CHUNK_GENERATING) / 2.0) + 1;
 		int minGenY = (int) Math.floor(-(chunkCountY + Chunk.CHUNK_GENERATING) / 2.0) - 1;
@@ -780,16 +855,40 @@ public abstract class World implements DebuggableText {
 		int minLoadY = (int) Math.floor(-(chunkCountY + Chunk.CHUNK_LOADING) / 2.0) - 1;
 		int maxLoadY = (int) Math.ceil((chunkCountY + Chunk.CHUNK_LOADING) / 2.0) + 1;
 
+		// Enqueue chunks for generation if there are not generated but should be and collect chunks which should be loaded
+		HashSet<ChunkIndex> desired = new HashSet<>();
 		for (int x = minGenX; x < maxGenX; x++) {
 			for (int y = minGenY; y < maxGenY; y++) {
 				ChunkIndex index = viewCenter.add(x, y);
+				// Chunk is not generated yet
 				if (!generatedChunks.containsKey(index)) {
 					enqueueChunkForGeneration(index);
-				} else {
+				}
+				// Chunk is already generated check if it should be loaded or not
+				else {
+					// Chunk is in range and should be loaded
 					if (minLoadX < x && x <= maxLoadX && minLoadY < y && y <= maxLoadY) {
-						loadChunk(index);
+						desired.add(index);
 					}
 				}
+			}
+		}
+
+		// Unload chunks which should be no longer loaded
+		Iterator<ChunkIndex> loadedIterator = this.loadedChunks.keySet().iterator();
+		while (loadedIterator.hasNext()) {
+			ChunkIndex index = loadedIterator.next();
+
+			if (!desired.contains(index)) {
+				unloadChunk(index);
+				loadedIterator.remove();
+			}
+		}
+
+		// Load missing chunks which should be loaded
+		for (ChunkIndex index : desired) {
+			if (!this.loadedChunks.containsKey(index)) {
+				loadChunk(index);
 			}
 		}
 
@@ -798,24 +897,30 @@ public abstract class World implements DebuggableText {
 
 	public abstract void init();
 
-	/**
-	 * @deprecated
-	 */
 	public abstract void UpdateEntityGeneration(double deltaTime);
 
 	@Override
 	public DebugCategoryMask getCategoryMask() {
-		return new DebugCategoryMask(DebugCategory.PERFORMANCE);
+		return new DebugCategoryMask(DebugCategory.PERFORMANCE, DebugCategory.WORLD);
 	}
 
 	@Override
 	public ArrayList<String> getTextElements() {
 		ArrayList<String> elements = new ArrayList<>();
 
-		elements.add(String.format("Loaded: %d", this.getLoadedChunksSize()));
-		elements.add(String.format("Generated: %d", this.getGeneratedChunksSize()));
-		elements.add(String.format("Queued: %d", this.getGenerationQueueSize()));
+		int entityCount = 0;
+		for (Set<Entity> chunk : this.entities.values()) {
+			entityCount += chunk.size();
+		}
+
+		elements.add(String.format("Chunks Loaded: %d", this.getLoadedChunksSize()));
+		elements.add(String.format("Chunks Generated: %d", this.getGeneratedChunksSize()));
+		elements.add(String.format("Chunks Queued: %d", this.getGenerationQueueSize()));
 		elements.add(String.format("Generation time: %d ms", this.lastChunkGenerationTime));
+		elements.add(String.format("Entities registered: %d", entityCount));
+		elements.add(String.format("Entities add queue: %d", this.pendingAdditions.size()));
+		elements.add(String.format("Entities remove queue: %d", this.pendingRemovals.size()));
+		elements.add(String.format("Entities chunk switch queue: %d", this.pendingChunkMoves.size()));
 		return elements;
 	}
 }

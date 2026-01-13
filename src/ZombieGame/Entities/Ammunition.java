@@ -30,6 +30,8 @@ public class Ammunition extends Item {
 	@Override
 	public void pickUp(Entity entity) {
 		super.pickUp(entity);
-		entity.getComponents(GunshotComponent.class).forEach(c -> c.restockAmmunition(20));
+		for (GunshotComponent c : entity.getComponents(GunshotComponent.class)) {
+			c.restockAmmunition(20);
+		}
 	}
 }

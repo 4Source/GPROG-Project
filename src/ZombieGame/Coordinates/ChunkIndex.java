@@ -157,4 +157,23 @@ public record ChunkIndex(int x, int y) implements DebuggableGeometry {
     public DebugCategoryMask getCategoryMask() {
         return new DebugCategoryMask(DebugCategory.WORLD);
     }
+
+    /**
+     * @return {@code true} if the x and y are the same
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        ChunkIndex chunkIndex = (ChunkIndex) object;
+        return this.x == chunkIndex.x && this.y == chunkIndex.y;
+    }
+
+    @Override
+    public int hashCode() {
+        // Combine two hashes with prime number
+        return Integer.hashCode(x) + 31 * Integer.hashCode(y);
+    }
 }

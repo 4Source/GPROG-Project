@@ -48,7 +48,6 @@ public class GunshotComponent extends ActionComponent {
             InputSystem input = InputSystem.getInstance();
             Gunshot shot = new Gunshot(this.getEntity(), this.getEntity().getPositionComponent().getWorldPos(), input.getMousePosition().toWorldPos(Game.world));
             Game.world.spawnEntity(shot);
-
         }
     }
 

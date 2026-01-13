@@ -39,12 +39,12 @@ public abstract class PhysicsComponent extends Component implements DebuggableGe
      * @return Collision, overlapping or no collision
      */
     public CollisionResponse checkCollision(PhysicsComponent other) {
-        if (this == other) {
+        if (this.equals(other)) {
             // No Collision with is self
             return CollisionResponse.None;
         }
 
-        if (this.getEntity() == other.getEntity()) {
+        if (this.getEntity().equals(other.getEntity())) {
             // No Collision between components of same entity
             return CollisionResponse.None;
         }

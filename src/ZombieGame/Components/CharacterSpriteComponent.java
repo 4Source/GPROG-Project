@@ -6,7 +6,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,7 +23,7 @@ import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Graphic.MissingTexture;
 
 public class CharacterSpriteComponent extends SpriteComponent {
-    private EnumMap<CharacterPart, Map<CharacterAnimationKey, AnimatedSprite>> sprites;
+    private EnumMap<CharacterPart, HashMap<CharacterAnimationKey, AnimatedSprite>> sprites;
     private CharacterAnimationKey state;
 
     public CharacterSpriteComponent(Entity entity, CharacterAnimationKey initialState) {
@@ -55,19 +54,20 @@ public class CharacterSpriteComponent extends SpriteComponent {
                 break;
         }
 
-        partsOrder.forEach(p -> {
-            this.getState(p).ifPresent(s -> {
-                Sprite sprite = this.sprites.getOrDefault(p, new HashMap<>()).get(s);
+        for (CharacterPart p : partsOrder) {
+            Optional<CharacterAnimationKey> s = this.getState(p);
+            if (s.isPresent()) {
+                Sprite sprite = this.sprites.getOrDefault(p, new HashMap<>()).get(s.get());
 
                 if (sprite == null) {
                     int size = MissingTexture.getSize();
                     GraphicSystem.getInstance().drawSprite(MissingTexture.getTexture(), view.add(size / 2, size / 2), 0, 0, 1, size * 2, size * 2);
-                    return;
+                    continue;
                 }
 
                 sprite.draw(view);
-            });
-        });
+            }
+        }
     }
 
     @Override
@@ -135,7 +135,7 @@ public class CharacterSpriteComponent extends SpriteComponent {
     }
 
     public Optional<CharacterAnimationKey> getState(CharacterPart part) {
-        Map<CharacterAnimationKey, AnimatedSprite> s = this.sprites.get(part);
+        HashMap<CharacterAnimationKey, AnimatedSprite> s = this.sprites.get(part);
         if (s == null) {
             return Optional.empty();
         }
@@ -189,7 +189,7 @@ public class CharacterSpriteComponent extends SpriteComponent {
      * @return A set containing the sprite or an empty sprite if no matching sprite found
      */
     public Set<AnimatedSprite> getSprite(CharacterPart part, CharacterAnimationKey animationKey) {
-        Map<CharacterAnimationKey, AnimatedSprite> map = this.sprites.get(part);
+        HashMap<CharacterAnimationKey, AnimatedSprite> map = this.sprites.get(part);
         if (map == null) {
             return new HashSet<>();
         }
