@@ -3,6 +3,7 @@ package ZombieGame.Systems.Debug;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import ZombieGame.Viewport;
@@ -117,6 +118,7 @@ public class DebugSystem {
         ViewPos base = Viewport.getTopLeft().add(20, 60);
         int yIndex = 0;
         DrawStyle textStyle = new DrawStyle().color(Color.WHITE);
+        HashSet<String> drewText = new HashSet<>();
 
         for (Map.Entry<DebugCategory, Boolean> entry : enabledCategories.entrySet()) {
             DebugCategory key = entry.getKey();
@@ -134,8 +136,11 @@ public class DebugSystem {
 
                 for (DebuggableText debuggable : list) {
                     for (String text : debuggable.getTextElements()) {
-                        GraphicSystem.getInstance().drawString(text, base.add(0, yIndex * 30), textStyle);
-                        yIndex++;
+                        if (!drewText.contains(text)) {
+                            GraphicSystem.getInstance().drawString(text, base.add(0, yIndex * 30), textStyle);
+                            yIndex++;
+                            drewText.add(text);
+                        }
                     }
                 }
             }
