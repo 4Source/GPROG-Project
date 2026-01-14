@@ -1,5 +1,10 @@
 package ZombieGame;
 
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+
 // (c) Thorsten Hasbargen
 
 import javax.swing.*;
@@ -8,17 +13,19 @@ import ZombieGame.Systems.Graphic.GraphicSystem;
 
 class Frame extends JFrame {
 	private static final long serialVersionUID = 2L;
-	//hier kann zwischen Fenstermodus und Fullscreen gewechselt werden!
+	// Switch between window and fullscreen mode
 	private static final boolean BORDERLESS_FULLSCREEN = true;
 
+	// BUG: in window mode the ui elements get NOT repositioned and therefore are not longer in visible range when reducing size
+	// TODO: Different window size should require different scales
 
 	public Frame() {
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-		java.awt.GraphicsEnvironment ge = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment();
-		java.awt.GraphicsDevice gd = ge.getDefaultScreenDevice();
-		java.awt.GraphicsConfiguration gc = gd.getDefaultConfiguration();
-		java.awt.Rectangle bounds = gc.getBounds(); // kompletter Monitor
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice gd = ge.getDefaultScreenDevice();
+		GraphicsConfiguration gc = gd.getDefaultConfiguration();
+		Rectangle bounds = gc.getBounds(); // kompletter Monitor
 
 		if (BORDERLESS_FULLSCREEN) {
 			// Borderless fullscreen
@@ -40,6 +47,8 @@ class Frame extends JFrame {
 			this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		}
 
+		Viewport.setScreenWidth(this.getWidth());
+		Viewport.setScreenHeight(this.getHeight());
 
 		this.setContentPane(GraphicSystem.getInstance());
 
@@ -47,17 +56,12 @@ class Frame extends JFrame {
 		GraphicSystem.getInstance().setFocusable(true);
 	}
 
-
 	public void displayOnScreen() {
 		this.validate();
 		this.setVisible(true);
 
-		Viewport.setScreenWidth(this.getContentPane().getWidth());
-		Viewport.setScreenHeight(this.getContentPane().getHeight());
-
 		// Fokus erst wenn sichtbar
 		GraphicSystem.getInstance().requestFocusInWindow();
 	}
-
 
 }

@@ -1,5 +1,7 @@
 package ZombieGame;
 
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.Iterator;
 
 import ZombieGame.Components.LivingComponent;
@@ -23,6 +25,14 @@ public final class Game {
 	public Game() {
 		// Setup the window
 		Frame frame = new Frame();
+		frame.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				Viewport.setScreenWidth(frame.getWidth());
+				Viewport.setScreenHeight(frame.getHeight());
+				GraphicSystem.getInstance().onViewportResize();
+			}
+		});
 		frame.displayOnScreen();
 
 		// Create a new world
