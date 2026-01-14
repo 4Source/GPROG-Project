@@ -123,16 +123,44 @@ public abstract class Sprite {
         GraphicSystem.getInstance().drawSprite(this.sprite, pos.add(offset), this.columnIndex, this.rowIndex, this.scale, this.rotation, this.rotationCenter, this.width, this.height, tint);
     }
 
+    public BufferedImage getSprite() {
+        return this.sprite;
+    }
+
+    public int getColumnCount() {
+        return this.columnCount;
+    }
+
+    public int getColumnIndex() {
+        return this.columnIndex;
+    }
+
     public void setColumnIndex(int index) {
         this.columnIndex = index;
+    }
+
+    public int getRowCount() {
+        return this.rowCount;
+    }
+
+    public int getRowIndex() {
+        return this.rowIndex;
     }
 
     public void setRowIndex(int index) {
         this.rowIndex = index;
     }
 
+    public int getTileHeight() {
+        return this.height;
+    }
+
     public double getDrawHeight() {
         return this.scale * this.height;
+    }
+
+    public int getTileWidth() {
+        return this.width;
     }
 
     public double getDrawWidth() {

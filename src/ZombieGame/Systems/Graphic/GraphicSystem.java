@@ -26,6 +26,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
     private EnumMap<GraphicLayer, ArrayList<Drawable>> drawables;
     private long lastTime;
     private long lastdiff;
+    private long drawTime;
 
     // GraphicsSystem variables
     private GraphicsConfiguration graphicsConf = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
@@ -45,6 +46,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
         this.drawables = new EnumMap<>(GraphicLayer.class);
         this.lastTime = System.currentTimeMillis();
         this.lastdiff = 0;
+        this.drawTime = 0;
 
         if (!DebugSystem.getInstance().registerDebuggable(this)) {
             System.err.println(String.format("Failed to register graphic system to debug system"));
@@ -109,6 +111,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
      * Draw the entities on the Screen
      */
     public void draw() {
+        long start = System.nanoTime();
         drawables.getOrDefault(GraphicLayer.BACKGROUND, new ArrayList<>()).forEach(entity -> entity.draw());
         ArrayList<Drawable> game = drawables.getOrDefault(GraphicLayer.GAME, new ArrayList<>());
         game.sort(null);
@@ -118,6 +121,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
         effects.forEach(entity -> entity.draw());
         drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).forEach(entity -> entity.draw());
         DebugSystem.getInstance().draw();
+        this.drawTime = System.nanoTime() - start;
     }
 
     /**
@@ -374,6 +378,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
 
         elements.add(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / this.lastdiff)));
         elements.add(String.format("Frame time: %.2f ms", this.lastdiff / 1_000_000.0));
+        elements.add(String.format("Draw time: %.2f ms", this.drawTime / 1_000_000.0));
         elements.add(String.format("Draw calls: %d", backgroundSize + gameSize + effectsSize + uiSize));
         elements.add(String.format("  Background: %d", backgroundSize));
         elements.add(String.format("  Game: %d", gameSize));

@@ -20,6 +20,7 @@ import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
 import ZombieGame.Systems.Physic.PhysicsSystem;
+import ZombieGame.World.TileType;
 import ZombieGame.World.World;
 import ZombieGame.World.ZombieWorld;
 
@@ -328,6 +329,8 @@ public final class Game {
 		game.startScreen();
 		System.out.println("Starting game...");
 		game.run();
+
+		// TileType.testTileGrid(3);
 	}
 }
 

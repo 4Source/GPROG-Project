@@ -1,17 +1,22 @@
 package ZombieGame.World;
 
+import java.awt.Font;
 import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.UUID;
-
+import ZombieGame.Capabilities.DebuggableGeometry;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
+import ZombieGame.Systems.Graphic.DrawStyle;
 import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
-public class Chunk implements Drawable {
+public class Chunk implements Drawable, DebuggableGeometry {
     private final UUID uuid = UUID.randomUUID();
     public static double TILE_SIZE = 0;
     public static final int SIZE = 16;
@@ -84,6 +89,32 @@ public class Chunk implements Drawable {
     @Override
     public int getDepth() {
         return this.index.y();
+    }
+
+    @Override
+    public void drawDebug() {
+        ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
+
+        for (int y = 0; y < tilesCountY(); y++) {
+            StaticSprite[] spritesRows = this.sprites[y];
+            TileType[] tilesRows = this.tiles[y];
+            for (int x = 0; x < tilesCountX(); x++) {
+                StaticSprite sprite = spritesRows[x];
+                TileType tile = tilesRows[x];
+
+                int fontSize = (int) (sprite.getDrawHeight() * 0.6);
+                Offset offset = new Offset((x + 0.3) * sprite.getDrawWidth(), (y + 0.7) * sprite.getDrawHeight());
+                String label;
+                label = tile == TileType.DIRT ? "D" : "G";
+
+                GraphicSystem.getInstance().drawString(label, viewPos.add(offset), new DrawStyle().font(new Font("ARIAL", Font.PLAIN, fontSize)));
+            }
+        }
+    }
+
+    @Override
+    public DebugCategoryMask getCategoryMask() {
+        return new DebugCategoryMask(DebugCategory.WORLD);
     }
 
     public ChunkIndex getIndex() {
