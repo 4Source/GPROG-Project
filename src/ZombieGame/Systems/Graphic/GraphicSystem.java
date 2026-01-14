@@ -10,7 +10,7 @@ import java.util.EnumMap;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import ZombieGame.Constants;
+import ZombieGame.Viewport;
 import ZombieGame.Capabilities.DebuggableText;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.Offset;
@@ -33,8 +33,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
     private Graphics2D graphics;
 
     private GraphicSystem() {
-        // TODO: Make it depend on the monitor resolution
-        this.setSize(Constants.WORLDPART_WIDTH, Constants.WORLDPART_HEIGHT);
+        this.setSize(Viewport.getScreenWidth(), Viewport.getScreenHeight());
         this.imageBuffer = this.graphicsConf.createCompatibleImage(this.getWidth(), this.getHeight());
         this.graphics = this.imageBuffer.createGraphics();
 
@@ -94,7 +93,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
      */
     public void clear() {
         this.graphics.setColor(Color.LIGHT_GRAY);
-        this.graphics.fillRect(0, 0, Constants.WORLDPART_WIDTH, Constants.WORLDPART_HEIGHT);
+        this.graphics.fillRect(0, 0, Viewport.getScreenWidth(), Viewport.getScreenHeight());
     }
 
     /**
@@ -381,5 +380,11 @@ public class GraphicSystem extends JPanel implements DebuggableText {
         elements.add(String.format("  Effects: %d", effectsSize));
         elements.add(String.format("  UI: %d", uiSize));
         return elements;
+    }
+
+    public void onViewportResize() {
+        this.setSize(Viewport.getScreenWidth(), Viewport.getScreenHeight());
+        this.imageBuffer = this.graphicsConf.createCompatibleImage(this.getWidth(), this.getHeight());
+        this.graphics = this.imageBuffer.createGraphics();
     }
 }
