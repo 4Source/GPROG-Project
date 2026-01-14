@@ -3,14 +3,13 @@ package ZombieGame.Sprites;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import ZombieGame.Systems.Graphic.MissingTexture;
 
 public class SpriteManager {
-    private static final Map<String, BufferedImage> cache = new HashMap<>();
+    private static final HashMap<String, BufferedImage> cache = new HashMap<>();
 
     private SpriteManager() {
     }

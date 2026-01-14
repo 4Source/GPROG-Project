@@ -103,6 +103,13 @@ public abstract class Sprite {
     }
 
     /**
+     * Sprite with missing texture
+     */
+    public Sprite() {
+        this("", 1, 1, 1);
+    }
+
+    /**
      * Update the sprite using delta time to get constant change with varying fps
      * 
      * @param deltaTime The time since last frame in seconds

@@ -45,7 +45,7 @@ public class Avatar extends Character {
 						Game.world.gameOver = true;
 					}
 				});
-				
+
 		this.gunshotComponent = this.add(new GunshotComponent(this, 0.2, 20));
 
 		double animationFrameTime = 0.1;
@@ -120,7 +120,7 @@ public class Avatar extends Character {
 	protected void onMovementCollisionStart(Collision collision) {
 		// if Object is a tree, move back one step
 		if (collision.collisionResponse() == CollisionResponse.Block) {
-			this.getPositionComponent().moveBack();
+			this.getPositionComponent().resolveCollision(collision.entity());
 		}
 
 		// pick up Items
@@ -135,7 +135,7 @@ public class Avatar extends Character {
 	protected void onMovementCollisionStay(Collision collision) {
 		// if Object is a tree, move back one step
 		if (collision.collisionResponse() == CollisionResponse.Block) {
-			this.getPositionComponent().moveBack();
+			this.getPositionComponent().resolveCollision(collision.entity());
 		}
 	}
 

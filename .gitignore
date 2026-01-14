@@ -29,3 +29,6 @@ replay_pid*
 # Java Flight Recorder
 profile.jfr
 assets/PostApocalypse_AssetPack/
+
+# Debug
+ChunkGeneration/

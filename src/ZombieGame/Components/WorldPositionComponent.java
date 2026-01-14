@@ -1,6 +1,7 @@
 package ZombieGame.Components;
 
 import ZombieGame.Game;
+import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
@@ -33,7 +34,12 @@ public class WorldPositionComponent extends PositionComponent {
 
     @Override
     public final void setWorldPos(WorldPos pos) {
+        ChunkIndex currentIndex = this.pos.toChunkIndex();
         this.pos = pos;
+
+        if (!currentIndex.equals(pos.toChunkIndex())) {
+            Game.world.onEntityChunkChanged(this.getEntity(), currentIndex);
+        }
     }
 
     @Override

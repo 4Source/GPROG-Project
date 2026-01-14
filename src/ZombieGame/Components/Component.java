@@ -1,8 +1,11 @@
 package ZombieGame.Components;
 
+import java.util.UUID;
+
 import ZombieGame.Entities.Entity;
 
 public abstract class Component {
+    private final UUID uuid = UUID.randomUUID();
     private final Entity entity;
 
     /**
@@ -21,5 +24,20 @@ public abstract class Component {
 
     public Entity getEntity() {
         return this.entity;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        Component component = (Component) object;
+        return this.uuid.equals(component.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uuid.hashCode();
     }
 }

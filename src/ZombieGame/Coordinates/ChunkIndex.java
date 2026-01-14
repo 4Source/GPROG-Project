@@ -4,9 +4,10 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 
 import ZombieGame.Game;
-import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Capabilities.DebuggableGeometry;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
 import ZombieGame.Systems.Graphic.DrawStyle;
-import ZombieGame.Systems.Graphic.GraphicLayer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.World.Chunk;
 import ZombieGame.World.World;
@@ -15,8 +16,7 @@ import ZombieGame.World.World;
  * Represents the integer coordinates of a chunk in the world grid.
  * The origin of the chunk is at (0,0) top-left of chunk.
  */
-public record ChunkIndex(int x, int y) implements Drawable {
-    private static boolean debugBorders = false;
+public record ChunkIndex(int x, int y) implements DebuggableGeometry {
 
     public ChunkIndex() {
         this(0, 0);
@@ -133,35 +133,47 @@ public record ChunkIndex(int x, int y) implements Drawable {
     }
 
     @Override
-    public void draw() {
+    public void drawDebug() {
         World world = Game.world;
         ViewPos viewPos = this.toWorldPos().toViewPos(world);
 
-        if (debugBorders) {
-            DrawStyle style = new DrawStyle();
+        DrawStyle style = new DrawStyle();
 
-            if (world.isChunkQueuedForGeneration(this)) {
-                float[] dashPattern = { 2.0f, 8.0f };
-                style.color(Color.YELLOW).stroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
-            }
-
-            if (world.isChunkLoaded(this)) {
-                style.color(Color.GREEN);
-            } else if (world.isChunkGenerated(this)) {
-                style.color(Color.BLUE);
-            }
-
-            GraphicSystem.getInstance().drawRect(viewPos.add((int) (Chunk.getChunkSize() / 2.0), (int) (Chunk.getChunkSize() / 2.0)), (int) Chunk.getChunkSize(), (int) Chunk.getChunkSize(), style);
+        if (world.isChunkQueuedForGeneration(this)) {
+            float[] dashPattern = { 2.0f, 8.0f };
+            style.color(Color.YELLOW).stroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
         }
+
+        if (world.isChunkLoaded(this)) {
+            style.color(Color.GREEN);
+        } else if (world.isChunkGenerated(this)) {
+            style.color(Color.BLUE);
+        }
+
+        GraphicSystem.getInstance().drawRect(viewPos.add((int) (Chunk.getChunkSize() / 2.0), (int) (Chunk.getChunkSize() / 2.0)), (int) Chunk.getChunkSize(), (int) Chunk.getChunkSize(), style);
     }
 
     @Override
-    public GraphicLayer getLayer() {
-        return GraphicLayer.UI;
+    public DebugCategoryMask getCategoryMask() {
+        return new DebugCategoryMask(DebugCategory.WORLD);
+    }
+
+    /**
+     * @return {@code true} if the x and y are the same
+     */
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        ChunkIndex chunkIndex = (ChunkIndex) object;
+        return this.x == chunkIndex.x && this.y == chunkIndex.y;
     }
 
     @Override
-    public int getDepth() {
-        return 0;
+    public int hashCode() {
+        // Combine two hashes with prime number
+        return Integer.hashCode(x) + 31 * Integer.hashCode(y);
     }
 }

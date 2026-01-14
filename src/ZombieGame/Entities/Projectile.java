@@ -43,14 +43,7 @@ public abstract class Projectile extends Entity {
 
         this.visualComponent = this.add(visualFactory.apply(this));
         this.lifetimeComponent = this.add(new LifetimeComponent(this, lifetime));
-        this.physicsComponent = this.add(
-                new DynamicPhysicsComponent(
-                        this,
-                        hitBox,
-                        PhysicsCollisionLayer.PROJECTILE,
-                        mask,
-                        c -> onCollision(c),
-                        c -> {}));
+        this.physicsComponent = this.add(new DynamicPhysicsComponent(this, hitBox, PhysicsCollisionLayer.PROJECTILE, mask, c -> onCollisionEnter(c), c -> onCollisionStay(c), c -> onCollisionExit(c)));
     }
 
     /**
@@ -90,14 +83,14 @@ public abstract class Projectile extends Entity {
      * 
      * @param collision The collision which started
      */
-    protected void onCollision(Collision collision) {
+    protected void onCollisionEnter(Collision collision) {
         if (collision.collisionResponse() == CollisionResponse.Block) {
-            if (collision.entity() == this.owner) {
+            if (collision.entity().equals(this.owner)) {
                 // Cancel collision with owner of projectile
                 return;
             }
 
-            // Make damage to all the lifeComponents of the hited entity
+            // Make damage to all the lifeComponents of the hitted entity
             ArrayList<LifeComponent> lifeComponents = collision.entity().getComponents(LifeComponent.class);
             for (LifeComponent lifeComponent : lifeComponents) {
                 lifeComponent.takeDamage(this.damage);
@@ -106,5 +99,11 @@ public abstract class Projectile extends Entity {
             // Blocking collision therefor destroy projectile
             this.lifetimeComponent.kill();
         }
+    }
+
+    protected void onCollisionStay(Collision collision) {
+    }
+
+    protected void onCollisionExit(Collision collision) {
     }
 }

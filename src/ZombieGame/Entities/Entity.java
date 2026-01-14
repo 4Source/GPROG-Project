@@ -2,7 +2,7 @@ package ZombieGame.Entities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import ZombieGame.EntityType;
@@ -11,7 +11,8 @@ import ZombieGame.Components.Component;
 import ZombieGame.Components.PositionComponent;
 
 public abstract class Entity {
-    private Map<Class<? extends Component>, ArrayList<Component>> components = new HashMap<>();
+    private final UUID uuid = UUID.randomUUID();
+    private HashMap<Class<? extends Component>, ArrayList<Component>> components = new HashMap<>();
     private final PositionComponent positionComponent;
 
     /**
@@ -88,10 +89,25 @@ public abstract class Entity {
      * @param deltaTime The time since last frame in seconds
      */
     public final void update(double deltaTime) {
-        this.components.forEach((key, componentList) -> {
-            componentList.forEach(component -> {
+        for (ArrayList<Component> entry : this.components.values()) {
+            for (Component component : entry) {
                 component.update(deltaTime);
-            });
-        });
+            }
+        }
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+
+        Entity entity = (Entity) object;
+        return this.uuid.equals(entity.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uuid.hashCode();
     }
 }

@@ -21,7 +21,7 @@ public class Gunshot extends Projectile {
 	 * @param damage The damage it makes in half-hearts (1 = 1/2 Heart, 2 = 1 Heart)
 	 */
 	public Gunshot(Entity owner, WorldPos pos, double alpha, double speed, double lifetime, int damage) {
-		super(owner, pos, alpha, speed, lifetime, damage, new CircleHitBox(HitBoxType.Block, 4), new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.ZOMBIE), e -> new CircleComponent(e, 4, Color.YELLOW));
+		super(owner, pos, alpha, speed, lifetime, damage, new CircleHitBox(HitBoxType.Block, 4), new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.ZOMBIE_CHARACTER), e -> new CircleComponent(e, 4, Color.YELLOW));
 	}
 
 	/**

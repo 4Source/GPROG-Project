@@ -1,18 +1,20 @@
 package ZombieGame.Components;
 
-import ZombieGame.Capabilities.Drawable;
+import ZombieGame.Capabilities.DebuggableGeometry;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
-import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
 import ZombieGame.Systems.Physic.CircleHitBox;
 import ZombieGame.Systems.Physic.CollisionResponse;
 import ZombieGame.Systems.Physic.HitBox;
 import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
 import ZombieGame.Systems.Physic.PhysicsCollisionMask;
+import ZombieGame.Systems.Physic.PhysicsSystem;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
-public abstract class PhysicsComponent extends Component implements Drawable {
+public abstract class PhysicsComponent extends Component implements DebuggableGeometry {
     protected HitBox hitBox;
     protected final int layer;
     protected final int mask;
@@ -37,12 +39,12 @@ public abstract class PhysicsComponent extends Component implements Drawable {
      * @return Collision, overlapping or no collision
      */
     public CollisionResponse checkCollision(PhysicsComponent other) {
-        if (this == other) {
+        if (this.equals(other)) {
             // No Collision with is self
             return CollisionResponse.None;
         }
 
-        if (this.getEntity() == other.getEntity()) {
+        if (this.getEntity().equals(other.getEntity())) {
             // No Collision between components of same entity
             return CollisionResponse.None;
         }
@@ -106,15 +108,10 @@ public abstract class PhysicsComponent extends Component implements Drawable {
     /**
      * Draw the hit box in the graphics system if {@link PhysicsComponent}.enableDebug is true.
      */
-    public abstract void draw();
+    public abstract void drawDebug();
 
     @Override
-    public GraphicLayer getLayer() {
-        return GraphicLayer.UI;
-    }
-
-    @Override
-    public int getDepth() {
-        return (int) this.getEntity().getPositionComponent().getViewPos().y();
+    public DebugCategoryMask getCategoryMask() {
+        return new DebugCategoryMask(DebugCategory.PHYSICS, DebugCategory.COLLISION);
     }
 }

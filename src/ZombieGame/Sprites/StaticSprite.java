@@ -54,6 +54,13 @@ public class StaticSprite extends Sprite {
         this(spritePath, columnCount, rowCount, scale, columnIndex, rowIndex, new Offset());
     }
 
+    /**
+     * Sprite with missing texture
+     */
+    public StaticSprite() {
+        this("", 1, 1, 1, 0, 0);
+    }
+
     @Override
     public void update(double deltaTime) {
     }

@@ -3,25 +3,29 @@ package ZombieGame.Systems.Graphic;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.EnumMap;
+
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 import ZombieGame.Constants;
+import ZombieGame.Capabilities.DebuggableText;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.Rotation;
 import ZombieGame.Coordinates.ViewPos;
-import ZombieGame.Systems.Input.Action;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
+import ZombieGame.Systems.Debug.DebugSystem;
 import ZombieGame.Systems.Input.InputSystem;
 
-public class GraphicSystem extends JPanel {
-    private static GraphicSystem instance;
-    private Map<GraphicLayer, ArrayList<Drawable>> drawables;
-
-    private static boolean showFPS = false;
+public class GraphicSystem extends JPanel implements DebuggableText {
+    private static final GraphicSystem instance = new GraphicSystem();
+    private EnumMap<GraphicLayer, ArrayList<Drawable>> drawables;
     private long lastTime;
+    private long lastdiff;
 
     // GraphicsSystem variables
     private GraphicsConfiguration graphicsConf = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
@@ -39,18 +43,19 @@ public class GraphicSystem extends JPanel {
         this.addMouseMotionListener(InputSystem.getInstance());
         this.addKeyListener(InputSystem.getInstance());
 
-        this.drawables = new HashMap<>();
+        this.drawables = new EnumMap<>(GraphicLayer.class);
         this.lastTime = System.currentTimeMillis();
+        this.lastdiff = 0;
+
+        if (!DebugSystem.getInstance().registerDebuggable(this)) {
+            System.err.println(String.format("Failed to register graphic system to debug system"));
+        }
     }
 
     /**
      * @return The instance of the singleton or newly created if first access.
      */
     public static synchronized GraphicSystem getInstance() {
-        if (instance == null) {
-            instance = new GraphicSystem();
-        }
-
         return instance;
     }
 
@@ -59,21 +64,22 @@ public class GraphicSystem extends JPanel {
      * 
      * @param drawable The drawable to register
      * @param layer The Layer the drawable should be drawn in
-     * @return {@code true} if this registered the drawable as a result of the call
+     * @return {@code true} if the registration was successful or if it was already registered
      */
     public boolean registerDrawable(Drawable drawable) {
         ArrayList<Drawable> list = drawables.computeIfAbsent(drawable.getLayer(), c -> new ArrayList<>());
-        if (!list.contains(drawable)) {
+        if (list.contains(drawable)) {
+            return true;
+        } else {
             return list.add(drawable);
         }
-        return false;
     }
 
     /**
      * Unregister a drawable from the visualization
      * 
      * @param drawable The drawable to unregister
-     * @return {@code true} if this had the specified drawable registered for drawing
+     * @return {@code true} if unregistering was successful, {@code false} if not successful or not contained
      */
     public boolean unregisterDrawable(Drawable drawable) {
         ArrayList<Drawable> list = drawables.get(drawable.getLayer());
@@ -100,12 +106,6 @@ public class GraphicSystem extends JPanel {
         graphics.setFont(style.font());
     }
 
-    public void update() {
-        if (InputSystem.getInstance().isPressed(Action.SHOW_FPS)) {
-            GraphicSystem.showFPS = !GraphicSystem.showFPS;
-        }
-    }
-
     /**
      * Draw the entities on the Screen
      */
@@ -118,6 +118,7 @@ public class GraphicSystem extends JPanel {
         effects.sort(null);
         effects.forEach(entity -> entity.draw());
         drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).forEach(entity -> entity.draw());
+        DebugSystem.getInstance().draw();
     }
 
     /**
@@ -197,6 +198,33 @@ public class GraphicSystem extends JPanel {
     public void drawRect(ViewPos pos, int width, int height, DrawStyle style) {
         this.setStyle(style);
         this.graphics.drawRect(pos.x() - width / 2, pos.y() - height / 2, width, height);
+    }
+
+    /**
+     * Draws a line between two points
+     * 
+     * @param start The starting position of the line.
+     * @param end The ending position of the line.
+     * @param style The style to use when drawing the line.
+     */
+    public void drawLine(ViewPos start, ViewPos end, DrawStyle style) {
+        this.setStyle(style);
+        graphics.drawLine(start.x(), start.y(), end.x(), end.y());
+    }
+
+    /**
+     * Draws a line starting at a position, with a given rotation and length.
+     * 
+     * @param pos The starting position of the line.
+     * @param rotation Rotation in radians. 0 points to the right, positive counter-clockwise.
+     * @param length The length of the line in pixels.
+     * @param style The style to use when drawing the line.
+     */
+    public void drawLine(ViewPos pos, double rotation, int length, DrawStyle style) {
+        this.setStyle(style);
+        int x2 = (int) (pos.x() + Math.cos(rotation) * length);
+        int y2 = (int) (pos.y() + Math.sin(rotation) * length);
+        graphics.drawLine(pos.x(), pos.y(), x2, y2);
     }
 
     /**
@@ -297,17 +325,61 @@ public class GraphicSystem extends JPanel {
      * Draw the objects to screen
      */
     public void swapBuffers() {
-        if (showFPS) {
-            long currentTime = System.nanoTime();
-            long diff = currentTime - lastTime;
-            lastTime = currentTime;
-
-            DrawStyle style = new DrawStyle().color(Color.WHITE);
-            ViewPos pos = new ViewPos(20, 100);
-            this.drawString(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / diff)), pos, style);
-            this.drawString(String.format("Frame time: %.2f ms", diff / 1_000_000.0), pos.add(0, 25), style);
-        }
+        long currentTime = System.nanoTime();
+        this.lastdiff = currentTime - lastTime;
+        this.lastTime = currentTime;
 
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);
+    }
+
+    public void saveAsGreyScaleImage(double[][] map, int w, int h, String filePath) {
+        try {
+            BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+            for (int y = 0; y < h; y++) {
+                for (int x = 0; x < w; x++) {
+                    double v = map[y][x]; // 0..1
+                    int g = (int) (v * 255.0); // 0..255
+                    int rgb = (g << 16) | (g << 8) | g; // grayscale
+                    img.setRGB(x, y, rgb);
+                }
+            }
+
+            File file = new File(filePath);
+            // Ensure parent directories exist
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            // Save image at path
+            ImageIO.write(img, "png", file);
+        } catch (Exception e) {
+            System.err.println("Failed saving grey scale image with: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public DebugCategoryMask getCategoryMask() {
+        return new DebugCategoryMask(DebugCategory.PERFORMANCE);
+    }
+
+    @Override
+    public ArrayList<String> getTextElements() {
+        ArrayList<String> elements = new ArrayList<>();
+
+        int backgroundSize = drawables.getOrDefault(GraphicLayer.BACKGROUND, new ArrayList<>()).size();
+        int gameSize = drawables.getOrDefault(GraphicLayer.GAME, new ArrayList<>()).size();
+        int effectsSize = drawables.getOrDefault(GraphicLayer.EFFECTS, new ArrayList<>()).size();
+        int uiSize = drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).size();
+
+        elements.add(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / this.lastdiff)));
+        elements.add(String.format("Frame time: %.2f ms", this.lastdiff / 1_000_000.0));
+        elements.add(String.format("Draw calls: %d", backgroundSize + gameSize + effectsSize + uiSize));
+        elements.add(String.format("  Background: %d", backgroundSize));
+        elements.add(String.format("  Game: %d", gameSize));
+        elements.add(String.format("  Effects: %d", effectsSize));
+        elements.add(String.format("  UI: %d", uiSize));
+        return elements;
     }
 }

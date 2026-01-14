@@ -2,9 +2,7 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 
-import ZombieGame.Constants;
 import ZombieGame.Components.GunshotComponent;
-import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Components.StaticSpriteComponent;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.StaticSprite;
@@ -16,18 +14,12 @@ import ZombieGame.Systems.Physic.RectangleHitBox;
 // TODO: Make Ammunition drop in packs when the gun is changed
 // TODO: Add abstract class Gun extends Item and different implementations for Shotgun, Pistol, Rifle
 public class Ammunition extends Item {
-	private final LifetimeComponent lifetimeComponent;
 
 	/**
 	 * @param pos The initial position of the ammunition
 	 */
 	public Ammunition(WorldPos pos) {
 		super(pos, new RectangleHitBox(HitBoxType.Overlap, 21, 16), Color.ORANGE, e -> new StaticSpriteComponent(e, new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Ammo-crate_Blue.png", 1, 1, 3, 0, 0)));
-		this.lifetimeComponent = this.add(new LifetimeComponent(this, Constants.DESPAWN_COOL_DOWN));
-	}
-
-	public LifetimeComponent getLifetimeComponent() {
-		return this.lifetimeComponent;
 	}
 
 	@Override
@@ -38,6 +30,8 @@ public class Ammunition extends Item {
 	@Override
 	public void pickUp(Entity entity) {
 		super.pickUp(entity);
-		entity.getComponents(GunshotComponent.class).forEach(c -> c.restockAmmunition(20));
+		for (GunshotComponent c : entity.getComponents(GunshotComponent.class)) {
+			c.restockAmmunition(20);
+		}
 	}
 }

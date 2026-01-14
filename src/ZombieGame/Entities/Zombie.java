@@ -110,12 +110,12 @@ public class Zombie extends Character {
 	private static int maxHealthFor(ZombieType type) {
 		switch (type) {
 			case SMALL:
-				return 50;
+				return 10;
 			case AXE:
-				return 70;
+				return 12;
 			case BIG:
 			default:
-				return 100;
+				return 15;
 		}
 	}
 
@@ -396,14 +396,14 @@ public class Zombie extends Character {
 
 			// if object is zombie, step back
 			if (entityType == EntityType.ZOMBIE) {
-				this.getPositionComponent().moveBack();
+				this.getPositionComponent().resolveCollision(collision.entity());
 				this.getPositionComponent().setState(AIState.STUCK);
 				return;
 			}
 
 			// if Object is a tree, move back one step
 			if (entityType == EntityType.TREE) {
-				this.getPositionComponent().moveBack();
+				this.getPositionComponent().resolveCollision(collision.entity());
 				this.getPositionComponent().setState(AIState.STUCK);
 				return;
 			}

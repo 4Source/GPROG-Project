@@ -1,8 +1,6 @@
 package ZombieGame.Components;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;

@@ -52,6 +52,13 @@ public abstract class AnimatedSprite extends Sprite {
         this(spritePath, columnCount, rowCount, scale, new Offset(), frameTime);
     }
 
+    /**
+     * Sprite with missing texture
+     */
+    public AnimatedSprite() {
+        this("", 1, 1, 1, 0);
+    }
+
     @Override
     public void update(double deltaTime) {
         this.lastUpdate += deltaTime;

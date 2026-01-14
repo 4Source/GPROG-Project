@@ -96,6 +96,10 @@ public record ViewPos(int x, int y) {
         return new ViewPos((int) (this.x / divisor.x()), (int) (this.y / divisor.y()));
     }
 
+    public double length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
     /**
      * Converts a view position to absolute world coordinates.
      *
