@@ -30,10 +30,6 @@ public abstract class MovementComponent extends WorldPositionComponent {
 
     @Override
     public void update(double deltaTime) {
-        for (PhysicsComponent component : this.getEntity().getComponents(PhysicsComponent.class)) {
-            PhysicsSystem.getInstance().invalidateBufferFor(component);
-        }
-
         // remember old position
         this.old = this.getWorldPos();
 

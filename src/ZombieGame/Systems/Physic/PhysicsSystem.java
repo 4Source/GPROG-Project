@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -28,14 +27,17 @@ record CollisionEvent(DynamicPhysicsComponent component, PhysicsComponent other,
 
 public class PhysicsSystem implements DebuggableText {
 	private static PhysicsSystem instance;
-	private HashMap<PhysicsComponent, HashMap<PhysicsComponent, CollisionResponse>> collisionBuffer;
-	private Set<PhysicsComponent> invalidComponents;
+	private final HashSet<PhysicsComponent> registeredComponents;
+	private HashMap<PhysicsComponent, HashMap<PhysicsComponent, CollisionResponse>> previousBuffer;
+	private HashMap<PhysicsComponent, HashMap<PhysicsComponent, CollisionResponse>> currentBuffer;
+
 	private long lastUpdateDuration = -1;
 	private long lastEventDispatchDuration = -1;
 
 	private PhysicsSystem() {
-		this.collisionBuffer = new HashMap<>();
-		this.invalidComponents = new HashSet<>();
+		this.registeredComponents = new HashSet<>();
+		this.previousBuffer = new HashMap<>();
+		this.currentBuffer = new HashMap<>();
 		if (!DebugSystem.getInstance().registerDebuggable(this)) {
 			System.err.println("Failed to register PhysicsSystem to debug system");
 		}
@@ -59,24 +61,14 @@ public class PhysicsSystem implements DebuggableText {
 	 * @return {@code true} if the registration was successful or if it was already registered
 	 */
 	public boolean registerComponent(PhysicsComponent component) {
-		AtomicBoolean changed = new AtomicBoolean(false);
-
 		// Component is already registered
-		if (this.collisionBuffer.containsKey(component)) {
-			changed.set(true);
+		if (this.registeredComponents.contains(component)) {
+			return true;
 		}
 		// Add unregistered component
 		else {
-			this.collisionBuffer.computeIfAbsent(component, c -> {
-				changed.set(true);
-				return new HashMap<>();
-			});
+			return registeredComponents.add(component);
 		}
-
-		// Invalidate the buffer for this component
-		invalidateBufferFor(component);
-
-		return changed.get();
 	}
 
 	/**
@@ -86,78 +78,7 @@ public class PhysicsSystem implements DebuggableText {
 	 * @return {@code true} if unregistering was successful, {@code false} if not successful or not contained
 	 */
 	public boolean unregisterComponent(PhysicsComponent component) {
-		boolean changed = false;
-
-		// Remove the component form invalid components if existed
-		this.invalidComponents.remove(component);
-
-		// Remove the main entry of the component
-		if (this.collisionBuffer.remove(component) != null) {
-			changed = true;
-		}
-
-		// Remove secondary entries from other component which have an entry for this component
-		for (HashMap<PhysicsComponent, CollisionResponse> entriesForComponents : this.collisionBuffer.values()) {
-			if (entriesForComponents.remove(component) != null) {
-				changed = true;
-			}
-		}
-
-		return changed;
-	}
-
-	/**
-	 * Invalidate the buffered collisions of the component.
-	 * This also invalidates the collisions of the components which had a collision with the component.
-	 * <p>
-	 * The collision states are stored pairwise {@code A} ↔ {@code B}, {@code A} ↔ {@code C}, {@code C} ↔ {@code D}, when than {@code A} should be invalidated than all components that have a collision with this component also have to be invalidated.
-	 * Here {@code A}, {@code B}, and {@code C} need to be invalidated because as it is here if only {@code A} gets invalidated {@code C} and {@code B} still will contain the old information that they have a collision with {@code A}.
-	 * {@code D} should not be invalidated even if {@code C} is invalidated because of {@code A} the reason is that for {@code C} only the collision with {@code A} is not valid anymore but the collision with {@code D} still could be valid.
-	 * </p>
-	 * 
-	 * @param component The component to invalidate the collisions for
-	 */
-	public void invalidateBufferFor(PhysicsComponent component) {
-		HashMap<PhysicsComponent, CollisionResponse> entriesForInvalid = this.collisionBuffer.get(component);
-		if (entriesForInvalid != null) {
-			// Add component to the invalidated components list
-			this.invalidComponents.add(component);
-
-			// Invalidate all components which had a collision with this component
-			Iterator<Entry<PhysicsComponent, CollisionResponse>> entriesIterator = entriesForInvalid.entrySet().iterator();
-			while (entriesIterator.hasNext()) {
-				Entry<PhysicsComponent, CollisionResponse> entry = entriesIterator.next();
-				switch (entry.getValue()) {
-					case None:
-						// Remove components with no collision but an entry to reduce iteration time for future calls
-						entriesIterator.remove();
-						break;
-					case Block:
-					case Overlap:
-						// Add components with collision to the invalidation
-						this.invalidComponents.add(entry.getKey());
-						break;
-
-					default:
-						System.err.println("Invalid CollisionResponse.");
-						break;
-				}
-			}
-		} else {
-			System.err.println("Can not invalidate buffer for a component which is not registered");
-		}
-	}
-
-	/**
-	 * Calculates the distance between two points
-	 * 
-	 * @param pos1 The position of point 1
-	 * @param pos2 The position of point 2
-	 * @return The distance between point 1 and point 2
-	 */
-	public static double distance(WorldPos pos1, WorldPos pos2) {
-		WorldPos d = pos1.sub(pos2).pow2();
-		return Math.sqrt(d.x() + d.y());
+		return this.registeredComponents.remove(component);
 	}
 
 	/**
@@ -167,31 +88,39 @@ public class PhysicsSystem implements DebuggableText {
 		try {
 			ArrayDeque<CollisionEvent> eventQueue = new ArrayDeque<>();
 
-			// Update invalid components
+			// Swap the previous buffer with current buffer
+			this.previousBuffer = this.currentBuffer;
+			this.currentBuffer = new HashMap<>();
+			for (PhysicsComponent entry : this.registeredComponents) {
+				currentBuffer.put(entry, new HashMap<>());
+			}
+
+			// Update all components
 			long start = System.currentTimeMillis();
-			Iterator<PhysicsComponent> invalidIt = this.invalidComponents.iterator();
-			while (invalidIt.hasNext()) {
-				// When invalid component is a dynamic physics component check for collisions
-				PhysicsComponent invalidComponent = invalidIt.next();
-				if (invalidComponent instanceof DynamicPhysicsComponent) {
+			Iterator<PhysicsComponent> componentsIt = this.currentBuffer.keySet().iterator();
+			while (componentsIt.hasNext()) {
+				PhysicsComponent component = componentsIt.next();
+
+				// When component is a dynamic physics component check for collisions
+				if (component instanceof DynamicPhysicsComponent) {
 					// Check for every other registered component if the invalid component has a collision with it
-					for (PhysicsComponent otherComponent : this.collisionBuffer.keySet()) {
+					for (PhysicsComponent otherComponent : this.currentBuffer.keySet()) {
 						// Can not have collision with it self
-						if (otherComponent.equals(invalidComponent)) {
+						if (otherComponent.equals(component)) {
 							continue;
 						}
 
 						// Check for collisions between invalid component and other component
-						CollisionResponse response = invalidComponent.checkCollision(otherComponent);
+						CollisionResponse response = component.checkCollision(otherComponent);
 
 						// Look up the previous collision state to avoid firing onEnter every time
 						// the physics buffer is invalidated (e.g., when a character is moving).
-						CollisionResponse previous = this.collisionBuffer.getOrDefault(invalidComponent, new HashMap<>()).getOrDefault(otherComponent, CollisionResponse.None);
+						CollisionResponse previous = this.previousBuffer.getOrDefault(component, new HashMap<>()).getOrDefault(otherComponent, CollisionResponse.None);
 
 						// There is a collision between invalid component and other component
 						if (response != CollisionResponse.None) {
 							// Try getting the entries for the invalid component
-							HashMap<PhysicsComponent, CollisionResponse> entriesForInvalid = this.collisionBuffer.get(invalidComponent);
+							HashMap<PhysicsComponent, CollisionResponse> entriesForInvalid = this.currentBuffer.get(component);
 							if (entriesForInvalid != null) {
 								// Add an collision entry for invalid component with other component
 								entriesForInvalid.put(otherComponent, response);
@@ -200,10 +129,10 @@ public class PhysicsSystem implements DebuggableText {
 							}
 
 							// Try getting the entries for the other component
-							HashMap<PhysicsComponent, CollisionResponse> entriesForOther = this.collisionBuffer.get(otherComponent);
+							HashMap<PhysicsComponent, CollisionResponse> entriesForOther = this.currentBuffer.get(otherComponent);
 							if (entriesForOther != null) {
 								// Add an collision entry for other component with invalid component
-								entriesForOther.put(invalidComponent, response);
+								entriesForOther.put(component, response);
 							} else {
 								throw new Exception("This should not be possible. Tried to add to component which is not registered");
 							}
@@ -211,18 +140,18 @@ public class PhysicsSystem implements DebuggableText {
 							// Previously there was no collision but now is -> onEnter
 							if (previous == CollisionResponse.None) {
 								// Save the event to process it later
-								eventQueue.add(new CollisionEvent((DynamicPhysicsComponent) invalidComponent, otherComponent, response, EventType.ENTER));
+								eventQueue.add(new CollisionEvent((DynamicPhysicsComponent) component, otherComponent, response, EventType.ENTER));
 							}
 							// There was previously already a collision an still is -> onStay
 							else {
 								// Save the event to process it later
-								eventQueue.add(new CollisionEvent((DynamicPhysicsComponent) invalidComponent, otherComponent, response, EventType.STAY));
+								eventQueue.add(new CollisionEvent((DynamicPhysicsComponent) component, otherComponent, response, EventType.STAY));
 							}
 						}
 						// There is no collision anymore but was previously
 						else if (response == CollisionResponse.None && previous != CollisionResponse.None) {
 							// Try getting the entries for the invalid component
-							HashMap<PhysicsComponent, CollisionResponse> entriesForInvalid = this.collisionBuffer.get(invalidComponent);
+							HashMap<PhysicsComponent, CollisionResponse> entriesForInvalid = this.currentBuffer.get(component);
 							if (entriesForInvalid != null) {
 								// Remove the previous collision entry for invalid component with other component
 								entriesForInvalid.remove(otherComponent);
@@ -231,23 +160,20 @@ public class PhysicsSystem implements DebuggableText {
 							}
 
 							// Try getting the entries for the other component
-							HashMap<PhysicsComponent, CollisionResponse> entriesForOther = this.collisionBuffer.get(otherComponent);
+							HashMap<PhysicsComponent, CollisionResponse> entriesForOther = this.currentBuffer.get(otherComponent);
 							if (entriesForOther != null) {
 								// Remove the previous collision entry for other component with invalid component
-								entriesForOther.remove(invalidComponent);
+								entriesForOther.remove(component);
 							} else {
 								throw new Exception("This should not be possible. Tried to remove from a component which is not registered");
 							}
 
 							// There was previously already a collision but is not anymore -> onExit
 							// Save the event to process it later
-							eventQueue.add(new CollisionEvent((DynamicPhysicsComponent) invalidComponent, otherComponent, response, EventType.EXIT));
+							eventQueue.add(new CollisionEvent((DynamicPhysicsComponent) component, otherComponent, response, EventType.EXIT));
 						}
 					}
 				}
-
-				// Remove component from invalid components list
-				invalidIt.remove();
 			}
 			this.lastUpdateDuration = (System.currentTimeMillis() - start);
 
@@ -305,18 +231,12 @@ public class PhysicsSystem implements DebuggableText {
 		ArrayList<Collision> result = new ArrayList<>();
 
 		// Physics component is not registered in the PhysicsSystem
-		if (!this.collisionBuffer.containsKey(component)) {
+		if (!this.currentBuffer.containsKey(component)) {
 			System.err.println("PhysicsComponent of Entity is not registered!");
 			return result;
 		}
 
-		// Physics component not up to date
-		if (this.invalidComponents.contains(component)) {
-			System.out.println("Unplanned update of PhysicsSystem!");
-			update();
-		}
-
-		HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.collisionBuffer.get(component);
+		HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.currentBuffer.get(component);
 		if (entriesForComponent != null) {
 			for (Entry<PhysicsComponent, CollisionResponse> entry : entriesForComponent.entrySet()) {
 				if (entry.getValue() != CollisionResponse.None) {
@@ -356,18 +276,12 @@ public class PhysicsSystem implements DebuggableText {
 		AtomicBoolean result = new AtomicBoolean(false);
 
 		// Physics component is not registered in the PhysicsSystem
-		if (!this.collisionBuffer.containsKey(component)) {
+		if (!this.currentBuffer.containsKey(component)) {
 			System.err.println("PhysicsComponent of Entity is not registered!");
 			return false;
 		}
 
-		// Physics component not up to date
-		if (this.invalidComponents.contains(component)) {
-			System.out.println("Unplanned update of PhysicsSystem!");
-			update();
-		}
-
-		HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.collisionBuffer.get(component);
+		HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.currentBuffer.get(component);
 		if (entriesForComponent != null) {
 			for (CollisionResponse response : entriesForComponent.values()) {
 				if (response != CollisionResponse.None) {
@@ -455,15 +369,10 @@ public class PhysicsSystem implements DebuggableText {
 		AtomicBoolean result = new AtomicBoolean(false);
 
 		// Physics component is not registered in the PhysicsSystem
-		if (this.collisionBuffer.containsKey(component)) {
+		if (this.currentBuffer.containsKey(component)) {
 			System.err.println("PhysicsComponent of Entity is registered, use 'hasCollision' instead if this is expected!");
 
-			// Physics component not up to date
-			if (this.invalidComponents.contains(component)) {
-				System.out.println("Unplanned update of PhysicsSystem!");
-				update();
-			}
-			HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.collisionBuffer.get(component);
+			HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.currentBuffer.get(component);
 			if (entriesForComponent != null) {
 				for (CollisionResponse response : entriesForComponent.values()) {
 					if (response != CollisionResponse.None) {
@@ -474,7 +383,7 @@ public class PhysicsSystem implements DebuggableText {
 			}
 		}
 
-		for (PhysicsComponent otherComponent : this.collisionBuffer.keySet()) {
+		for (PhysicsComponent otherComponent : this.currentBuffer.keySet()) {
 			if (otherComponent.equals(component)) {
 				continue;
 			}
@@ -489,6 +398,18 @@ public class PhysicsSystem implements DebuggableText {
 		return result.get();
 	}
 
+	/**
+	 * Calculates the distance between two points
+	 * 
+	 * @param pos1 The position of point 1
+	 * @param pos2 The position of point 2
+	 * @return The distance between point 1 and point 2
+	 */
+	public static double distance(WorldPos pos1, WorldPos pos2) {
+		WorldPos d = pos1.sub(pos2).pow2();
+		return Math.sqrt(d.x() + d.y());
+	}
+
 	@Override
 	public DebugCategoryMask getCategoryMask() {
 		return new DebugCategoryMask(DebugCategory.PERFORMANCE, DebugCategory.PHYSICS);
@@ -501,7 +422,7 @@ public class PhysicsSystem implements DebuggableText {
 		int staticCount = 0;
 		int dynamicCount = 0;
 		int coll = 0;
-		for (PhysicsComponent c : this.collisionBuffer.keySet()) {
+		for (PhysicsComponent c : this.currentBuffer.keySet()) {
 			coll += this.getCollisions(c).size();
 			if (c instanceof DynamicPhysicsComponent) {
 				dynamicCount++;
@@ -510,11 +431,10 @@ public class PhysicsSystem implements DebuggableText {
 				staticCount++;
 			}
 		}
-		elements.add(String.format("Physics Components: %d", this.collisionBuffer.size()));
+		elements.add(String.format("Physics Components: %d", this.currentBuffer.size()));
 		elements.add(String.format("Physics Static Components: %d", staticCount));
 		elements.add(String.format("Physics Dynamic Components: %d", dynamicCount));
 		elements.add(String.format("Physics Collisions: %d", coll));
-		elements.add(String.format("Physics invalid Components: %d", this.invalidComponents.size()));
 		elements.add(String.format("Physics update time: %d", this.lastUpdateDuration));
 		elements.add(String.format("Physics event dispatch time: %d", this.lastEventDispatchDuration));
 		return elements;

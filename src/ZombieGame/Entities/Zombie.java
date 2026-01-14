@@ -110,12 +110,12 @@ public class Zombie extends Character {
 	private static int maxHealthFor(ZombieType type) {
 		switch (type) {
 			case SMALL:
-				return 50;
+				return 10;
 			case AXE:
-				return 70;
+				return 12;
 			case BIG:
 			default:
-				return 100;
+				return 15;
 		}
 	}
 

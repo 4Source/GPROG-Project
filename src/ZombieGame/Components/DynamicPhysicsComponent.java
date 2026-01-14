@@ -42,13 +42,6 @@ public class DynamicPhysicsComponent extends PhysicsComponent {
     }
 
     /**
-     * Backwards-compatible constructor (no onStay callback).
-     */
-    public DynamicPhysicsComponent(Entity entity, HitBox hitBox, PhysicsCollisionLayer layer, PhysicsCollisionMask mask, Consumer<Collision> onEnter, Consumer<Collision> onExit) {
-        this(entity, hitBox, layer, mask, onEnter, collision -> {}, onExit);
-    }
-
-    /**
      * @param entity The entity to which the components belongs to
      * @param hitBox The hit box against which the {@link PhysicsSystem physics system} checks for collisions
      * @param layer The layer on which the PhysicsComponent should belong
