@@ -42,7 +42,7 @@ record ChunkMove(Entity entity, ChunkIndex oldChunk) {
 
 public abstract class World implements DebuggableText {
 	// if game is over
-	public boolean gameOver = false;
+	public boolean gameOver;
 	private long lastChunkGenerationTime = -1;
 	private double worldTimeSeconds = 0;
 
@@ -62,6 +62,7 @@ public abstract class World implements DebuggableText {
 		if (!DebugSystem.getInstance().registerDebuggable(this)) {
 			System.err.println("Failed to register World to debug system");
 		}
+		this.gameOver = false;
 	}
 
 	/**
