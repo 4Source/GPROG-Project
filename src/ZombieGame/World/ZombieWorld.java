@@ -115,24 +115,24 @@ public class ZombieWorld extends World {
 
 	@Override
 	public Chunk generateChunk(ChunkIndex index) {
-		final int CHUNK_SIZE = Chunk.SIZE;
 		// radius ≤ CHUNK_SIZE / 6
 		final int BLUR_RADIUS = 2;
 		// sigma ≈ radius × 0.7
 		final float SIGMA = 1.2f;
 
-		int W = CHUNK_SIZE + 2 * BLUR_RADIUS;
+		int W = Chunk.DATA_SIZE + 2 * BLUR_RADIUS;
 		double[][] map = new double[W][W];
+		double[][] mapTakeOver = new double[W][W];
 		Chunk currentTempChunk = new Chunk(this, index);
 
 		// Fill with random values
 		for (int y = 0; y < map.length; y++) {
 			boolean isTopChunk = y < BLUR_RADIUS;
-			boolean isBottomChunk = y >= CHUNK_SIZE + BLUR_RADIUS;
+			boolean isBottomChunk = y >= Chunk.DATA_SIZE + BLUR_RADIUS;
 
 			for (int x = 0; x < map[y].length; x++) {
 				boolean isLeftChunk = x < BLUR_RADIUS;
-				boolean isRightChunk = x >= CHUNK_SIZE + BLUR_RADIUS;
+				boolean isRightChunk = x >= Chunk.DATA_SIZE + BLUR_RADIUS;
 
 				// Getting the tile from chunk to the side to fill the existing values in
 				if (isTopChunk || isBottomChunk || isLeftChunk || isRightChunk) {
@@ -140,6 +140,7 @@ public class ZombieWorld extends World {
 
 					if (tileType != null) {
 						map[y][x] = tileType.getValue();
+						mapTakeOver[y][x] = tileType.getValue();
 						continue;
 					}
 				}
@@ -163,17 +164,32 @@ public class ZombieWorld extends World {
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
 		for (int y = 0; y < map.length; y++) {
+			boolean isTopChunk = y < BLUR_RADIUS;
+			boolean isBottomChunk = y >= Chunk.DATA_SIZE + BLUR_RADIUS;
 			for (int x = 0; x < map[y].length; x++) {
+				boolean isLeftChunk = x < BLUR_RADIUS;
+				boolean isRightChunk = x >= Chunk.DATA_SIZE + BLUR_RADIUS;
+
 				double v = map[y][x];
-				if (v < min)
+				if (v < min) {
 					min = v;
-				if (v > max)
+				}
+				if (v > max) {
 					max = v;
+				}
+
+				// Getting the tile from chunk to the side to fill the existing values in
+				// Reset tiles from previous generated chunks which have corners/edges together with this chunk
+				if (isTopChunk || isBottomChunk || isLeftChunk || isRightChunk) {
+					map[y][x] = mapTakeOver[y][x];
+
+					// TEST: if edge/corner tiles are correctly used
+				}
 			}
 		}
 
-		double[][] t = new double[CHUNK_SIZE][CHUNK_SIZE];
-		TileType[][] tiles = new TileType[CHUNK_SIZE][CHUNK_SIZE];
+		double[][] t = new double[Chunk.DATA_SIZE][Chunk.DATA_SIZE];
+		TileType[][] tiles = new TileType[Chunk.DATA_SIZE][Chunk.DATA_SIZE];
 		for (int y = 0; y < tiles.length; y++) {
 			for (int x = 0; x < tiles[y].length; x++) {
 				// Map everything to 0..1
@@ -182,7 +198,6 @@ public class ZombieWorld extends World {
 				// Convert the random values to TileTypes
 				tiles[y][x] = TileType.select(map[y + BLUR_RADIUS][x + BLUR_RADIUS]);
 				t[y][x] = tiles[y][x].getValue();
-
 			}
 		}
 

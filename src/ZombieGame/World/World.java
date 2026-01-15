@@ -648,7 +648,7 @@ public abstract class World implements DebuggableText {
 	 * @return The amount of generated entities
 	 */
 	protected final <T extends Entity> int generateEntity(ChunkIndex index, double density, Function<WorldPos, T> createCallback) {
-		double lambda = Chunk.SIZE / 8 * density;
+		double lambda = Chunk.CHUNK_SIZE / 8 * density;
 
 		String className = "Unknown";
 

@@ -1,5 +1,6 @@
 package ZombieGame.World;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.security.InvalidParameterException;
 import java.util.Optional;
@@ -19,7 +20,19 @@ import ZombieGame.Systems.Graphic.GraphicSystem;
 public class Chunk implements Drawable, DebuggableGeometry {
     private final UUID uuid = UUID.randomUUID();
     public static double TILE_SIZE = 0;
-    public static final int SIZE = 16;
+    public static final int CHUNK_SIZE = 9;
+    public static final int DATA_SIZE = (CHUNK_SIZE / 3) * 2 + 1;
+
+    // BUG: For CHUNK_SIZE=15
+    // Exception in thread "main" java.security.InvalidParameterException: Current tile of chunk is not inside boundaries
+    //     at ZombieGame.World.Chunk.getTileToTopLeft(Chunk.java:275)
+    //     at ZombieGame.World.Chunk.<init>(Chunk.java:73)
+    //     at ZombieGame.World.ZombieWorld.generateChunk(ZombieWorld.java:214)
+    //     at ZombieGame.World.World.processGenerationQueue(World.java:767)   
+    //     at ZombieGame.World.ZombieWorld.<init>(ZombieWorld.java:53)        
+    //     at ZombieGame.Game.<init>(Game.java:47)
+    //     at ZombieGame.Game.main(Game.java:327)
+
     /**
      * Additional chunks around the visible viewport to load
      */
@@ -38,19 +51,54 @@ public class Chunk implements Drawable, DebuggableGeometry {
     private final World world;
     private final ChunkIndex index;
 
+    /**
+     * @param world
+     * @param index
+     * @param tiles The edges and corner types of the tiles. Needs to chunk size + 1
+     */
     public Chunk(World world, ChunkIndex index, TileType[][] tiles) {
+        if (Chunk.CHUNK_SIZE < 3) {
+            // Because of the Tile selection it requires a corner for each tile
+            throw new IllegalArgumentException("Size of chunk have to be greater or equal 3");
+        }
+        if (Chunk.CHUNK_SIZE % 3 != 0) {
+            // Because of the Tile selection it requires a corner for each tile
+            throw new IllegalArgumentException("Size of chunk have to be multiple of 3");
+        }
         this.world = world;
         this.index = index;
         this.tiles = tiles;
 
-        StaticSprite[][] sprites = new StaticSprite[tilesCountY()][tilesCountX()];
-        for (int y = 0; y < tilesCountY(); y++) {
-            TileType[] tileRows = tiles[y];
-            for (int x = 0; x < tilesCountX(); x++) {
-                TileType tile = tileRows[x];
-                sprites[y][x] = TileType.TileToSprite(tile, getTileToTop(x, y).orElse(tile), getTileToTopRight(x, y).orElse(tile), getTileToRight(x, y).orElse(tile), getTileToBottomRight(x, y).orElse(tile), getTileToBottom(x, y).orElse(tile), getTileToBottomLeft(x, y).orElse(tile), getTileToLeft(x, y).orElse(tile), getTileToTopLeft(x, y).orElse(tile));
+        StaticSprite[][] sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
+
+        if (tiles == null || tiles.length != DATA_SIZE) {
+            throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of rows");
+        }
+
+        for (int y = 0; y < CHUNK_SIZE; y += 3) {
+            TileType[] tileRows = tiles[y / 3 * 2];
+            if (tileRows == null || tileRows.length != DATA_SIZE) {
+                throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of columns");
+            }
+            for (int x = 0; x < CHUNK_SIZE; x += 3) {
+                TileType tile = tileRows[x / 3 * 2];
+                StaticSprite[][] temp = TileType.ClusterToSprites(getTileToTopLeft(x, y).orElse(tile), getTileToTop(x, y).orElse(tile), getTileToTopRight(x, y).orElse(tile), getTileToLeft(x, y).orElse(tile), tile, getTileToRight(x, y).orElse(tile), getTileToBottomLeft(x, y).orElse(tile), getTileToBottom(x, y).orElse(tile), getTileToBottomRight(x, y).orElse(tile));
+
+                sprites[y + 0][x + 0] = temp[0][0];
+                sprites[y + 0][x + 1] = temp[0][1];
+                sprites[y + 0][x + 2] = temp[0][2];
+
+                sprites[y + 1][x + 0] = temp[1][0];
+                sprites[y + 1][x + 1] = temp[1][1];
+                sprites[y + 1][x + 2] = temp[1][2];
+
+                sprites[y + 2][x + 0] = temp[2][0];
+                sprites[y + 2][x + 1] = temp[2][1];
+                sprites[y + 2][x + 2] = temp[2][2];
+
             }
         }
+
         this.sprites = sprites;
     }
 
@@ -58,10 +106,10 @@ public class Chunk implements Drawable, DebuggableGeometry {
         this.world = world;
         this.index = index;
 
-        this.tiles = new TileType[SIZE][SIZE];
-        this.sprites = new StaticSprite[SIZE][SIZE];
-        for (int y = 0; y < SIZE; y++) {
-            for (int x = 0; x < SIZE; x++) {
+        this.tiles = new TileType[DATA_SIZE][DATA_SIZE];
+        this.sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (int x = 0; x < CHUNK_SIZE; x++) {
                 this.sprites[y][x] = new StaticSprite();
             }
         }
@@ -71,9 +119,9 @@ public class Chunk implements Drawable, DebuggableGeometry {
     public void draw() {
         ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
 
-        for (int y = 0; y < tilesCountY(); y++) {
+        for (int y = 0; y < spritesCountY(); y++) {
             StaticSprite[] spritesRows = this.sprites[y];
-            for (int x = 0; x < tilesCountX(); x++) {
+            for (int x = 0; x < spritesCountX(); x++) {
                 StaticSprite sprite = spritesRows[x];
                 Offset offset = new Offset((x + 0.5) * sprite.getDrawWidth(), (y + 0.5) * sprite.getDrawHeight());
                 sprite.draw(viewPos.add(offset));
@@ -94,20 +142,28 @@ public class Chunk implements Drawable, DebuggableGeometry {
     @Override
     public void drawDebug() {
         ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
+        StaticSprite ref = this.sprites[0][0];
 
+        for (int y = 0; y < spritesCountY(); y++) {
+            for (int x = 0; x < spritesCountX(); x++) {
+                Offset offset = new Offset((x + 0.5) * ref.getDrawWidth(), (y + 0.5) * ref.getDrawHeight());
+
+                GraphicSystem.getInstance().drawRect(viewPos.add(offset), (int) ref.getDrawWidth(), (int) ref.getDrawHeight(), new DrawStyle().color(Color.RED));
+            }
+        }
+        
         for (int y = 0; y < tilesCountY(); y++) {
-            StaticSprite[] spritesRows = this.sprites[y];
             TileType[] tilesRows = this.tiles[y];
             for (int x = 0; x < tilesCountX(); x++) {
-                StaticSprite sprite = spritesRows[x];
                 TileType tile = tilesRows[x];
-
-                int fontSize = (int) (sprite.getDrawHeight() * 0.6);
-                Offset offset = new Offset((x + 0.3) * sprite.getDrawWidth(), (y + 0.7) * sprite.getDrawHeight());
                 String label;
                 label = tile == TileType.DIRT ? "D" : "G";
+                Color c = tile == TileType.DIRT ? Color.RED : Color.GREEN;
 
-                GraphicSystem.getInstance().drawString(label, viewPos.add(offset), new DrawStyle().font(new Font("ARIAL", Font.PLAIN, fontSize)));
+                int fontSize = (int) (ref.getDrawHeight() * 0.6);
+                Offset offset = new Offset(x * 1.5 * ref.getDrawWidth(), y * 1.5 * ref.getDrawHeight()).add(ref.getDrawWidth() * -0.2, ref.getDrawHeight() * 0.2);
+
+                GraphicSystem.getInstance().drawString(label, viewPos.add(offset), new DrawStyle().font(new Font("ARIAL", Font.BOLD, fontSize)).color(c));
             }
         }
     }
@@ -129,6 +185,13 @@ public class Chunk implements Drawable, DebuggableGeometry {
         return this.tiles.length;
     }
 
+    public int spritesCountX() {
+        return this.sprites[0].length;
+    }
+
+    public int spritesCountY() {
+        return this.sprites.length;    }
+
     public static double getChunkSize() {
         if (TILE_SIZE <= 0) {
             TileType.preLoadSprite();
@@ -136,7 +199,7 @@ public class Chunk implements Drawable, DebuggableGeometry {
                 throw new InvalidParameterException("TILE_SIZE is not set jet");
             }
         }
-        return TILE_SIZE * SIZE;
+        return TILE_SIZE * CHUNK_SIZE;
     }
 
     public Optional<Chunk> getChunkToTop() {

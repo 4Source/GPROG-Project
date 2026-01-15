@@ -246,7 +246,7 @@ public final class Game {
 
 			Game.world.update(secondsDiff);
 			Game.world.adjustWorldPart();
-			Game.world.processGenerationQueue(10);
+			Game.world.processGenerationQueue(2);
 
 			// Update all Entities
 			Iterator<Entity> entityIt = Game.world.loadedEntityIterator();
@@ -330,7 +330,8 @@ public final class Game {
 		System.out.println("Starting game...");
 		game.run();
 
-		// TileType.testTileGrid(3);
+		// Generate Tile test sheet
+		// TileType.testTileClusters();
 	}
 }
 
@@ -339,3 +340,5 @@ public final class Game {
 // BUG: #3 After 2 time hit by a zombie the zombie freezes
 
 // BUG: #4 BABY Zombies can bug into player
+
+// TODO: More Obstacles for visual variety
