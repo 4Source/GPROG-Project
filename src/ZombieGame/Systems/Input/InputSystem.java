@@ -35,6 +35,7 @@ public class InputSystem implements KeyListener, MouseListener, MouseMotionListe
 		this.setKeyMapping(Action.DEBUG_PHYSICS, DeviceType.KEYBOARD, KeyEvent.VK_F3);
 		this.setKeyMapping(Action.DEBUG_COLLISION, DeviceType.KEYBOARD, KeyEvent.VK_F4);
 		this.setKeyMapping(Action.DEBUG_AI, DeviceType.KEYBOARD, KeyEvent.VK_F5);
+		this.setKeyMapping(Action.DEBUG_UI, DeviceType.KEYBOARD, KeyEvent.VK_F6);
 
 		this.setKeyMapping(Action.PRIMARY_CLICK, DeviceType.MOUSE, MouseEvent.BUTTON1);
 	}

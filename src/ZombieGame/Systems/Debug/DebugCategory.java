@@ -59,7 +59,16 @@ public enum DebugCategory {
      * <li>Behavior tree or state machine data</li>
      * </ul>
      */
-    AI(1 << 4);
+    AI(1 << 4),
+    /**
+     * User interface 
+     *      * Includes:
+     * <ul>
+     * <li>Interaction Boundaries</li>
+     * *
+     * </ul>
+     */
+    UI(1 << 5);
 
     public final int bit;
 

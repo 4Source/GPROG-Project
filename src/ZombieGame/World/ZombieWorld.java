@@ -8,12 +8,11 @@ import ZombieGame.Viewport;
 import ZombieGame.ZombieType;
 import ZombieGame.Algorithms.GaussianBlur;
 import ZombieGame.Coordinates.ChunkIndex;
-import ZombieGame.Coordinates.ViewPos;
+import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Ammunition;
 import ZombieGame.Entities.AmmunitionCounter;
 import ZombieGame.Entities.HeartUI;
-import ZombieGame.Entities.HelpText;
 import ZombieGame.Entities.Tree;
 import ZombieGame.Entities.Zombie;
 import ZombieGame.Entities.ZombieCounter;
@@ -30,16 +29,8 @@ public class ZombieWorld extends World {
 	private final double ZOMBIE_GROTH = 0.08;
 	private final double CURVE = 1.8;
 
-	public void init() {
-		// add the Avatar
-		this.spawnEntity(new Avatar(Viewport.getCenter().toWorldPos(this)));
-
-		this.addUIElement(new ZombieCounter(Viewport.getTopLeft().add(20, 40)));
-		this.addUIElement(new Timer(Viewport.getTopCenter().add(-45, 40)));
-		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -56)));
-		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(20, -68), 0));
-		this.addUIElement(new HelpText(new ViewPos(100, 400), 10.0));
-
+	public ZombieWorld() {
+		super();
 		// Pregenerate chunks
 		final int PREGENERATE_CHUNK_X = 8;
 		final int PREGENERATE_CHUNK_Y = 6;
@@ -48,8 +39,20 @@ public class ZombieWorld extends World {
 				this.enqueueChunkForGeneration(new ChunkIndex(x, y));
 			}
 		}
+
 		this.processGenerationQueue(this.getGenerationQueueSize());
+
+		// add the Avatar
+		this.spawnEntity(new Avatar(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 3)).toWorldPos(this)));
+		this.update(0);
 		this.updateLoadedChunks();
+	}
+
+	public void init() {
+		this.addUIElement(new ZombieCounter(Viewport.getTopLeft().add(20, 40)));
+		this.addUIElement(new Timer(Viewport.getTopCenter().add(-45, 40)));
+		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -56)));
+		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(20, -68), 0));
 	}
 
 	public void UpdateEntityGeneration(double deltaTime) {

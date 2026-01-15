@@ -3,12 +3,18 @@ package ZombieGame;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import ZombieGame.Components.ImageComponent;
 import ZombieGame.Components.LivingComponent;
 import ZombieGame.Components.VisualComponent;
+import ZombieGame.Coordinates.Offset;
+import ZombieGame.Entities.Button;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.UIElement;
+import ZombieGame.Sprites.StaticSprite;
 import ZombieGame.Systems.Debug.DebugSystem;
+import ZombieGame.Systems.Graphic.GraphicLayer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
@@ -37,8 +43,121 @@ public final class Game {
 
 		// Create a new world
 		Game.world = new ZombieWorld();
-		Game.world.init();
+		Game.world.adjustWorldPart();
+	}
 
+	private void startScreen() {
+		AtomicBoolean started = new AtomicBoolean(false);
+
+		UIElement title = new UIElement(Viewport.getTopCenter().add(new Offset(0, Viewport.getScreenHeight() / 3)),
+				e -> new ImageComponent(e, new StaticSprite("assets\\TheUndeadTitle.png", 1, 1, 1, 0, 0), GraphicLayer.UI)) {
+		};
+		Button startBtn = new Button(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 4)),
+				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Play_Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Play_Not-Pressed.png", 1, 1, 3, 0, 0),
+				() -> {
+					started.set(true);
+				});
+		Button exitBtn = new Button(
+				Viewport.getBottomCenter()
+						.sub(new Offset(0, Viewport.getScreenHeight() / 4).sub(0,
+								startBtn.getUIComponent().getHeight() + 10)),
+				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Not-Pressed.png", 1, 1, 3, 0, 0),
+				() -> {
+					System.exit(0);
+				});
+
+		// Game.world.addUIElement(help);
+		Game.world.addUIElement(title);
+		Game.world.addUIElement(startBtn);
+		Game.world.addUIElement(exitBtn);
+
+		while (!started.get()) {
+			double secondsDiff = calculateDeltaTime();
+
+			// Update the visual components of all Entities
+			Iterator<Entity> entityIt = Game.world.loadedEntityIterator();
+			while (entityIt.hasNext()) {
+				Entity e = entityIt.next();
+
+				for (VisualComponent c : e.getComponents(VisualComponent.class)) {
+					c.update(secondsDiff);
+				}
+			}
+
+			// Update all UI Elements
+			Iterator<UIElement> uiIt = Game.world.uiElementIterator();
+			while (uiIt.hasNext()) {
+				UIElement ui = uiIt.next();
+
+				// Update entity
+				ui.update(secondsDiff);
+
+				// Remove entity if not alive
+				if (ui.getComponents(LivingComponent.class).stream().anyMatch(c -> c.isLiving() == false)) {
+					uiIt.remove();
+					continue;
+				}
+			}
+
+			DebugSystem.getInstance().update();
+
+			// After handled the inputs of components clear the input system
+			InputSystem.getInstance().clear();
+
+			GraphicSystem.getInstance().clear();
+			GraphicSystem.getInstance().draw();
+			GraphicSystem.getInstance().swapBuffers();
+		}
+
+		Game.world.removeUIElement(title);
+		Game.world.removeUIElement(startBtn);
+		Game.world.removeUIElement(exitBtn);
+	}
+
+	private void pauseMenu() {
+		System.exit(0);
+	}
+
+	private void gameOver() {
+		while (Game.world.gameOver) {
+			double secondsDiff = calculateDeltaTime();
+
+			// Update the visual components of avatar for death animation
+			Iterator<Entity> entityIt = Game.world.loadedEntityIterator();
+			while (entityIt.hasNext()) {
+				Entity e = entityIt.next();
+				if (e.getType() == EntityType.AVATAR) {
+					for (VisualComponent c : e.getComponents(VisualComponent.class)) {
+						c.update(secondsDiff);
+					}
+				}
+			}
+
+			// Update all UI Elements
+			Iterator<UIElement> uiIt = Game.world.uiElementIterator();
+			while (uiIt.hasNext()) {
+				UIElement ui = uiIt.next();
+
+				// Update entity
+				ui.update(secondsDiff);
+
+				// Remove entity if not alive
+				if (ui.getComponents(LivingComponent.class).stream().anyMatch(c -> c.isLiving() == false)) {
+					uiIt.remove();
+					continue;
+				}
+			}
+
+			GraphicSystem.getInstance().clear();
+			GraphicSystem.getInstance().draw();
+			GraphicSystem.getInstance().swapBuffers();
+		}
+	}
+
+	private void run() {
+		Game.world.init();
 		lastTick = System.currentTimeMillis();
 
 		while (true) {
@@ -47,24 +166,12 @@ public final class Game {
 
 			// Open Pause menu
 			if (InputSystem.getInstance().isPressed(Action.GAME_PAUSE)) {
-				System.exit(0);
+				pauseMenu();
 			}
 
 			// Game over
 			if (Game.world.gameOver) {
-				Iterator<Entity> entityIt = Game.world.loadedEntityIterator();
-				while (entityIt.hasNext()) {
-					Entity e = entityIt.next();
-
-					for (VisualComponent c : e.getComponents(VisualComponent.class)) {
-						c.update(secondsDiff);
-					}
-				}
-
-				GraphicSystem.getInstance().clear();
-				GraphicSystem.getInstance().draw();
-				GraphicSystem.getInstance().swapBuffers();
-				continue;
+				gameOver();
 			}
 
 			Game.world.update(secondsDiff);
@@ -146,9 +253,12 @@ public final class Game {
 	}
 
 	public static void main(String[] args) {
+		System.out.println("Creating world...");
+		Game game = new Game();
+		System.out.println("Loading game...");
+		game.startScreen();
 		System.out.println("Starting game...");
-		new Game();
-		System.out.println("Game stopped...");
+		game.run();
 	}
 }
 
