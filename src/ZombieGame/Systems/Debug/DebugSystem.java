@@ -178,5 +178,11 @@ public class DebugSystem {
             }));
             System.out.println("Toggle DEBUG_AI " + this.enabledCategories.get(DebugCategory.AI));
         }
+        if (InputSystem.getInstance().isPressed(Action.DEBUG_UI)) {
+            this.enabledCategories.put(DebugCategory.UI, !this.enabledCategories.computeIfAbsent(DebugCategory.UI, c -> {
+                return false;
+            }));
+            System.out.println("Toggle DEBUG_UI " + this.enabledCategories.get(DebugCategory.UI));
+        }
     }
 }

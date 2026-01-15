@@ -56,7 +56,11 @@ public enum Action {
     /**
      * Show debug performance info
      */
-    DEBUG_PERFORMANCE(null);
+    DEBUG_PERFORMANCE(null),
+    /**
+     * Show debug ui info
+     */
+    DEBUG_UI(null);
 
     private final String label;
 
