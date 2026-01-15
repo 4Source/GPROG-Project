@@ -4,25 +4,17 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.List;
 
-import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
 
 public class HelpText extends TextElement {
-    private final LifetimeComponent lifetimeComponent;
 
     /**
      * @param pos The position in the world
-     * @param visibilityLifetime The time how long the text should be visible before disappearing
      */
-    public HelpText(ViewPos pos, double visibilityLifetime) {
+    public HelpText(ViewPos pos) {
         super(pos, new Color(255, 255, 255, 200), new Font("Arial", Font.PLAIN, 24));
-        this.lifetimeComponent = this.add(new LifetimeComponent(this, visibilityLifetime));
-    }
-
-    public LifetimeComponent getLifetimeComponent() {
-        return this.lifetimeComponent;
     }
 
     @Override
