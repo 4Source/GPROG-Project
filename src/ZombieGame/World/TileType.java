@@ -13,7 +13,7 @@ import javax.management.InvalidAttributeValueException;
 import ZombieGame.Sprites.StaticSprite;
 
 public enum TileType {
-    GRASS(0.5), DIRT(0.5);
+    GRASS(1), DIRT(1);
 
     TileType(double weight) {
         this.weight = weight;
@@ -482,7 +482,5 @@ class ClusterTileLookup {
         TABLE[247] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
         TABLE[223] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
         TABLE[255] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-
-        
     }
 }

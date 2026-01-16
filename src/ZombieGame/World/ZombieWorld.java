@@ -116,74 +116,76 @@ public class ZombieWorld extends World {
 	@Override
 	public Chunk generateChunk(ChunkIndex index) {
 		// radius ≤ CHUNK_SIZE / 6
-		final int BLUR_RADIUS = 2;
+		final int BLUR_RADIUS = 0; // BUG: only 0 is working 
 		// sigma ≈ radius × 0.7
 		final float SIGMA = 1.2f;
 
 		int W = Chunk.DATA_SIZE + 2 * BLUR_RADIUS;
-		double[][] map = new double[W][W];
-		double[][] mapTakeOver = new double[W][W];
+		double[][] tileData = new double[W][W];
+		double[][] takeOverTileData = new double[W][W];
 		Chunk currentTempChunk = new Chunk(this, index);
 
 		// Fill with random values
-		for (int y = 0; y < map.length; y++) {
-			boolean isTopChunk = y < BLUR_RADIUS;
-			boolean isBottomChunk = y >= Chunk.DATA_SIZE + BLUR_RADIUS;
+		for (int y = 0; y < tileData.length; y++) {
+			boolean isTopChunk = y < BLUR_RADIUS + 1;
+			boolean isBottomChunk = y >= Chunk.DATA_SIZE + BLUR_RADIUS - 1;
 
-			for (int x = 0; x < map[y].length; x++) {
-				boolean isLeftChunk = x < BLUR_RADIUS;
-				boolean isRightChunk = x >= Chunk.DATA_SIZE + BLUR_RADIUS;
+			for (int x = 0; x < tileData[y].length; x++) {
+				boolean isLeftChunk = x < BLUR_RADIUS + 1;
+				boolean isRightChunk = x >= Chunk.DATA_SIZE + BLUR_RADIUS - 1;
 
 				// Getting the tile from chunk to the side to fill the existing values in
 				if (isTopChunk || isBottomChunk || isLeftChunk || isRightChunk) {
-					TileType tileType = currentTempChunk.getTile(x - BLUR_RADIUS, y - BLUR_RADIUS).orElse(null);
+					int offsetY = -BLUR_RADIUS;
+					int offsetX = -BLUR_RADIUS;
+					if (isTopChunk) {
+						offsetY = -(BLUR_RADIUS + 1);
+					} else if (isBottomChunk) {
+						offsetY = 1;
+					}
+
+					if (isLeftChunk) {
+						offsetX = -(BLUR_RADIUS + 1);
+					} else if (isRightChunk) {
+						offsetX = 1;
+					}
+
+					TileType tileType = currentTempChunk.getTile(x + offsetX, y + offsetY).orElse(null);
 
 					if (tileType != null) {
-						map[y][x] = tileType.getValue();
-						mapTakeOver[y][x] = tileType.getValue();
+						tileData[y][x] = tileType.getValue();
+						takeOverTileData[y][x] = tileType.getValue();
 						continue;
 					}
 				}
 
-				map[y][x] = ThreadLocalRandom.current().nextDouble();
+				tileData[y][x] = ThreadLocalRandom.current().nextDouble();
+				takeOverTileData[y][x] = Double.NaN;
 			}
 		}
 
 		if (debugGeneration) {
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/rng/%d_%d_chunk_rng.png", index.x(), index.y()));
+			GraphicSystem.getInstance().saveAsGreyScaleImage(tileData, tileData.length, tileData[0].length, String.format("ChunkGeneration/rng/%d_%d_chunk_rng.png", index.x(), index.y()));
 		}
 
 		// Smooth the random values
-		map = GaussianBlur.blur(map, BLUR_RADIUS, SIGMA);
+		tileData = GaussianBlur.blur(tileData, BLUR_RADIUS, SIGMA);
 
 		if (debugGeneration) {
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/blur/%d_%d_chunk_blur.png", index.x(), index.y()));
+			GraphicSystem.getInstance().saveAsGreyScaleImage(tileData, tileData.length, tileData[0].length, String.format("ChunkGeneration/blur/%d_%d_chunk_blur.png", index.x(), index.y()));
 		}
 
 		// Find min and max of the blurred map
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
-		for (int y = 0; y < map.length; y++) {
-			boolean isTopChunk = y < BLUR_RADIUS;
-			boolean isBottomChunk = y >= Chunk.DATA_SIZE + BLUR_RADIUS;
-			for (int x = 0; x < map[y].length; x++) {
-				boolean isLeftChunk = x < BLUR_RADIUS;
-				boolean isRightChunk = x >= Chunk.DATA_SIZE + BLUR_RADIUS;
-
-				double v = map[y][x];
+		for (int y = 0; y < tileData.length; y++) {
+			for (int x = 0; x < tileData[y].length; x++) {
+				double v = tileData[y][x];
 				if (v < min) {
 					min = v;
 				}
 				if (v > max) {
 					max = v;
-				}
-
-				// Getting the tile from chunk to the side to fill the existing values in
-				// Reset tiles from previous generated chunks which have corners/edges together with this chunk
-				if (isTopChunk || isBottomChunk || isLeftChunk || isRightChunk) {
-					map[y][x] = mapTakeOver[y][x];
-
-					// TEST: if edge/corner tiles are correctly used
 				}
 			}
 		}
@@ -192,17 +194,23 @@ public class ZombieWorld extends World {
 		TileType[][] tiles = new TileType[Chunk.DATA_SIZE][Chunk.DATA_SIZE];
 		for (int y = 0; y < tiles.length; y++) {
 			for (int x = 0; x < tiles[y].length; x++) {
-				// Map everything to 0..1
-				map[y + BLUR_RADIUS][x + BLUR_RADIUS] = (map[y + BLUR_RADIUS][x + BLUR_RADIUS] - min) / (max - min);
+				if (Double.isFinite(takeOverTileData[y + BLUR_RADIUS][x + BLUR_RADIUS])) {
+					// If take over data from other chunk exists use it
+					tiles[y][x] = TileType.select(takeOverTileData[y + BLUR_RADIUS][x + BLUR_RADIUS]);
+					t[y][x] = tiles[y][x].getValue();
+				} else {
+					// Map everything to 0..1
+					tileData[y + BLUR_RADIUS][x + BLUR_RADIUS] = (tileData[y + BLUR_RADIUS][x + BLUR_RADIUS] - min) / (max - min);
 
-				// Convert the random values to TileTypes
-				tiles[y][x] = TileType.select(map[y + BLUR_RADIUS][x + BLUR_RADIUS]);
-				t[y][x] = tiles[y][x].getValue();
+					// Convert the random values to TileTypes
+					tiles[y][x] = TileType.select(tileData[y + BLUR_RADIUS][x + BLUR_RADIUS]);
+					t[y][x] = tiles[y][x].getValue();
+				}
 			}
 		}
 
 		if (debugGeneration) {
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/normalized/%d_%d_chunk_normalized.png", index.x(), index.y()));
+			GraphicSystem.getInstance().saveAsGreyScaleImage(tileData, tileData.length, tileData[0].length, String.format("ChunkGeneration/normalized/%d_%d_chunk_normalized.png", index.x(), index.y()));
 		}
 
 		if (debugGeneration) {

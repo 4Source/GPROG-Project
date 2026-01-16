@@ -20,18 +20,8 @@ import ZombieGame.Systems.Graphic.GraphicSystem;
 public class Chunk implements Drawable, DebuggableGeometry {
     private final UUID uuid = UUID.randomUUID();
     public static double TILE_SIZE = 0;
-    public static final int CHUNK_SIZE = 9;
+    public static final int CHUNK_SIZE = 15;
     public static final int DATA_SIZE = (CHUNK_SIZE / 3) * 2 + 1;
-
-    // BUG: For CHUNK_SIZE=15
-    // Exception in thread "main" java.security.InvalidParameterException: Current tile of chunk is not inside boundaries
-    //     at ZombieGame.World.Chunk.getTileToTopLeft(Chunk.java:275)
-    //     at ZombieGame.World.Chunk.<init>(Chunk.java:73)
-    //     at ZombieGame.World.ZombieWorld.generateChunk(ZombieWorld.java:214)
-    //     at ZombieGame.World.World.processGenerationQueue(World.java:767)   
-    //     at ZombieGame.World.ZombieWorld.<init>(ZombieWorld.java:53)        
-    //     at ZombieGame.Game.<init>(Game.java:47)
-    //     at ZombieGame.Game.main(Game.java:327)
 
     /**
      * Additional chunks around the visible viewport to load
@@ -75,26 +65,30 @@ public class Chunk implements Drawable, DebuggableGeometry {
             throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of rows");
         }
 
-        for (int y = 0; y < CHUNK_SIZE; y += 3) {
-            TileType[] tileRows = tiles[y / 3 * 2];
+        for (int spriteY = 0; spriteY < CHUNK_SIZE; spriteY += 3) {
+            int tileY = spriteY / 3 * 2 + 1;
+            TileType[] tileRows = tiles[tileY];
+
             if (tileRows == null || tileRows.length != DATA_SIZE) {
                 throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of columns");
             }
-            for (int x = 0; x < CHUNK_SIZE; x += 3) {
-                TileType tile = tileRows[x / 3 * 2];
-                StaticSprite[][] temp = TileType.ClusterToSprites(getTileToTopLeft(x, y).orElse(tile), getTileToTop(x, y).orElse(tile), getTileToTopRight(x, y).orElse(tile), getTileToLeft(x, y).orElse(tile), tile, getTileToRight(x, y).orElse(tile), getTileToBottomLeft(x, y).orElse(tile), getTileToBottom(x, y).orElse(tile), getTileToBottomRight(x, y).orElse(tile));
+            for (int spriteX = 0; spriteX < CHUNK_SIZE; spriteX += 3) {
+                int tileX = spriteX / 3 * 2 + 1;
+                TileType centerTile = tileRows[tileX];
 
-                sprites[y + 0][x + 0] = temp[0][0];
-                sprites[y + 0][x + 1] = temp[0][1];
-                sprites[y + 0][x + 2] = temp[0][2];
+                StaticSprite[][] temp = TileType.ClusterToSprites(getTileToTopLeft(tileX, tileY).orElse(centerTile), getTileToTop(tileX, tileY).orElse(centerTile), getTileToTopRight(tileX, tileY).orElse(centerTile), getTileToLeft(tileX, tileY).orElse(centerTile), centerTile, getTileToRight(tileX, tileY).orElse(centerTile), getTileToBottomLeft(tileX, tileY).orElse(centerTile), getTileToBottom(tileX, tileY).orElse(centerTile), getTileToBottomRight(tileX, tileY).orElse(centerTile));
 
-                sprites[y + 1][x + 0] = temp[1][0];
-                sprites[y + 1][x + 1] = temp[1][1];
-                sprites[y + 1][x + 2] = temp[1][2];
+                sprites[spriteY + 0][spriteX + 0] = temp[0][0];
+                sprites[spriteY + 0][spriteX + 1] = temp[0][1];
+                sprites[spriteY + 0][spriteX + 2] = temp[0][2];
 
-                sprites[y + 2][x + 0] = temp[2][0];
-                sprites[y + 2][x + 1] = temp[2][1];
-                sprites[y + 2][x + 2] = temp[2][2];
+                sprites[spriteY + 1][spriteX + 0] = temp[1][0];
+                sprites[spriteY + 1][spriteX + 1] = temp[1][1];
+                sprites[spriteY + 1][spriteX + 2] = temp[1][2];
+
+                sprites[spriteY + 2][spriteX + 0] = temp[2][0];
+                sprites[spriteY + 2][spriteX + 1] = temp[2][1];
+                sprites[spriteY + 2][spriteX + 2] = temp[2][2];
 
             }
         }
@@ -151,13 +145,13 @@ public class Chunk implements Drawable, DebuggableGeometry {
                 GraphicSystem.getInstance().drawRect(viewPos.add(offset), (int) ref.getDrawWidth(), (int) ref.getDrawHeight(), new DrawStyle().color(Color.RED));
             }
         }
-        
+
         for (int y = 0; y < tilesCountY(); y++) {
             TileType[] tilesRows = this.tiles[y];
             for (int x = 0; x < tilesCountX(); x++) {
                 TileType tile = tilesRows[x];
                 String label;
-                label = tile == TileType.DIRT ? "D" : "G";
+                label = "" + tile.toString().charAt(0);
                 Color c = tile == TileType.DIRT ? Color.RED : Color.GREEN;
 
                 int fontSize = (int) (ref.getDrawHeight() * 0.6);
@@ -190,7 +184,8 @@ public class Chunk implements Drawable, DebuggableGeometry {
     }
 
     public int spritesCountY() {
-        return this.sprites.length;    }
+        return this.sprites.length;
+    }
 
     public static double getChunkSize() {
         if (TILE_SIZE <= 0) {
@@ -304,38 +299,78 @@ public class Chunk implements Drawable, DebuggableGeometry {
         boolean isLeftChunk = indexX < 0;
         boolean isRightChunk = indexX >= this.tilesCountX();
 
-        int x = indexX;
-        int y = indexY;
-
-        // Update positions to new chunk when not in this chunk
-        if (isTopChunk) {
-            y = this.tilesCountY() - 1;
-        } else if (isBottomChunk) {
-            y = 0;
-        }
-        if (isLeftChunk) {
-            x = this.tilesCountX() - 1;
-        } else if (isRightChunk) {
-            x = 0;
-        }
+        int x = indexY;
+        int y = indexX;
 
         // Select the chunk where the tile is in
         Chunk chunk = this;
         if (isTopChunk && isLeftChunk) {
+            y = indexY + this.tilesCountY();
+            x = indexX + this.tilesCountX();
             chunk = this.getChunkToTopLeft().orElse(null);
         } else if (isTopChunk && isRightChunk) {
+            y = indexY + this.tilesCountY();
+            x = indexX - this.tilesCountX();
             chunk = this.getChunkToTopRight().orElse(null);
         } else if (isBottomChunk && isLeftChunk) {
+            y = indexY - this.tilesCountY();
+            x = indexX + this.tilesCountX();
             chunk = this.getChunkToBottomLeft().orElse(null);
         } else if (isBottomChunk && isRightChunk) {
+            y = indexY - this.tilesCountY();
+            x = indexX - this.tilesCountX();
             chunk = this.getChunkToBottomRight().orElse(null);
-        } else if (isTopChunk) {
+        }
+
+        if (isTopChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isLeftChunk) {
+                    x = indexX + 1;
+                } else if (isRightChunk) {
+                    x = indexX - 1;
+                }
+            } else {
+                x = indexX;
+            }
+            y = indexY + this.tilesCountY();
             chunk = this.getChunkToTop().orElse(null);
-        } else if (isBottomChunk) {
+        } else if (isBottomChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isLeftChunk) {
+                    x = indexX + 1;
+                } else if (isRightChunk) {
+                    x = indexX - 1;
+                }
+            } else {
+                x = indexX;
+            }
+            y = indexY - this.tilesCountY();
             chunk = this.getChunkToBottom().orElse(null);
-        } else if (isLeftChunk) {
+        }
+
+        if (isLeftChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isTopChunk) {
+                    y = indexY + 1;
+                } else if (isBottomChunk) {
+                    y = indexY - 1;
+                }
+            } else {
+                y = indexY;
+            }
+            x = indexX + this.tilesCountX();
             chunk = this.getChunkToLeft().orElse(null);
-        } else if (isRightChunk) {
+        } else if (isRightChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isTopChunk) {
+                    y = indexY + 1;
+                } else if (isBottomChunk) {
+                    y = indexY - 1;
+                }
+            } else {
+                y = indexY;
+            }
+            x = indexX - this.tilesCountX();
             chunk = this.getChunkToRight().orElse(null);
         }
 
