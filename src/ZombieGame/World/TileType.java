@@ -119,6 +119,7 @@ public enum TileType {
         boolean s = bottom == DIRT;
         boolean w = left == DIRT;
 
+        // Diagonal constrains
         boolean ne = topRight == DIRT && n && e;
         boolean se = bottomRight == DIRT && s && e;
         boolean sw = bottomLeft == DIRT && s && w;

@@ -112,6 +112,7 @@ public class ZombieWorld extends World {
 		return type;
 	}
 
+	// BUG: This generation technic can has hard cuts at chunk borders because of the diagonal constrains
 	@Override
 	public Chunk generateChunk(ChunkIndex index) {
 		// radius ≤ CHUNK_SIZE / 6
