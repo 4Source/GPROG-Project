@@ -26,7 +26,7 @@ import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class ZombieWorld extends World {
 	private double zombieTime = 0;
-	private boolean debugGeneration = true;
+	private boolean debugGeneration = false;
 	public final double SPAWN_INTERVAL = 1.0; // secondes
 	private final double ZOMBIE_BASE_DENSITY = 1.0;
 	private final double ZOMBIE_MAX_DENSITY = 10.0;
@@ -231,6 +231,10 @@ public class ZombieWorld extends World {
 		this.generateEntity(index, 0.25, pos -> new Ammunition(pos));
 		this.generateEntity(index, 0.2, pos -> new FirstAidKit(pos));
 
-		return new Chunk(this, index, tiles);
+		Chunk res = new Chunk(this, index, tiles);
+		if (debugGeneration) {
+			res.exportBakedChunk("ChunkGeneration/chunks/");
+		}
+		return res;
 	}
 }

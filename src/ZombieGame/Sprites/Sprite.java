@@ -120,7 +120,7 @@ public abstract class Sprite {
      * Draw the sprite in the graphics system.
      */
     public void draw(ViewPos pos) {
-        GraphicSystem.getInstance().drawSprite(this.sprite, pos.add(offset), this.columnIndex, this.rowIndex, this.scale, this.rotation, this.rotationCenter, this.width, this.height, tint);
+        GraphicSystem.getInstance().drawSprite(this.sprite, pos.add(offset), this.columnIndex, this.rowIndex, this.scale, this.rotation, this.rotationCenter, this.width, this.height, this.tint);
     }
 
     public BufferedImage getSprite() {

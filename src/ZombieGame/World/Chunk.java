@@ -2,9 +2,15 @@ package ZombieGame.World;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.imageio.ImageIO;
+
 import ZombieGame.Capabilities.DebuggableGeometry;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ChunkIndex;
@@ -26,7 +32,7 @@ public class Chunk implements Drawable, DebuggableGeometry {
     /**
      * Additional chunks around the visible viewport to load
      */
-    public static final int CHUNK_LOADING = 1;
+    public static final int CHUNK_LOADING = 0;
     /**
      * Additional chunks around the visible viewport to generate
      */
@@ -37,7 +43,11 @@ public class Chunk implements Drawable, DebuggableGeometry {
     public static final int CHUNK_DESPAWN = 5;
 
     private final TileType[][] tiles;
-    private final StaticSprite[][] sprites;
+    private BufferedImage bakedImage;
+    private int bakedWidth;
+    private int bakedHeight;
+    private int tileDrawWidth;
+    private int tileDrawHeight;
     private final World world;
     private final ChunkIndex index;
 
@@ -119,7 +129,7 @@ public class Chunk implements Drawable, DebuggableGeometry {
             }
         }
 
-        this.sprites = sprites;
+        this.bakeChunk(sprites);
     }
 
     public Chunk(World world, ChunkIndex index) {
@@ -127,11 +137,62 @@ public class Chunk implements Drawable, DebuggableGeometry {
         this.index = index;
 
         this.tiles = new TileType[DATA_SIZE][DATA_SIZE];
-        this.sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
+        StaticSprite[][] sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
         for (int y = 0; y < CHUNK_SIZE; y++) {
             for (int x = 0; x < CHUNK_SIZE; x++) {
-                this.sprites[y][x] = new StaticSprite();
+                sprites[y][x] = new StaticSprite();
             }
+        }
+
+        this.bakeChunk(sprites);
+    }
+
+    private void bakeChunk(StaticSprite[][] sprites) {
+        this.tileDrawWidth = (int) sprites[0][0].getDrawWidth();
+        this.tileDrawHeight = (int) sprites[0][0].getDrawHeight();
+
+        this.bakedWidth = this.tileDrawWidth * CHUNK_SIZE;
+        this.bakedHeight = this.tileDrawHeight * CHUNK_SIZE;
+
+        this.bakedImage = new BufferedImage(this.bakedWidth, this.bakedHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = this.bakedImage.createGraphics();
+
+        for (int y = 0; y < sprites.length; y++) {
+            StaticSprite[] spritesRows = sprites[y];
+            for (int x = 0; x < sprites.length; x++) {
+                StaticSprite sprite = spritesRows[x];
+                int drawWidth = (int) sprite.getDrawWidth();
+                int drawHeight = (int) sprite.getDrawHeight();
+                int columnIndex = (int) sprite.getColumnIndex();
+                int rowIndex = (int) sprite.getRowIndex();
+                int spriteWidth = (int) sprite.getTileWidth();
+                int spriteHeight = (int) sprite.getTileHeight();
+
+                graphics.drawImage(sprite.getSprite(), (x * drawWidth), (y * drawHeight), ((x + 1) * drawWidth), ((y + 1) * drawHeight), (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
+            }
+        }
+
+        graphics.dispose();
+    }
+
+    public void exportBakedChunk(String folderPath) {
+        if (this.bakedImage == null) {
+            System.err.println("Failed to export baked chunk as image with: Image does not exist");
+            return;
+        }
+
+        try {
+            File file = new File(String.format("%schunk_baked_%d_%d.png", folderPath, this.index.x(), this.index.y()));
+            // Ensure parent directories exist
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            // Save image at path
+            ImageIO.write(this.bakedImage, "png", file);
+        } catch (Exception e) {
+            System.err.println("Failed to export baked chunk as image with: " + e.getMessage());
         }
     }
 
@@ -139,14 +200,7 @@ public class Chunk implements Drawable, DebuggableGeometry {
     public void draw() {
         ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
 
-        for (int y = 0; y < spritesCountY(); y++) {
-            StaticSprite[] spritesRows = this.sprites[y];
-            for (int x = 0; x < spritesCountX(); x++) {
-                StaticSprite sprite = spritesRows[x];
-                Offset offset = new Offset((x + 0.5) * sprite.getDrawWidth(), (y + 0.5) * sprite.getDrawHeight());
-                sprite.draw(viewPos.add(offset));
-            }
-        }
+        GraphicSystem.getInstance().drawImage(this.bakedImage, viewPos, bakedWidth, bakedHeight);
     }
 
     @Override
@@ -162,13 +216,12 @@ public class Chunk implements Drawable, DebuggableGeometry {
     @Override
     public void drawDebug() {
         ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
-        StaticSprite ref = this.sprites[0][0];
 
         for (int y = 0; y < spritesCountY(); y++) {
             for (int x = 0; x < spritesCountX(); x++) {
-                Offset offset = new Offset((x + 0.5) * ref.getDrawWidth(), (y + 0.5) * ref.getDrawHeight());
+                Offset offset = new Offset((x + 0.5) * this.tileDrawWidth, (y + 0.5) * this.tileDrawHeight);
 
-                GraphicSystem.getInstance().drawRect(viewPos.add(offset), (int) ref.getDrawWidth(), (int) ref.getDrawHeight(), new DrawStyle().color(Color.RED));
+                GraphicSystem.getInstance().drawRect(viewPos.add(offset), this.tileDrawWidth, this.tileDrawHeight, new DrawStyle().color(Color.RED));
             }
         }
 
@@ -180,8 +233,8 @@ public class Chunk implements Drawable, DebuggableGeometry {
                 label = "" + tile.toString().charAt(0);
                 Color c = tile == TileType.DIRT ? Color.RED : Color.GREEN;
 
-                int fontSize = (int) (ref.getDrawHeight() * 0.6);
-                Offset offset = new Offset(x * 1.5 * ref.getDrawWidth(), y * 1.5 * ref.getDrawHeight()).add(ref.getDrawWidth() * -0.2, ref.getDrawHeight() * 0.2);
+                int fontSize = (int) (this.tileDrawHeight * 0.6);
+                Offset offset = new Offset(x * 1.5 * this.tileDrawWidth, y * 1.5 * this.tileDrawHeight).add(this.tileDrawWidth * -0.2, this.tileDrawHeight * 0.2);
 
                 GraphicSystem.getInstance().drawString(label, viewPos.add(offset), new DrawStyle().font(new Font("ARIAL", Font.BOLD, fontSize)).color(c));
             }
@@ -206,11 +259,11 @@ public class Chunk implements Drawable, DebuggableGeometry {
     }
 
     public int spritesCountX() {
-        return this.sprites[0].length;
+        return CHUNK_SIZE;
     }
 
     public int spritesCountY() {
-        return this.sprites.length;
+        return CHUNK_SIZE;
     }
 
     public static double getChunkSize() {
