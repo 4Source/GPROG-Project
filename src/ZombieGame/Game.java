@@ -7,11 +7,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import ZombieGame.Components.ImageComponent;
 import ZombieGame.Components.LivingComponent;
+import ZombieGame.Components.TimerComponent;
 import ZombieGame.Components.VisualComponent;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Entities.Button;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.HelpText;
+import ZombieGame.Entities.Timer;
 import ZombieGame.Entities.UIElement;
 import ZombieGame.Sprites.StaticSprite;
 import ZombieGame.Systems.Debug.DebugSystem;
@@ -143,11 +145,18 @@ public final class Game {
 		Game.world.addUIElement(startBtn);
 		Game.world.addUIElement(exitBtn);
 
+		// Pause the timer
+		Iterator<UIElement> uiIt = Game.world.uiElementIterator();
+		while (uiIt.hasNext()) {
+			UIElement ui = uiIt.next();
+			ui.getComponents(TimerComponent.class).stream().forEach(c -> c.pause());
+		}
+
 		while (!continueGame.get()) {
 			double secondsDiff = calculateDeltaTime();
 
 			// Update all UI Elements
-			Iterator<UIElement> uiIt = Game.world.uiElementIterator();
+			uiIt = Game.world.uiElementIterator();
 			while (uiIt.hasNext()) {
 				UIElement ui = uiIt.next();
 
@@ -174,6 +183,13 @@ public final class Game {
 		Game.world.removeUIElement(help);
 		Game.world.removeUIElement(startBtn);
 		Game.world.removeUIElement(exitBtn);
+
+		// Resume the timer
+		uiIt = Game.world.uiElementIterator();
+		while (uiIt.hasNext()) {
+			UIElement ui = uiIt.next();
+			ui.getComponents(TimerComponent.class).stream().forEach(c -> c.resume());
+		}
 	}
 
 	private void gameOver() {
@@ -191,6 +207,13 @@ public final class Game {
 		Game.world.addUIElement(gameover);
 		Game.world.addUIElement(exitBtn);
 
+		// Pause the timer
+		Iterator<UIElement> uiIt = Game.world.uiElementIterator();
+		while (uiIt.hasNext()) {
+			UIElement ui = uiIt.next();
+			ui.getComponents(TimerComponent.class).stream().forEach(c -> c.pause());
+		}
+
 		while (true) {
 			double secondsDiff = calculateDeltaTime();
 
@@ -207,7 +230,7 @@ public final class Game {
 			}
 
 			// Update all UI Elements
-			Iterator<UIElement> uiIt = Game.world.uiElementIterator();
+			uiIt = Game.world.uiElementIterator();
 			while (uiIt.hasNext()) {
 				UIElement ui = uiIt.next();
 
