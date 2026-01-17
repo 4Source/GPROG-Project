@@ -8,12 +8,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import javax.imageio.ImageIO;
-import javax.management.InvalidAttributeValueException;
 
 import ZombieGame.Sprites.StaticSprite;
 
 public enum TileType {
-    GRASS(1), DIRT(1);
+    GRASS(2.5), DIRT(1);
 
     TileType(double weight) {
         this.weight = weight;
@@ -55,6 +54,16 @@ public enum TileType {
         }
 
         return values()[values().length - 1];
+    }
+
+    public static TileType next(double n) {
+        TileType current = select(n);
+        TileType[] values = values();
+        int i = current.ordinal() + 1;
+        if (i >= values.length) {
+            i = 0; // wrap around to beginning
+        }
+        return values[i];
     }
 
     public double getValue() {
@@ -103,130 +112,68 @@ public enum TileType {
         return sprites;
     }
 
-    private static int calcBitMask(TileType tl, TileType t, TileType tr, TileType l, TileType c, TileType r, TileType bl, TileType b, TileType br) throws InvalidAttributeValueException {
-        // Grass = 0
-        // Dirt = 1
-        int bitMask = 0;
-        int significance;
+    private static int calcBitMask(TileType topLeft, TileType top, TileType topRight, TileType left, TileType center, TileType right, TileType bottomLeft, TileType bottom, TileType bottomRight) {
 
-        // Significance of center tile + center tile as fallback is tile is not set to specific type
-        significance = 8;
-        switch (c) {
-            case GRASS:
-                // TODO:
-                // throw new InvalidAttributeValueException("The type grass in center is not supported");
-            case DIRT:
-                // bitMask |= (1 << significance);
-                break;
-            default:
-                throw new InvalidAttributeValueException("The type of Center tile is required");
+        boolean n = top == DIRT;
+        boolean e = right == DIRT;
+        boolean s = bottom == DIRT;
+        boolean w = left == DIRT;
+
+        boolean ne = topRight == DIRT && n && e;
+        boolean se = bottomRight == DIRT && s && e;
+        boolean sw = bottomLeft == DIRT && s && w;
+        boolean nw = topLeft == DIRT && n && w;
+
+        boolean o = center == DIRT || n || e || s || w;
+
+        int mask = 0;
+        if (n) {
+            mask |= 1;
+        }
+        if (ne) {
+            mask |= 2;
+        }
+        if (e) {
+            mask |= 4;
+        }
+        if (se) {
+            mask |= 8;
+        }
+        if (s) {
+            mask |= 16;
+        }
+        if (sw) {
+            mask |= 32;
+        }
+        if (w) {
+            mask |= 64;
+        }
+        if (nw) {
+            mask |= 128;
+        }
+        if (o) {
+            mask |= 256;
         }
 
-        // Significance of top tile
-        significance = 0;
-        switch (t) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
+        return mask;
+    }
 
-        // Significance of top right tile
-        significance = 1;
-        switch (tr) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
+    public static TileType[][] applyRestrictions(TileType topLeft, TileType top, TileType topRight, TileType left, TileType center, TileType right, TileType bottomLeft, TileType bottom, TileType bottomRight) {
+        int mask = calcBitMask(topLeft, top, topRight, left, center, right, bottomLeft, bottom, bottomRight);
 
-        // Significance of right tile
-        significance = 2;
-        switch (r) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
+        TileType[][] tiles = new TileType[3][3];
 
-        // Significance of bottom right tile
-        significance = 3;
-        switch (br) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
+        tiles[0][1] = ((mask & 1) != 0) ? DIRT : GRASS;
+        tiles[0][2] = ((mask & 2) != 0) ? DIRT : GRASS;
+        tiles[1][2] = ((mask & 4) != 0) ? DIRT : GRASS;
+        tiles[2][2] = ((mask & 8) != 0) ? DIRT : GRASS;
+        tiles[2][1] = ((mask & 16) != 0) ? DIRT : GRASS;
+        tiles[2][0] = ((mask & 32) != 0) ? DIRT : GRASS;
+        tiles[1][0] = ((mask & 64) != 0) ? DIRT : GRASS;
+        tiles[0][0] = ((mask & 128) != 0) ? DIRT : GRASS;
+        tiles[1][1] = ((mask & 256) != 0) ? DIRT : GRASS;
 
-        // Significance of bottom tile
-        significance = 4;
-        switch (b) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
-
-        // Significance of bottom left tile
-        significance = 5;
-        switch (bl) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
-
-        // Significance of left tile
-        significance = 6;
-        switch (l) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
-
-        // Significance of top left tile
-        significance = 7;
-        switch (tl) {
-            case GRASS:
-                bitMask &= ~(1 << significance);
-                break;
-            case DIRT:
-                bitMask |= (1 << significance);
-                break;
-            default:
-                break;
-        }
-
-        return bitMask;
+        return tiles;
     }
 
     public static void testTileClusters() {
@@ -377,23 +324,27 @@ enum TilePos {
     /**
      * Grass tile with dirt exposed on the top and right edges forming a corner cut-in.
      */
-    GRASS_TOP_AND_RIGHT_DIRT(14, 7),
+    GRASS_TOP_AND_RIGHT_DIRT(14, 7), // 14, 5
     /**
      * Grass tile with dirt exposed on the bottom and right edges forming a corner cut-in.
      */
-    GRASS_BOTTOM_AND_RIGHT_DIRT(14, 8),
+    GRASS_BOTTOM_AND_RIGHT_DIRT(14, 8), // 14, 6
     /**
      * Grass tile with dirt exposed on the bottom and left edges forming a corner cut-in.
      */
-    GRASS_BOTTOM_AND_LEFT_DIRT(13, 8),
+    GRASS_BOTTOM_AND_LEFT_DIRT(13, 8), // 13, 6
     /**
      * Grass tile with dirt exposed on the top and left edges forming a corner cut-in.
      */
-    GRASS_TOP_AND_LEFT_DIRT(13, 7),
+    GRASS_TOP_AND_LEFT_DIRT(13, 7), // 13, 5
     /**
      * Solid dirt tile with no grass edges.
      */
-    DIRT_FULL(15, 1);
+    DIRT_FULL(15, 1),
+    /**
+     * Dirt but fully surrounded with grass
+     */
+    DIRT_SURROUNDED(18, 0);
 
     TilePos(int column, int row) {
         this.column = column;
@@ -436,51 +387,54 @@ class ClusterTileLookup {
 
     static {
         TABLE[0] = new TileCluster(TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL);
-        TABLE[1] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
-        TABLE[4] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[16] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[64] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
-        TABLE[5] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[20] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[80] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[65] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
-        TABLE[7] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[28] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[112] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[193] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
-        TABLE[17] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[68] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[21] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[84] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[81] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[69] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[23] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[92] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[113] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[197] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[29] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[116] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[209] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[71] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[31] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[124] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[241] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
-        TABLE[199] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
-        TABLE[85] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[87] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[93] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[117] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[213] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[95] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[125] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[245] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[215] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[119] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[221] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[127] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[253] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[247] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
-        TABLE[223] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
-        TABLE[255] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 1] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
+        TABLE[256 + 4] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 16] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 64] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
+        TABLE[256 + 5] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 20] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 80] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 65] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
+        TABLE[256 + 7] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_RIGHT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 28] = new TileCluster(TilePos.GRASS_BOTTOM_RIGHT_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 112] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 193] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_LEFT_DIRT);
+        TABLE[256 + 17] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 68] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 21] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 84] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 81] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 69] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 23] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 92] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 113] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 197] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 29] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 116] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 209] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 71] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 31] = new TileCluster(TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 124] = new TileCluster(TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.GRASS_BOTTOM_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 241] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_LEFT_DIRT);
+        TABLE[256 + 199] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT, TilePos.GRASS_TOP_DIRT);
+        TABLE[256 + 85] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 87] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 93] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 117] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 213] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 95] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 125] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 245] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 215] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 119] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 221] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 127] = new TileCluster(TilePos.GRASS_BOTTOM_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 253] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_BOTTOM_AND_LEFT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 247] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_LEFT_DIRT);
+        TABLE[256 + 223] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.GRASS_TOP_AND_RIGHT_DIRT, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+        TABLE[256 + 255] = new TileCluster(TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL, TilePos.DIRT_FULL);
+
+        // Additional
+        TABLE[256] = new TileCluster(TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.DIRT_SURROUNDED, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL, TilePos.GRASS_FULL);
     }
 }

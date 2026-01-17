@@ -116,9 +116,9 @@ public class ZombieWorld extends World {
 	@Override
 	public Chunk generateChunk(ChunkIndex index) {
 		// radius ≤ CHUNK_SIZE / 6
-		final int BLUR_RADIUS = 0; // BUG: only 0 is working 
+		final int BLUR_RADIUS = 2;
 		// sigma ≈ radius × 0.7
-		final float SIGMA = 1.2f;
+		final float SIGMA = 1.9f;
 
 		int W = Chunk.DATA_SIZE + 2 * BLUR_RADIUS;
 		double[][] tileData = new double[W][W];

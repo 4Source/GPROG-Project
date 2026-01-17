@@ -59,24 +59,50 @@ public class Chunk implements Drawable, DebuggableGeometry {
         this.index = index;
         this.tiles = tiles;
 
-        StaticSprite[][] sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
-
         if (tiles == null || tiles.length != DATA_SIZE) {
             throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of rows");
         }
 
         for (int spriteY = 0; spriteY < CHUNK_SIZE; spriteY += 3) {
-            int tileY = spriteY / 3 * 2 + 1;
-            TileType[] tileRows = tiles[tileY];
+            int tileY = spriteY / 3 * 2;
+            TileType[] tileRow = tiles[tileY];
 
-            if (tileRows == null || tileRows.length != DATA_SIZE) {
+            if (tileRow == null || tileRow.length != DATA_SIZE) {
                 throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of columns");
             }
             for (int spriteX = 0; spriteX < CHUNK_SIZE; spriteX += 3) {
-                int tileX = spriteX / 3 * 2 + 1;
-                TileType centerTile = tileRows[tileX];
+                int tileX = spriteX / 3 * 2;
 
-                StaticSprite[][] temp = TileType.ClusterToSprites(getTileToTopLeft(tileX, tileY).orElse(centerTile), getTileToTop(tileX, tileY).orElse(centerTile), getTileToTopRight(tileX, tileY).orElse(centerTile), getTileToLeft(tileX, tileY).orElse(centerTile), centerTile, getTileToRight(tileX, tileY).orElse(centerTile), getTileToBottomLeft(tileX, tileY).orElse(centerTile), getTileToBottom(tileX, tileY).orElse(centerTile), getTileToBottomRight(tileX, tileY).orElse(centerTile));
+                TileType[][] cleanTiles = TileType.applyRestrictions(
+                        tiles[tileY + 0][tileX], tiles[tileY + 0][tileX + 1], tiles[tileY + 0][tileX + 2],
+                        tiles[tileY + 1][tileX], tiles[tileY + 1][tileX + 1], tiles[tileY + 1][tileX + 2],
+                        tiles[tileY + 2][tileX], tiles[tileY + 2][tileX + 1], tiles[tileY + 2][tileX + 2]);
+
+                this.tiles[tileY + 0][tileX + 0] = cleanTiles[0][0];
+                this.tiles[tileY + 0][tileX + 1] = cleanTiles[0][1];
+                this.tiles[tileY + 0][tileX + 2] = cleanTiles[0][2];
+
+                this.tiles[tileY + 1][tileX + 0] = cleanTiles[1][0];
+                this.tiles[tileY + 1][tileX + 1] = cleanTiles[1][1];
+                this.tiles[tileY + 1][tileX + 2] = cleanTiles[1][2];
+
+                this.tiles[tileY + 2][tileX + 0] = cleanTiles[2][0];
+                this.tiles[tileY + 2][tileX + 1] = cleanTiles[2][1];
+                this.tiles[tileY + 2][tileX + 2] = cleanTiles[2][2];
+            }
+        }
+
+        StaticSprite[][] sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
+
+        for (int spriteY = 0; spriteY < CHUNK_SIZE; spriteY += 3) {
+            int tileY = spriteY / 3 * 2;
+            for (int spriteX = 0; spriteX < CHUNK_SIZE; spriteX += 3) {
+                int tileX = spriteX / 3 * 2;
+
+                StaticSprite[][] temp = TileType.ClusterToSprites(
+                        this.tiles[tileY + 0][tileX], this.tiles[tileY + 0][tileX + 1], this.tiles[tileY + 0][tileX + 2],
+                        this.tiles[tileY + 1][tileX], this.tiles[tileY + 1][tileX + 1], this.tiles[tileY + 1][tileX + 2],
+                        this.tiles[tileY + 2][tileX], this.tiles[tileY + 2][tileX + 1], this.tiles[tileY + 2][tileX + 2]);
 
                 sprites[spriteY + 0][spriteX + 0] = temp[0][0];
                 sprites[spriteY + 0][spriteX + 1] = temp[0][1];
@@ -308,18 +334,30 @@ public class Chunk implements Drawable, DebuggableGeometry {
             y = indexY + this.tilesCountY();
             x = indexX + this.tilesCountX();
             chunk = this.getChunkToTopLeft().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isTopChunk && isRightChunk) {
             y = indexY + this.tilesCountY();
             x = indexX - this.tilesCountX();
             chunk = this.getChunkToTopRight().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isBottomChunk && isLeftChunk) {
             y = indexY - this.tilesCountY();
             x = indexX + this.tilesCountX();
             chunk = this.getChunkToBottomLeft().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isBottomChunk && isRightChunk) {
             y = indexY - this.tilesCountY();
             x = indexX - this.tilesCountX();
             chunk = this.getChunkToBottomRight().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         }
 
         if (isTopChunk && (chunk == this || chunk == null)) {
@@ -334,6 +372,9 @@ public class Chunk implements Drawable, DebuggableGeometry {
             }
             y = indexY + this.tilesCountY();
             chunk = this.getChunkToTop().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isBottomChunk && (chunk == this || chunk == null)) {
             if (chunk == null) {
                 if (isLeftChunk) {
@@ -346,6 +387,9 @@ public class Chunk implements Drawable, DebuggableGeometry {
             }
             y = indexY - this.tilesCountY();
             chunk = this.getChunkToBottom().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         }
 
         if (isLeftChunk && (chunk == this || chunk == null)) {
@@ -360,6 +404,9 @@ public class Chunk implements Drawable, DebuggableGeometry {
             }
             x = indexX + this.tilesCountX();
             chunk = this.getChunkToLeft().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isRightChunk && (chunk == this || chunk == null)) {
             if (chunk == null) {
                 if (isTopChunk) {
@@ -372,9 +419,11 @@ public class Chunk implements Drawable, DebuggableGeometry {
             }
             x = indexX - this.tilesCountX();
             chunk = this.getChunkToRight().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         }
 
-        // Chunk not found
         if (chunk == null) {
             return Optional.empty();
         }
