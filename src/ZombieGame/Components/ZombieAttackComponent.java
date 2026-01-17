@@ -61,7 +61,7 @@ public class ZombieAttackComponent extends Component {
         this.target = target;
 
         // Pause movement and play attack animation.
-        this.getEntity().getPositionComponent().setState(AIState.IDLING);
+        this.getEntity().getPositionComponent().setState(AIState.ATTACKING);
         this.getEntity().getPositionComponent().stopMoving();
         this.getEntity().getVisualComponent().changeState(CharacterAction.ATTACK);
     }
