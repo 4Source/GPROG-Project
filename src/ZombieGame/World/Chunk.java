@@ -1,24 +1,38 @@
 package ZombieGame.World;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.security.InvalidParameterException;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
+
+import ZombieGame.Capabilities.DebuggableGeometry;
 import ZombieGame.Capabilities.Drawable;
 import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Debug.DebugCategory;
+import ZombieGame.Systems.Debug.DebugCategoryMask;
+import ZombieGame.Systems.Graphic.DrawStyle;
 import ZombieGame.Systems.Graphic.GraphicLayer;
+import ZombieGame.Systems.Graphic.GraphicSystem;
 
-public class Chunk implements Drawable {
+public class Chunk implements Drawable, DebuggableGeometry {
     private final UUID uuid = UUID.randomUUID();
     public static double TILE_SIZE = 0;
-    public static final int SIZE = 16;
+    public static final int CHUNK_SIZE = 15;
+    public static final int DATA_SIZE = (CHUNK_SIZE / 3) * 2 + 1;
+
     /**
      * Additional chunks around the visible viewport to load
      */
-    public static final int CHUNK_LOADING = 1;
+    public static final int CHUNK_LOADING = 0;
     /**
      * Additional chunks around the visible viewport to generate
      */
@@ -29,36 +43,156 @@ public class Chunk implements Drawable {
     public static final int CHUNK_DESPAWN = 5;
 
     private final TileType[][] tiles;
-    private final StaticSprite[][] sprites;
+    private BufferedImage bakedImage;
+    private int bakedWidth;
+    private int bakedHeight;
+    private int tileDrawWidth;
+    private int tileDrawHeight;
     private final World world;
     private final ChunkIndex index;
 
+    /**
+     * @param world
+     * @param index
+     * @param tiles The edges and corner types of the tiles. Needs to chunk size + 1
+     */
     public Chunk(World world, ChunkIndex index, TileType[][] tiles) {
+        if (Chunk.CHUNK_SIZE < 3) {
+            // Because of the Tile selection it requires a corner for each tile
+            throw new IllegalArgumentException("Size of chunk have to be greater or equal 3");
+        }
+        if (Chunk.CHUNK_SIZE % 3 != 0) {
+            // Because of the Tile selection it requires a corner for each tile
+            throw new IllegalArgumentException("Size of chunk have to be multiple of 3");
+        }
         this.world = world;
         this.index = index;
         this.tiles = tiles;
 
-        StaticSprite[][] sprites = new StaticSprite[tilesCountY()][tilesCountX()];
-        for (int y = 0; y < tilesCountY(); y++) {
-            TileType[] tileRows = tiles[y];
-            for (int x = 0; x < tilesCountX(); x++) {
-                TileType tile = tileRows[x];
-                sprites[y][x] = TileType.TileToSprite(tile, getTileToTop(x, y).orElse(tile), getTileToTopRight(x, y).orElse(tile), getTileToRight(x, y).orElse(tile), getTileToBottomRight(x, y).orElse(tile), getTileToBottom(x, y).orElse(tile), getTileToBottomLeft(x, y).orElse(tile), getTileToLeft(x, y).orElse(tile), getTileToTopLeft(x, y).orElse(tile));
+        if (tiles == null || tiles.length != DATA_SIZE) {
+            throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of rows");
+        }
+
+        for (int spriteY = 0; spriteY < CHUNK_SIZE; spriteY += 3) {
+            int tileY = spriteY / 3 * 2;
+            TileType[] tileRow = tiles[tileY];
+
+            if (tileRow == null || tileRow.length != DATA_SIZE) {
+                throw new IllegalArgumentException("tiles must have chunk size + 1 numbers of columns");
+            }
+            for (int spriteX = 0; spriteX < CHUNK_SIZE; spriteX += 3) {
+                int tileX = spriteX / 3 * 2;
+
+                TileType[][] cleanTiles = TileType.applyRestrictions(
+                        tiles[tileY + 0][tileX], tiles[tileY + 0][tileX + 1], tiles[tileY + 0][tileX + 2],
+                        tiles[tileY + 1][tileX], tiles[tileY + 1][tileX + 1], tiles[tileY + 1][tileX + 2],
+                        tiles[tileY + 2][tileX], tiles[tileY + 2][tileX + 1], tiles[tileY + 2][tileX + 2]);
+
+                this.tiles[tileY + 0][tileX + 0] = cleanTiles[0][0];
+                this.tiles[tileY + 0][tileX + 1] = cleanTiles[0][1];
+                this.tiles[tileY + 0][tileX + 2] = cleanTiles[0][2];
+
+                this.tiles[tileY + 1][tileX + 0] = cleanTiles[1][0];
+                this.tiles[tileY + 1][tileX + 1] = cleanTiles[1][1];
+                this.tiles[tileY + 1][tileX + 2] = cleanTiles[1][2];
+
+                this.tiles[tileY + 2][tileX + 0] = cleanTiles[2][0];
+                this.tiles[tileY + 2][tileX + 1] = cleanTiles[2][1];
+                this.tiles[tileY + 2][tileX + 2] = cleanTiles[2][2];
             }
         }
-        this.sprites = sprites;
+
+        StaticSprite[][] sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
+
+        for (int spriteY = 0; spriteY < CHUNK_SIZE; spriteY += 3) {
+            int tileY = spriteY / 3 * 2;
+            for (int spriteX = 0; spriteX < CHUNK_SIZE; spriteX += 3) {
+                int tileX = spriteX / 3 * 2;
+
+                StaticSprite[][] temp = TileType.ClusterToSprites(
+                        this.tiles[tileY + 0][tileX], this.tiles[tileY + 0][tileX + 1], this.tiles[tileY + 0][tileX + 2],
+                        this.tiles[tileY + 1][tileX], this.tiles[tileY + 1][tileX + 1], this.tiles[tileY + 1][tileX + 2],
+                        this.tiles[tileY + 2][tileX], this.tiles[tileY + 2][tileX + 1], this.tiles[tileY + 2][tileX + 2]);
+
+                sprites[spriteY + 0][spriteX + 0] = temp[0][0];
+                sprites[spriteY + 0][spriteX + 1] = temp[0][1];
+                sprites[spriteY + 0][spriteX + 2] = temp[0][2];
+
+                sprites[spriteY + 1][spriteX + 0] = temp[1][0];
+                sprites[spriteY + 1][spriteX + 1] = temp[1][1];
+                sprites[spriteY + 1][spriteX + 2] = temp[1][2];
+
+                sprites[spriteY + 2][spriteX + 0] = temp[2][0];
+                sprites[spriteY + 2][spriteX + 1] = temp[2][1];
+                sprites[spriteY + 2][spriteX + 2] = temp[2][2];
+
+            }
+        }
+
+        this.bakeChunk(sprites);
     }
 
     public Chunk(World world, ChunkIndex index) {
         this.world = world;
         this.index = index;
 
-        this.tiles = new TileType[SIZE][SIZE];
-        this.sprites = new StaticSprite[SIZE][SIZE];
-        for (int y = 0; y < SIZE; y++) {
-            for (int x = 0; x < SIZE; x++) {
-                this.sprites[y][x] = new StaticSprite();
+        this.tiles = new TileType[DATA_SIZE][DATA_SIZE];
+        StaticSprite[][] sprites = new StaticSprite[CHUNK_SIZE][CHUNK_SIZE];
+        for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (int x = 0; x < CHUNK_SIZE; x++) {
+                sprites[y][x] = new StaticSprite();
             }
+        }
+
+        this.bakeChunk(sprites);
+    }
+
+    private void bakeChunk(StaticSprite[][] sprites) {
+        this.tileDrawWidth = (int) sprites[0][0].getDrawWidth();
+        this.tileDrawHeight = (int) sprites[0][0].getDrawHeight();
+
+        this.bakedWidth = this.tileDrawWidth * CHUNK_SIZE;
+        this.bakedHeight = this.tileDrawHeight * CHUNK_SIZE;
+
+        this.bakedImage = new BufferedImage(this.bakedWidth, this.bakedHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = this.bakedImage.createGraphics();
+
+        for (int y = 0; y < sprites.length; y++) {
+            StaticSprite[] spritesRows = sprites[y];
+            for (int x = 0; x < sprites.length; x++) {
+                StaticSprite sprite = spritesRows[x];
+                int drawWidth = (int) sprite.getDrawWidth();
+                int drawHeight = (int) sprite.getDrawHeight();
+                int columnIndex = (int) sprite.getColumnIndex();
+                int rowIndex = (int) sprite.getRowIndex();
+                int spriteWidth = (int) sprite.getTileWidth();
+                int spriteHeight = (int) sprite.getTileHeight();
+
+                graphics.drawImage(sprite.getSprite(), (x * drawWidth), (y * drawHeight), ((x + 1) * drawWidth), ((y + 1) * drawHeight), (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
+            }
+        }
+
+        graphics.dispose();
+    }
+
+    public void exportBakedChunk(String folderPath) {
+        if (this.bakedImage == null) {
+            System.err.println("Failed to export baked chunk as image with: Image does not exist");
+            return;
+        }
+
+        try {
+            File file = new File(String.format("%schunk_baked_%d_%d.png", folderPath, this.index.x(), this.index.y()));
+            // Ensure parent directories exist
+            File parentDir = file.getParentFile();
+            if (parentDir != null && !parentDir.exists()) {
+                parentDir.mkdirs();
+            }
+
+            // Save image at path
+            ImageIO.write(this.bakedImage, "png", file);
+        } catch (Exception e) {
+            System.err.println("Failed to export baked chunk as image with: " + e.getMessage());
         }
     }
 
@@ -66,14 +200,7 @@ public class Chunk implements Drawable {
     public void draw() {
         ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
 
-        for (int y = 0; y < tilesCountY(); y++) {
-            StaticSprite[] spritesRows = this.sprites[y];
-            for (int x = 0; x < tilesCountX(); x++) {
-                StaticSprite sprite = spritesRows[x];
-                Offset offset = new Offset((x + 0.5) * sprite.getDrawWidth(), (y + 0.5) * sprite.getDrawHeight());
-                sprite.draw(viewPos.add(offset));
-            }
-        }
+        GraphicSystem.getInstance().drawImage(this.bakedImage, viewPos, bakedWidth, bakedHeight);
     }
 
     @Override
@@ -84,6 +211,39 @@ public class Chunk implements Drawable {
     @Override
     public int getDepth() {
         return this.index.y();
+    }
+
+    @Override
+    public void drawDebug() {
+        ViewPos viewPos = this.index.toWorldPos().toViewPos(world);
+
+        for (int y = 0; y < spritesCountY(); y++) {
+            for (int x = 0; x < spritesCountX(); x++) {
+                Offset offset = new Offset((x + 0.5) * this.tileDrawWidth, (y + 0.5) * this.tileDrawHeight);
+
+                GraphicSystem.getInstance().drawRect(viewPos.add(offset), this.tileDrawWidth, this.tileDrawHeight, new DrawStyle().color(Color.RED));
+            }
+        }
+
+        for (int y = 0; y < tilesCountY(); y++) {
+            TileType[] tilesRows = this.tiles[y];
+            for (int x = 0; x < tilesCountX(); x++) {
+                TileType tile = tilesRows[x];
+                String label;
+                label = "" + tile.toString().charAt(0);
+                Color c = tile == TileType.DIRT ? Color.RED : Color.GREEN;
+
+                int fontSize = (int) (this.tileDrawHeight * 0.6);
+                Offset offset = new Offset(x * 1.5 * this.tileDrawWidth, y * 1.5 * this.tileDrawHeight).add(this.tileDrawWidth * -0.2, this.tileDrawHeight * 0.2);
+
+                GraphicSystem.getInstance().drawString(label, viewPos.add(offset), new DrawStyle().font(new Font("ARIAL", Font.BOLD, fontSize)).color(c));
+            }
+        }
+    }
+
+    @Override
+    public DebugCategoryMask getCategoryMask() {
+        return new DebugCategoryMask(DebugCategory.WORLD);
     }
 
     public ChunkIndex getIndex() {
@@ -98,6 +258,14 @@ public class Chunk implements Drawable {
         return this.tiles.length;
     }
 
+    public int spritesCountX() {
+        return CHUNK_SIZE;
+    }
+
+    public int spritesCountY() {
+        return CHUNK_SIZE;
+    }
+
     public static double getChunkSize() {
         if (TILE_SIZE <= 0) {
             TileType.preLoadSprite();
@@ -105,7 +273,7 @@ public class Chunk implements Drawable {
                 throw new InvalidParameterException("TILE_SIZE is not set jet");
             }
         }
-        return TILE_SIZE * SIZE;
+        return TILE_SIZE * CHUNK_SIZE;
     }
 
     public Optional<Chunk> getChunkToTop() {
@@ -210,42 +378,105 @@ public class Chunk implements Drawable {
         boolean isLeftChunk = indexX < 0;
         boolean isRightChunk = indexX >= this.tilesCountX();
 
-        int x = indexX;
-        int y = indexY;
-
-        // Update positions to new chunk when not in this chunk
-        if (isTopChunk) {
-            y = this.tilesCountY() - 1;
-        } else if (isBottomChunk) {
-            y = 0;
-        }
-        if (isLeftChunk) {
-            x = this.tilesCountX() - 1;
-        } else if (isRightChunk) {
-            x = 0;
-        }
+        int x = indexY;
+        int y = indexX;
 
         // Select the chunk where the tile is in
         Chunk chunk = this;
         if (isTopChunk && isLeftChunk) {
+            y = indexY + this.tilesCountY();
+            x = indexX + this.tilesCountX();
             chunk = this.getChunkToTopLeft().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isTopChunk && isRightChunk) {
+            y = indexY + this.tilesCountY();
+            x = indexX - this.tilesCountX();
             chunk = this.getChunkToTopRight().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isBottomChunk && isLeftChunk) {
+            y = indexY - this.tilesCountY();
+            x = indexX + this.tilesCountX();
             chunk = this.getChunkToBottomLeft().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         } else if (isBottomChunk && isRightChunk) {
+            y = indexY - this.tilesCountY();
+            x = indexX - this.tilesCountX();
             chunk = this.getChunkToBottomRight().orElse(null);
-        } else if (isTopChunk) {
-            chunk = this.getChunkToTop().orElse(null);
-        } else if (isBottomChunk) {
-            chunk = this.getChunkToBottom().orElse(null);
-        } else if (isLeftChunk) {
-            chunk = this.getChunkToLeft().orElse(null);
-        } else if (isRightChunk) {
-            chunk = this.getChunkToRight().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
         }
 
-        // Chunk not found
+        if (isTopChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isLeftChunk) {
+                    x = indexX + 1;
+                } else if (isRightChunk) {
+                    x = indexX - 1;
+                }
+            } else {
+                x = indexX;
+            }
+            y = indexY + this.tilesCountY();
+            chunk = this.getChunkToTop().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
+        } else if (isBottomChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isLeftChunk) {
+                    x = indexX + 1;
+                } else if (isRightChunk) {
+                    x = indexX - 1;
+                }
+            } else {
+                x = indexX;
+            }
+            y = indexY - this.tilesCountY();
+            chunk = this.getChunkToBottom().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
+        }
+
+        if (isLeftChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isTopChunk) {
+                    y = indexY + 1;
+                } else if (isBottomChunk) {
+                    y = indexY - 1;
+                }
+            } else {
+                y = indexY;
+            }
+            x = indexX + this.tilesCountX();
+            chunk = this.getChunkToLeft().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
+        } else if (isRightChunk && (chunk == this || chunk == null)) {
+            if (chunk == null) {
+                if (isTopChunk) {
+                    y = indexY + 1;
+                } else if (isBottomChunk) {
+                    y = indexY - 1;
+                }
+            } else {
+                y = indexY;
+            }
+            x = indexX - this.tilesCountX();
+            chunk = this.getChunkToRight().orElse(null);
+            if (chunk != null) {
+                return chunk.getTile(x, y);
+            }
+        }
+
         if (chunk == null) {
             return Optional.empty();
         }

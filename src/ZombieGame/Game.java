@@ -45,6 +45,8 @@ public final class Game {
 		// Create a new world
 		Game.world = new ZombieWorld();
 		Game.world.adjustWorldPart();
+
+		lastTick = System.currentTimeMillis();
 	}
 
 	private void startScreen() {
@@ -70,6 +72,9 @@ public final class Game {
 		Game.world.addUIElement(title);
 		Game.world.addUIElement(startBtn);
 		Game.world.addUIElement(exitBtn);
+
+		// Update changed collisions
+		PhysicsSystem.getInstance().update();
 
 		while (!started.get()) {
 			double secondsDiff = calculateDeltaTime();
@@ -132,8 +137,9 @@ public final class Game {
 					System.exit(0);
 				});
 
-		Game.world.addUIElement(new HelpText(Viewport.getBottomLeft().sub(-200, 200)));
+		HelpText help = new HelpText(Viewport.getBottomLeft().sub(-200, 200));
 
+		Game.world.addUIElement(help);
 		Game.world.addUIElement(startBtn);
 		Game.world.addUIElement(exitBtn);
 
@@ -165,6 +171,7 @@ public final class Game {
 			GraphicSystem.getInstance().swapBuffers();
 		}
 
+		Game.world.removeUIElement(help);
 		Game.world.removeUIElement(startBtn);
 		Game.world.removeUIElement(exitBtn);
 	}
@@ -227,7 +234,6 @@ public final class Game {
 
 	private void run() {
 		Game.world.init();
-		lastTick = System.currentTimeMillis();
 
 		while (true) {
 
@@ -245,7 +251,7 @@ public final class Game {
 
 			Game.world.update(secondsDiff);
 			Game.world.adjustWorldPart();
-			Game.world.processGenerationQueue(10);
+			Game.world.processGenerationQueue(2);
 
 			// Update all Entities
 			Iterator<Entity> entityIt = Game.world.loadedEntityIterator();
@@ -328,10 +334,11 @@ public final class Game {
 		game.startScreen();
 		System.out.println("Starting game...");
 		game.run();
+
+		// Generate Tile test sheet
+		// TileType.testTileClusters();
 	}
 }
-
-// BUG: #1 Zombies seem to not always get damage registered
 
 // BUG: #3 After 2 time hit by a zombie the zombie freezes
 

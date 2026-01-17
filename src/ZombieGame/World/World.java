@@ -648,7 +648,7 @@ public abstract class World implements DebuggableText {
 	 * @return The amount of generated entities
 	 */
 	protected final <T extends Entity> int generateEntity(ChunkIndex index, double density, Function<WorldPos, T> createCallback) {
-		double lambda = Chunk.SIZE / 8 * density;
+		double lambda = Chunk.CHUNK_SIZE / 8 * density;
 
 		String className = "Unknown";
 
@@ -685,6 +685,9 @@ public abstract class World implements DebuggableText {
 			}
 
 			this.spawnEntity(entity);
+
+			// Add the entity so it is registered in physics system so it could be used for future collisions checks
+			this.update(0);
 			amount++;
 		}
 
@@ -742,7 +745,7 @@ public abstract class World implements DebuggableText {
 	public final void enqueueChunkForGeneration(ChunkIndex index) {
 		this.generationQueue.add(index);
 		if (!DebugSystem.getInstance().registerDebuggable(index)) {
-			System.err.println(String.format("Failed to register chunk %s to debug system", index.toString()));
+			System.err.println(String.format("Failed to register chunk index %s to debug system", index.toString()));
 		}
 	}
 
@@ -773,7 +776,7 @@ public abstract class World implements DebuggableText {
 					loadChunk(index);
 				} else {
 					if (!DebugSystem.getInstance().unregisterDebuggable(index)) {
-						System.err.println(String.format("Failed to unregister chunk %s from debug system", index.toString()));
+						System.err.println(String.format("Failed to unregister chunk index %s from debug system", index.toString()));
 					}
 				}
 			}
@@ -793,9 +796,12 @@ public abstract class World implements DebuggableText {
 
 	private final void loadChunk(ChunkIndex index) {
 		if (!DebugSystem.getInstance().registerDebuggable(index)) {
-			System.err.println(String.format("Failed to register chunk %s to debug system", index.toString()));
+			System.err.println(String.format("Failed to register chunk index %s to debug system", index.toString()));
 		}
 		getChunk(index).ifPresent(chunk -> {
+			if (!DebugSystem.getInstance().registerDebuggable(chunk)) {
+				System.err.println(String.format("Failed to register chunk %s to debug system", index.toString()));
+			}
 			if (!GraphicSystem.getInstance().registerDrawable(chunk)) {
 				System.err.println(String.format("Failed to register chunk %s to graphic system", index.toString()));
 			}
@@ -809,9 +815,12 @@ public abstract class World implements DebuggableText {
 
 	private final void unloadChunk(ChunkIndex index) {
 		if (!DebugSystem.getInstance().unregisterDebuggable(index)) {
-			System.err.println(String.format("Failed to unregister chunk %s from debug system", index.toString()));
+			System.err.println(String.format("Failed to unregister chunk index %s from debug system", index.toString()));
 		}
 		getChunk(index).ifPresent(chunk -> {
+			if (!DebugSystem.getInstance().unregisterDebuggable(chunk)) {
+				System.err.println(String.format("Failed to unregister chunk %s from debug system", index.toString()));
+			}
 			if (!GraphicSystem.getInstance().unregisterDrawable(chunk)) {
 				System.err.println(String.format("Failed to unregister chunk %s from graphic system", index.toString()));
 			}

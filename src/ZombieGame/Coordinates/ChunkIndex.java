@@ -141,7 +141,10 @@ public record ChunkIndex(int x, int y) implements DebuggableGeometry {
 
         if (world.isChunkQueuedForGeneration(this)) {
             float[] dashPattern = { 2.0f, 8.0f };
-            style.color(Color.YELLOW).stroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+            style.color(Color.YELLOW).stroke(new BasicStroke(3.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dashPattern, 0.0f));
+        }
+        else {
+            style.stroke(new BasicStroke(3.0f));
         }
 
         if (world.isChunkLoaded(this)) {

@@ -50,13 +50,6 @@ public class AIMovementComponent extends TargetMovementComponent {
         }
         Avatar avatar = opt.get();
 
-        // if avatar is too far away: stop
-        double dist = PhysicsSystem.distance(this.getWorldPos(), avatar.getPositionComponent().getWorldPos());
-
-        if (dist > 1500) {
-            this.hasDestination = false;
-            this.state = AIState.IDLING;
-        }
 
         switch (this.state) {
             case HUNTING:
@@ -85,10 +78,7 @@ public class AIMovementComponent extends TargetMovementComponent {
                 // try step in this direction
                 super.update(deltaTime);
                 break;
-            case IDLING:
-                if (dist < 800) {
-                    this.state = AIState.HUNTING;
-                }
+            case ATTACKING: 
                 break;
             default:
                 System.err.println("Unknown state: " + this.state);

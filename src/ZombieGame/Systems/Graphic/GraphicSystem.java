@@ -25,7 +25,15 @@ public class GraphicSystem extends JPanel implements DebuggableText {
     private static final GraphicSystem instance = new GraphicSystem();
     private EnumMap<GraphicLayer, ArrayList<Drawable>> drawables;
     private long lastTime;
-    private long lastdiff;
+    private long frameTime;
+    private long drawTime;
+    private long drawTimeBackground;
+    private long drawTimeGame;
+    private long sortTimeGame;
+    private long drawTimeEffects;
+    private long sortTimeEffects;
+    private long drawTimeUi;
+    private long drawTimeDebug;
 
     // GraphicsSystem variables
     private GraphicsConfiguration graphicsConf = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
@@ -44,7 +52,15 @@ public class GraphicSystem extends JPanel implements DebuggableText {
 
         this.drawables = new EnumMap<>(GraphicLayer.class);
         this.lastTime = System.currentTimeMillis();
-        this.lastdiff = 0;
+        this.frameTime = 0;
+        this.drawTime = 0;
+        this.drawTimeBackground = 0;
+        this.drawTimeGame = 0;
+        this.sortTimeGame = 0;
+        this.drawTimeEffects = 0;
+        this.sortTimeEffects = 0;
+        this.drawTimeUi = 0;
+        this.drawTimeDebug = 0;
 
         if (!DebugSystem.getInstance().registerDebuggable(this)) {
             System.err.println(String.format("Failed to register graphic system to debug system"));
@@ -109,15 +125,32 @@ public class GraphicSystem extends JPanel implements DebuggableText {
      * Draw the entities on the Screen
      */
     public void draw() {
+        long start = System.nanoTime();
         drawables.getOrDefault(GraphicLayer.BACKGROUND, new ArrayList<>()).forEach(entity -> entity.draw());
+        long endBackground = System.nanoTime();
         ArrayList<Drawable> game = drawables.getOrDefault(GraphicLayer.GAME, new ArrayList<>());
         game.sort(null);
+        long endSortGame = System.nanoTime();
         game.forEach(entity -> entity.draw());
+        long endGame = System.nanoTime();
         ArrayList<Drawable> effects = drawables.getOrDefault(GraphicLayer.EFFECTS, new ArrayList<>());
         effects.sort(null);
+        long endSortEffects = System.nanoTime();
         effects.forEach(entity -> entity.draw());
+        long endEffects = System.nanoTime();
         drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).forEach(entity -> entity.draw());
+        long endUi = System.nanoTime();
         DebugSystem.getInstance().draw();
+        long endDebug = System.nanoTime();
+
+        this.drawTime = endDebug - start;
+        this.drawTimeBackground = endBackground - start;
+        this.drawTimeGame = endGame - endBackground;
+        this.sortTimeGame = endSortGame - endBackground;
+        this.drawTimeEffects = endEffects - endGame;
+        this.sortTimeEffects = endSortEffects - endGame;
+        this.drawTimeUi = endUi - endEffects;
+        this.drawTimeDebug = endDebug - endUi;
     }
 
     /**
@@ -263,7 +296,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
             tempGraphics.fillRect(0, 0, drawWidth, drawHeight);
             tempGraphics.dispose();
 
-            graphics.drawImage(temp, drawPos.x(), drawPos.y(), null);
+            this.graphics.drawImage(temp, drawPos.x(), drawPos.y(), null);
         } else {
             this.graphics.drawImage(sprite, drawPos.x(), drawPos.y(), drawPos.x() + drawWidth, drawPos.y() + drawHeight, (columnIndex * spriteWidth), (rowIndex * spriteHeight), ((columnIndex + 1) * spriteWidth), ((rowIndex + 1) * spriteHeight), null);
         }
@@ -320,12 +353,16 @@ public class GraphicSystem extends JPanel implements DebuggableText {
         this.drawSprite(sprite, pos, columnIndex, rowIndex, scale, spriteWidth, spriteHeight, null);
     }
 
+    public void drawImage(BufferedImage image, ViewPos pos, int width, int height) {
+        this.graphics.drawImage(image, pos.x(), pos.y(), width, height, null);
+    }
+
     /**
      * Draw the objects to screen
      */
     public void swapBuffers() {
         long currentTime = System.nanoTime();
-        this.lastdiff = currentTime - lastTime;
+        this.frameTime = currentTime - lastTime;
         this.lastTime = currentTime;
 
         this.getGraphics().drawImage(this.imageBuffer, 0, 0, this);
@@ -372,8 +409,16 @@ public class GraphicSystem extends JPanel implements DebuggableText {
         int effectsSize = drawables.getOrDefault(GraphicLayer.EFFECTS, new ArrayList<>()).size();
         int uiSize = drawables.getOrDefault(GraphicLayer.UI, new ArrayList<>()).size();
 
-        elements.add(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / this.lastdiff)));
-        elements.add(String.format("Frame time: %.2f ms", this.lastdiff / 1_000_000.0));
+        elements.add(String.format("FPS: %d", (int) Math.round(1_000_000_000.0 / this.frameTime)));
+        elements.add(String.format("Frame time: %.2f ms", this.frameTime / 1_000_000.0));
+        elements.add(String.format("Draw time: %.2f ms", this.drawTime / 1_000_000.0));
+        elements.add(String.format("  Background: %.2f ms", this.drawTimeBackground / 1_000_000.0));
+        elements.add(String.format("  Game: %.2f ms", this.drawTimeGame / 1_000_000.0));
+        elements.add(String.format("    Sort: %.2f ms", this.sortTimeGame / 1_000_000.0));
+        elements.add(String.format("  Effects: %.2f ms", this.drawTimeEffects / 1_000_000.0));
+        elements.add(String.format("    Sort: %.2f ms", this.sortTimeEffects / 1_000_000.0));
+        elements.add(String.format("  Ui: %.2f ms", this.drawTimeUi / 1_000_000.0));
+        elements.add(String.format("  Debug: %.2f ms", this.drawTimeDebug / 1_000_000.0));
         elements.add(String.format("Draw calls: %d", backgroundSize + gameSize + effectsSize + uiSize));
         elements.add(String.format("  Background: %d", backgroundSize));
         elements.add(String.format("  Game: %d", gameSize));

@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import ZombieGame.Entities.Avatar;
+import ZombieGame.Entities.FirstAidKit;
 import ZombieGame.Viewport;
 import ZombieGame.ZombieType;
 import ZombieGame.Algorithms.GaussianBlur;
@@ -13,24 +14,31 @@ import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Ammunition;
 import ZombieGame.Entities.AmmunitionCounter;
 import ZombieGame.Entities.HeartUI;
-import ZombieGame.Entities.Tree;
 import ZombieGame.Entities.Zombie;
-import ZombieGame.Entities.ZombieCounter;
+import ZombieGame.Entities.ZombieKillCounter;
+import ZombieGame.Entities.Obstacles.Tree1;
+import ZombieGame.Entities.Obstacles.Tree10;
+import ZombieGame.Entities.Obstacles.Tree2;
+import ZombieGame.Entities.Obstacles.Tree3;
 import ZombieGame.Entities.Timer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class ZombieWorld extends World {
 	private double zombieTime = 0;
-	private boolean debugGeneration = true;
+	private boolean debugGeneration = false;
 	public final double SPAWN_INTERVAL = 1.0; // secondes
-	private final double ZOMBIE_BASE_DENSITY = 1.0;
-	private final double ZOMBIE_MAX_DENSITY = 10.0;
+	private final double ZOMBIE_BASE_DENSITY = 2.0;
+	private final double ZOMBIE_MAX_DENSITY = 20.0;
 	private final double ZOMBIE_GROTH = 0.08;
 	private final double CURVE = 1.8;
 
 	public ZombieWorld() {
 		super();
+		// add the Avatar
+		this.spawnEntity(new Avatar(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 3)).toWorldPos(this)));
+		this.update(0);
+
 		// Pregenerate chunks
 		final int PREGENERATE_CHUNK_X = 8;
 		final int PREGENERATE_CHUNK_Y = 6;
@@ -42,14 +50,12 @@ public class ZombieWorld extends World {
 
 		this.processGenerationQueue(this.getGenerationQueueSize());
 
-		// add the Avatar
-		this.spawnEntity(new Avatar(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 3)).toWorldPos(this)));
 		this.update(0);
 		this.updateLoadedChunks();
 	}
 
 	public void init() {
-		this.addUIElement(new ZombieCounter(Viewport.getTopLeft().add(20, 40)));
+		this.addUIElement(new ZombieKillCounter(Viewport.getTopLeft().add(20, 40)));
 		this.addUIElement(new Timer(Viewport.getTopCenter().add(-45, 40)));
 		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -56)));
 		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(20, -68), 0));
@@ -83,7 +89,17 @@ public class ZombieWorld extends World {
 			return null;
 		}
 
-		// Pick a type: mostly BIG, some SMALL, few AXE
+		// if collisions occur, cancel
+		Zombie zombie = new Zombie(pos, randomZombieType());
+		if (PhysicsSystem.getInstance().testCollision(zombie)) {
+			this.zombieTime += SPAWN_INTERVAL;
+			return null;
+		}
+
+		return zombie;
+	}
+
+	private ZombieType randomZombieType() {
 		ZombieType type;
 		double r = Math.random();
 		if (r < 0.55) {
@@ -93,101 +109,108 @@ public class ZombieWorld extends World {
 		} else {
 			type = ZombieType.AXE;
 		}
-
-		// if collisions occur, cancel
-		Zombie zombie = new Zombie(pos, type);
-		if (PhysicsSystem.getInstance().testCollision(zombie)) {
-			this.zombieTime += SPAWN_INTERVAL;
-			return null;
-		}
-
-		// Increase zombie counter
-		zombie.getPositionComponent().setDestination(avatar);
-		Optional<ZombieCounter> optZ = this.getUIElement(ZombieCounter.class);
-		if (optZ.isEmpty()) {
-			System.err.println("Could not find ZombieCounter");
-		}
-		ZombieCounter counter = optZ.get();
-		counter.increment();
-
-		return zombie;
+		return type;
 	}
 
+	// BUG: This generation technic can has hard cuts at chunk borders because of the diagonal constrains
 	@Override
 	public Chunk generateChunk(ChunkIndex index) {
-		final int CHUNK_SIZE = Chunk.SIZE;
 		// radius ≤ CHUNK_SIZE / 6
 		final int BLUR_RADIUS = 2;
 		// sigma ≈ radius × 0.7
-		final float SIGMA = 1.2f;
+		final float SIGMA = 1.9f;
 
-		int W = CHUNK_SIZE + 2 * BLUR_RADIUS;
-		double[][] map = new double[W][W];
+		int W = Chunk.DATA_SIZE + 2 * BLUR_RADIUS;
+		double[][] tileData = new double[W][W];
+		double[][] takeOverTileData = new double[W][W];
 		Chunk currentTempChunk = new Chunk(this, index);
 
 		// Fill with random values
-		for (int y = 0; y < map.length; y++) {
-			boolean isTopChunk = y < BLUR_RADIUS;
-			boolean isBottomChunk = y >= CHUNK_SIZE + BLUR_RADIUS;
+		for (int y = 0; y < tileData.length; y++) {
+			boolean isTopChunk = y < BLUR_RADIUS + 1;
+			boolean isBottomChunk = y >= Chunk.DATA_SIZE + BLUR_RADIUS - 1;
 
-			for (int x = 0; x < map[y].length; x++) {
-				boolean isLeftChunk = x < BLUR_RADIUS;
-				boolean isRightChunk = x >= CHUNK_SIZE + BLUR_RADIUS;
+			for (int x = 0; x < tileData[y].length; x++) {
+				boolean isLeftChunk = x < BLUR_RADIUS + 1;
+				boolean isRightChunk = x >= Chunk.DATA_SIZE + BLUR_RADIUS - 1;
 
 				// Getting the tile from chunk to the side to fill the existing values in
 				if (isTopChunk || isBottomChunk || isLeftChunk || isRightChunk) {
-					TileType tileType = currentTempChunk.getTile(x - BLUR_RADIUS, y - BLUR_RADIUS).orElse(null);
+					int offsetY = -BLUR_RADIUS;
+					int offsetX = -BLUR_RADIUS;
+					if (isTopChunk) {
+						offsetY = -(BLUR_RADIUS + 1);
+					} else if (isBottomChunk) {
+						offsetY = 1;
+					}
+
+					if (isLeftChunk) {
+						offsetX = -(BLUR_RADIUS + 1);
+					} else if (isRightChunk) {
+						offsetX = 1;
+					}
+
+					TileType tileType = currentTempChunk.getTile(x + offsetX, y + offsetY).orElse(null);
 
 					if (tileType != null) {
-						map[y][x] = tileType.getValue();
+						tileData[y][x] = tileType.getValue();
+						takeOverTileData[y][x] = tileType.getValue();
 						continue;
 					}
 				}
 
-				map[y][x] = ThreadLocalRandom.current().nextDouble();
+				tileData[y][x] = ThreadLocalRandom.current().nextDouble();
+				takeOverTileData[y][x] = Double.NaN;
 			}
 		}
 
 		if (debugGeneration) {
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/rng/%d_%d_chunk_rng.png", index.x(), index.y()));
+			GraphicSystem.getInstance().saveAsGreyScaleImage(tileData, tileData.length, tileData[0].length, String.format("ChunkGeneration/rng/%d_%d_chunk_rng.png", index.x(), index.y()));
 		}
 
 		// Smooth the random values
-		map = GaussianBlur.blur(map, BLUR_RADIUS, SIGMA);
+		tileData = GaussianBlur.blur(tileData, BLUR_RADIUS, SIGMA);
 
 		if (debugGeneration) {
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/blur/%d_%d_chunk_blur.png", index.x(), index.y()));
+			GraphicSystem.getInstance().saveAsGreyScaleImage(tileData, tileData.length, tileData[0].length, String.format("ChunkGeneration/blur/%d_%d_chunk_blur.png", index.x(), index.y()));
 		}
 
 		// Find min and max of the blurred map
 		double min = Double.POSITIVE_INFINITY;
 		double max = Double.NEGATIVE_INFINITY;
-		for (int y = 0; y < map.length; y++) {
-			for (int x = 0; x < map[y].length; x++) {
-				double v = map[y][x];
-				if (v < min)
+		for (int y = 0; y < tileData.length; y++) {
+			for (int x = 0; x < tileData[y].length; x++) {
+				double v = tileData[y][x];
+				if (v < min) {
 					min = v;
-				if (v > max)
+				}
+				if (v > max) {
 					max = v;
+				}
 			}
 		}
 
-		double[][] t = new double[CHUNK_SIZE][CHUNK_SIZE];
-		TileType[][] tiles = new TileType[CHUNK_SIZE][CHUNK_SIZE];
+		double[][] t = new double[Chunk.DATA_SIZE][Chunk.DATA_SIZE];
+		TileType[][] tiles = new TileType[Chunk.DATA_SIZE][Chunk.DATA_SIZE];
 		for (int y = 0; y < tiles.length; y++) {
 			for (int x = 0; x < tiles[y].length; x++) {
-				// Map everything to 0..1
-				map[y + BLUR_RADIUS][x + BLUR_RADIUS] = (map[y + BLUR_RADIUS][x + BLUR_RADIUS] - min) / (max - min);
+				if (Double.isFinite(takeOverTileData[y + BLUR_RADIUS][x + BLUR_RADIUS])) {
+					// If take over data from other chunk exists use it
+					tiles[y][x] = TileType.select(takeOverTileData[y + BLUR_RADIUS][x + BLUR_RADIUS]);
+					t[y][x] = tiles[y][x].getValue();
+				} else {
+					// Map everything to 0..1
+					tileData[y + BLUR_RADIUS][x + BLUR_RADIUS] = (tileData[y + BLUR_RADIUS][x + BLUR_RADIUS] - min) / (max - min);
 
-				// Convert the random values to TileTypes
-				tiles[y][x] = TileType.select(map[y + BLUR_RADIUS][x + BLUR_RADIUS]);
-				t[y][x] = tiles[y][x].getValue();
-
+					// Convert the random values to TileTypes
+					tiles[y][x] = TileType.select(tileData[y + BLUR_RADIUS][x + BLUR_RADIUS]);
+					t[y][x] = tiles[y][x].getValue();
+				}
 			}
 		}
 
 		if (debugGeneration) {
-			GraphicSystem.getInstance().saveAsGreyScaleImage(map, map.length, map[0].length, String.format("ChunkGeneration/normalized/%d_%d_chunk_normalized.png", index.x(), index.y()));
+			GraphicSystem.getInstance().saveAsGreyScaleImage(tileData, tileData.length, tileData[0].length, String.format("ChunkGeneration/normalized/%d_%d_chunk_normalized.png", index.x(), index.y()));
 		}
 
 		if (debugGeneration) {
@@ -195,11 +218,22 @@ public class ZombieWorld extends World {
 		}
 
 		// Generate tree in chunk
-		this.generateEntity(index, 2.5, pos -> new Tree(pos));
+		this.generateEntity(index, 4, pos -> new Tree1(pos));
+		this.generateEntity(index, 4, pos -> new Tree2(pos));
+		this.generateEntity(index, 4, pos -> new Tree3(pos));
+		this.generateEntity(index, 4, pos -> new Tree10(pos));
 
 		// Add loot
-		this.generateEntity(index, 0.1, pos -> new Ammunition(pos));
+		this.generateEntity(index, 0.25, pos -> new Ammunition(pos));
+		this.generateEntity(index, 0.2, pos -> new FirstAidKit(pos));
 
-		return new Chunk(this, index, tiles);
+		// Add Zombies to chunk
+		this.generateEntity(index, 1.0, pos -> new Zombie(pos, randomZombieType()));
+
+		Chunk res = new Chunk(this, index, tiles);
+		if (debugGeneration) {
+			res.exportBakedChunk("ChunkGeneration/chunks/");
+		}
+		return res;
 	}
 }

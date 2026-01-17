@@ -153,7 +153,7 @@ public record ChunkLocalPos(double x, double y) {
     }
 
     public boolean isInsideChunk() {
-        return x >= 0 && x < Chunk.SIZE && y >= 0 && y < Chunk.SIZE;
+        return x >= 0 && x < Chunk.CHUNK_SIZE && y >= 0 && y < Chunk.CHUNK_SIZE;
     }
 
     /**
