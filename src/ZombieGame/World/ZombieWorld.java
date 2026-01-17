@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import ZombieGame.Entities.Avatar;
+import ZombieGame.Entities.FirstAidKit;
 import ZombieGame.Viewport;
 import ZombieGame.ZombieType;
 import ZombieGame.Algorithms.GaussianBlur;
@@ -13,9 +14,12 @@ import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Ammunition;
 import ZombieGame.Entities.AmmunitionCounter;
 import ZombieGame.Entities.HeartUI;
-import ZombieGame.Entities.Tree;
 import ZombieGame.Entities.Zombie;
 import ZombieGame.Entities.ZombieCounter;
+import ZombieGame.Entities.Obstacles.Tree1;
+import ZombieGame.Entities.Obstacles.Tree10;
+import ZombieGame.Entities.Obstacles.Tree2;
+import ZombieGame.Entities.Obstacles.Tree3;
 import ZombieGame.Entities.Timer;
 import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Physic.PhysicsSystem;
@@ -218,10 +222,14 @@ public class ZombieWorld extends World {
 		}
 
 		// Generate tree in chunk
-		this.generateEntity(index, 2.5, pos -> new Tree(pos));
+		this.generateEntity(index, 3, pos -> new Tree1(pos));
+		this.generateEntity(index, 3, pos -> new Tree2(pos));
+		this.generateEntity(index, 3, pos -> new Tree3(pos));
+		this.generateEntity(index, 3, pos -> new Tree10(pos));
 
 		// Add loot
-		this.generateEntity(index, 0.1, pos -> new Ammunition(pos));
+		this.generateEntity(index, 0.25, pos -> new Ammunition(pos));
+		this.generateEntity(index, 0.2, pos -> new FirstAidKit(pos));
 
 		return new Chunk(this, index, tiles);
 	}
