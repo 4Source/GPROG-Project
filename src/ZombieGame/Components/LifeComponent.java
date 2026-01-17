@@ -12,11 +12,24 @@ public class LifeComponent extends LivingComponent {
 
     private double damageFlashTimeout;
 
-    public LifeComponent(Entity entity, int halfHearts) {
-        super(entity);
+    /**
+     * @param entity The entity to which the components belongs to
+     * @param halfHearts The number of hearts which are max allowed and the initial number of hearts
+     * @param onDie A callback function which gets called when the component is marked as dead
+     */
+    public LifeComponent(Entity entity, int halfHearts, Runnable onDie) {
+        super(entity, onDie);
         this.life = halfHearts;
         this.maxLife = halfHearts;
         this.damageFlashTimeout = 0.0;
+    }
+
+    /**
+     * @param entity The entity to which the components belongs to
+     * @param halfHearts The number of hearts which are max allowed and the initial number of hearts
+     */
+    public LifeComponent(Entity entity, int halfHearts) {
+        this(entity, halfHearts, () -> {});
     }
 
     /** Current half-hearts */

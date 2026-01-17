@@ -20,7 +20,6 @@ import ZombieGame.Systems.Graphic.GraphicSystem;
 import ZombieGame.Systems.Input.Action;
 import ZombieGame.Systems.Input.InputSystem;
 import ZombieGame.Systems.Physic.PhysicsSystem;
-import ZombieGame.World.TileType;
 import ZombieGame.World.World;
 import ZombieGame.World.ZombieWorld;
 
@@ -46,6 +45,8 @@ public final class Game {
 		// Create a new world
 		Game.world = new ZombieWorld();
 		Game.world.adjustWorldPart();
+
+		lastTick = System.currentTimeMillis();
 	}
 
 	private void startScreen() {
@@ -71,6 +72,9 @@ public final class Game {
 		Game.world.addUIElement(title);
 		Game.world.addUIElement(startBtn);
 		Game.world.addUIElement(exitBtn);
+
+		// Update changed collisions
+		PhysicsSystem.getInstance().update();
 
 		while (!started.get()) {
 			double secondsDiff = calculateDeltaTime();
@@ -133,8 +137,9 @@ public final class Game {
 					System.exit(0);
 				});
 
-		Game.world.addUIElement(new HelpText(Viewport.getBottomLeft().sub(-200, 200)));
+		HelpText help = new HelpText(Viewport.getBottomLeft().sub(-200, 200));
 
+		Game.world.addUIElement(help);
 		Game.world.addUIElement(startBtn);
 		Game.world.addUIElement(exitBtn);
 
@@ -166,6 +171,7 @@ public final class Game {
 			GraphicSystem.getInstance().swapBuffers();
 		}
 
+		Game.world.removeUIElement(help);
 		Game.world.removeUIElement(startBtn);
 		Game.world.removeUIElement(exitBtn);
 	}
@@ -228,7 +234,6 @@ public final class Game {
 
 	private void run() {
 		Game.world.init();
-		lastTick = System.currentTimeMillis();
 
 		while (true) {
 
@@ -335,10 +340,6 @@ public final class Game {
 	}
 }
 
-// BUG: #1 Zombies seem to not always get damage registered
-
 // BUG: #3 After 2 time hit by a zombie the zombie freezes
 
 // BUG: #4 BABY Zombies can bug into player
-
-// TODO: More Obstacles for visual variety

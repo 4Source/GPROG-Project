@@ -26,6 +26,9 @@ public class DebugSystem {
         this.debuggablesGeometry = new EnumMap<>(DebugCategory.class);
         this.debuggablesText = new EnumMap<>(DebugCategory.class);
         this.enabledCategories = new EnumMap<>(DebugCategory.class);
+        for (DebugCategory category : DebugCategory.values()) {
+            this.enabledCategories.putIfAbsent(category, false);
+        }
     }
 
     /**

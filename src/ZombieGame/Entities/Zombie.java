@@ -1,5 +1,7 @@
 package ZombieGame.Entities;
 
+import java.util.Optional;
+
 import ZombieGame.AIState;
 import ZombieGame.CharacterAction;
 import ZombieGame.CharacterAnimationKey;
@@ -27,7 +29,6 @@ import ZombieGame.Systems.Physic.RectangleHitBox;
 import ZombieGame.Sprites.OneShotSprite;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
-// BUG: #1 Check LifeComponent of Zombie if it uses Hearts
 public class Zombie extends Character {
 	private final ZombieType type;
 	private final ZombieAttackComponent attackComponent;
@@ -41,7 +42,16 @@ public class Zombie extends Character {
 				bodyCircleHitBoxFor(type),
 				e -> new DynamicPhysicsComponent(e, physicsRectHitBoxFor(type), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
 				e -> new AIMovementComponent((Zombie) e, start, 0, movementSpeedFor(type)),
-				e -> new LifeComponent(e, maxHealthFor(type)));
+				e -> new LifeComponent(e, maxHealthFor(type), () -> {
+					// Increase zombie counter
+					Optional<ZombieKillCounter> optZ = Game.world.getUIElement(ZombieKillCounter.class);
+					if (optZ.isEmpty()) {
+						System.err.println("Could not find ZombieKillCounter");
+					} else {
+						ZombieKillCounter counter = optZ.get();
+						counter.increment();
+					}
+				}));
 		this.type = type;
 
 		// Attack params depend on the type

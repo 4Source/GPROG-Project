@@ -67,7 +67,7 @@ public class PhysicsSystem implements DebuggableText {
 		}
 		// Add unregistered component
 		else {
-			return registeredComponents.add(component);
+			return this.registeredComponents.add(component);
 		}
 	}
 
@@ -231,17 +231,20 @@ public class PhysicsSystem implements DebuggableText {
 		ArrayList<Collision> result = new ArrayList<>();
 
 		// Physics component is not registered in the PhysicsSystem
-		if (!this.currentBuffer.containsKey(component)) {
+		if (!this.registeredComponents.contains(component)) {
 			System.err.println("PhysicsComponent of Entity is not registered!");
 			return result;
 		}
 
 		HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.currentBuffer.get(component);
-		if (entriesForComponent != null) {
-			for (Entry<PhysicsComponent, CollisionResponse> entry : entriesForComponent.entrySet()) {
-				if (entry.getValue() != CollisionResponse.None) {
-					result.add(new Collision(entry.getKey().getEntity(), entry.getValue()));
-				}
+		if (entriesForComponent == null) {
+			System.err.println("getCollisions: Could not find entries for PhysicsComponent of Entity!");
+			return result;
+		}
+
+		for (Entry<PhysicsComponent, CollisionResponse> entry : entriesForComponent.entrySet()) {
+			if (entry.getValue() != CollisionResponse.None) {
+				result.add(new Collision(entry.getKey().getEntity(), entry.getValue()));
 			}
 		}
 
@@ -276,18 +279,21 @@ public class PhysicsSystem implements DebuggableText {
 		AtomicBoolean result = new AtomicBoolean(false);
 
 		// Physics component is not registered in the PhysicsSystem
-		if (!this.currentBuffer.containsKey(component)) {
+		if (!this.registeredComponents.contains(component)) {
 			System.err.println("PhysicsComponent of Entity is not registered!");
 			return false;
 		}
 
 		HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.currentBuffer.get(component);
-		if (entriesForComponent != null) {
-			for (CollisionResponse response : entriesForComponent.values()) {
-				if (response != CollisionResponse.None) {
-					result.set(true);
-					break;
-				}
+		if (entriesForComponent == null) {
+			System.err.println("hasCollision: Could not find entries for PhysicsComponent of Entity!");
+			return false;
+		}
+
+		for (CollisionResponse response : entriesForComponent.values()) {
+			if (response != CollisionResponse.None) {
+				result.set(true);
+				break;
 			}
 		}
 
@@ -369,21 +375,11 @@ public class PhysicsSystem implements DebuggableText {
 		AtomicBoolean result = new AtomicBoolean(false);
 
 		// Physics component is not registered in the PhysicsSystem
-		if (this.currentBuffer.containsKey(component)) {
-			System.err.println("PhysicsComponent of Entity is registered, use 'hasCollision' instead if this is expected!");
-
-			HashMap<PhysicsComponent, CollisionResponse> entriesForComponent = this.currentBuffer.get(component);
-			if (entriesForComponent != null) {
-				for (CollisionResponse response : entriesForComponent.values()) {
-					if (response != CollisionResponse.None) {
-						result.set(true);
-						break;
-					}
-				}
-			}
+		if (this.registeredComponents.contains(component)) {
+			throw new IllegalArgumentException("PhysicsComponent of Entity is registered, use 'hasCollision' instead if this is expected!");
 		}
 
-		for (PhysicsComponent otherComponent : this.currentBuffer.keySet()) {
+		for (PhysicsComponent otherComponent : this.registeredComponents) {
 			if (otherComponent.equals(component)) {
 				continue;
 			}
@@ -422,7 +418,7 @@ public class PhysicsSystem implements DebuggableText {
 		int staticCount = 0;
 		int dynamicCount = 0;
 		int coll = 0;
-		for (PhysicsComponent c : this.currentBuffer.keySet()) {
+		for (PhysicsComponent c : this.registeredComponents) {
 			coll += this.getCollisions(c).size();
 			if (c instanceof DynamicPhysicsComponent) {
 				dynamicCount++;
@@ -431,7 +427,7 @@ public class PhysicsSystem implements DebuggableText {
 				staticCount++;
 			}
 		}
-		elements.add(String.format("Physics Components: %d", this.currentBuffer.size()));
+		elements.add(String.format("Physics Components: %d", this.registeredComponents.size()));
 		elements.add(String.format("Physics Static Components: %d", staticCount));
 		elements.add(String.format("Physics Dynamic Components: %d", dynamicCount));
 		elements.add(String.format("Physics Collisions: %d", coll));

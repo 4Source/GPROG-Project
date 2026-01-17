@@ -685,6 +685,9 @@ public abstract class World implements DebuggableText {
 			}
 
 			this.spawnEntity(entity);
+
+			// Add the entity so it is registered in physics system so it could be used for future collisions checks
+			this.update(0);
 			amount++;
 		}
 
