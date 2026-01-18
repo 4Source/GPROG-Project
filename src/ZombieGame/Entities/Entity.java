@@ -35,7 +35,9 @@ public abstract class Entity {
      * @return The specific component
      */
     public <T extends Component> T add(T component) {
-        components.computeIfAbsent(component.getClass(), c -> new ArrayList<>()).add(component);
+        if (component != null) {
+            components.computeIfAbsent(component.getClass(), c -> new ArrayList<>()).add(component);
+        }
         return component;
     }
 

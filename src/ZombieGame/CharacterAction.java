@@ -1,5 +1,5 @@
 package ZombieGame;
 
 public enum CharacterAction {
-    IDLE, MOVE, ATTACK, PICKUP, DEATH
+    IDLE, MOVE, ATTACK, SPECIAL_ATTACK, PICKUP, DEATH
 }

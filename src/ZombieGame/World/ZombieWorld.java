@@ -4,9 +4,11 @@ import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import ZombieGame.Entities.Avatar;
+import ZombieGame.Entities.AxeZombie;
+import ZombieGame.Entities.BabyZombie;
+import ZombieGame.Entities.BigZombie;
 import ZombieGame.Entities.FirstAidKit;
 import ZombieGame.Viewport;
-import ZombieGame.ZombieType;
 import ZombieGame.Algorithms.GaussianBlur;
 import ZombieGame.Coordinates.ChunkIndex;
 import ZombieGame.Coordinates.Offset;
@@ -37,6 +39,8 @@ public class ZombieWorld extends World {
 		super();
 		// add the Avatar
 		this.spawnEntity(new Avatar(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 3)).toWorldPos(this)));
+		// HACK:
+		this.spawnEntity(new AxeZombie(new WorldPos(100, 100)));
 		this.update(0);
 
 		// Pregenerate chunks
@@ -64,14 +68,15 @@ public class ZombieWorld extends World {
 	public void UpdateEntityGeneration(double deltaTime) {
 		this.zombieTime += deltaTime;
 
-		if (this.zombieTime > SPAWN_INTERVAL) {
-			// Select random loaded chunk
-			Object[] loaded = getLoadedChunks().toArray();
-			ChunkIndex index = (ChunkIndex) loaded[Math.min(loaded.length - 1, Math.max(0, (int) Math.floor(ThreadLocalRandom.current().nextDouble() * loaded.length)))];
+		// HACK
+		// if (this.zombieTime > SPAWN_INTERVAL) {
+		// // Select random loaded chunk
+		// Object[] loaded = getLoadedChunks().toArray();
+		// ChunkIndex index = (ChunkIndex) loaded[Math.min(loaded.length - 1, Math.max(0, (int) Math.floor(ThreadLocalRandom.current().nextDouble() * loaded.length)))];
 
-			// Spawn zombies in it
-			this.zombieTime -= SPAWN_INTERVAL * Math.max(1, this.generateEntity(index, Math.min(ZOMBIE_BASE_DENSITY * Math.pow((1 + ZOMBIE_GROTH * getWorldTimeSeconds() / 60), CURVE), ZOMBIE_MAX_DENSITY), pos -> spawnZombie(pos)));
-		}
+		// // Spawn zombies in it
+		// this.zombieTime -= SPAWN_INTERVAL * Math.max(1, this.generateEntity(index, Math.min(ZOMBIE_BASE_DENSITY * Math.pow((1 + ZOMBIE_GROTH * getWorldTimeSeconds() / 60), CURVE), ZOMBIE_MAX_DENSITY), pos -> spawnZombie(pos)));
+		// }
 	}
 
 	private Zombie spawnZombie(WorldPos pos) {
@@ -90,7 +95,7 @@ public class ZombieWorld extends World {
 		}
 
 		// if collisions occur, cancel
-		Zombie zombie = new Zombie(pos, randomZombieType());
+		Zombie zombie = randomZombieType(pos);
 		if (PhysicsSystem.getInstance().testCollision(zombie)) {
 			this.zombieTime += SPAWN_INTERVAL;
 			return null;
@@ -99,17 +104,15 @@ public class ZombieWorld extends World {
 		return zombie;
 	}
 
-	private ZombieType randomZombieType() {
-		ZombieType type;
+	private Zombie randomZombieType(WorldPos pos) {
 		double r = Math.random();
 		if (r < 0.55) {
-			type = ZombieType.BIG;
+			return new BigZombie(pos);
 		} else if (r < 0.90) {
-			type = ZombieType.SMALL;
+			return new BabyZombie(pos);
 		} else {
-			type = ZombieType.AXE;
+			return new AxeZombie(pos);
 		}
-		return type;
 	}
 
 	// BUG: This generation technic can has hard cuts at chunk borders because of the diagonal constrains
@@ -227,8 +230,9 @@ public class ZombieWorld extends World {
 		this.generateEntity(index, 0.25, pos -> new Ammunition(pos));
 		this.generateEntity(index, 0.2, pos -> new FirstAidKit(pos));
 
+		// HACK
 		// Add Zombies to chunk
-		this.generateEntity(index, 1.0, pos -> new Zombie(pos, randomZombieType()));
+		// this.generateEntity(index, 1.0, pos -> randomZombieType(pos));
 
 		Chunk res = new Chunk(this, index, tiles);
 		if (debugGeneration) {

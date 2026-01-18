@@ -9,7 +9,6 @@ import ZombieGame.Game;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Zombie;
-import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class AIMovementComponent extends TargetMovementComponent {
     protected AIState state;
@@ -50,6 +49,11 @@ public class AIMovementComponent extends TargetMovementComponent {
         }
         Avatar avatar = opt.get();
 
+        this.getEntity().getPrimaryAttackComponent().setTarget(avatar);
+        AttackComponent c = this.getEntity().getSecondaryAttackComponent();
+        if (c != null) {
+            c.setTarget(avatar);
+        }
 
         switch (this.state) {
             case HUNTING:
@@ -78,7 +82,7 @@ public class AIMovementComponent extends TargetMovementComponent {
                 // try step in this direction
                 super.update(deltaTime);
                 break;
-            case ATTACKING: 
+            case ATTACKING:
                 break;
             default:
                 System.err.println("Unknown state: " + this.state);
