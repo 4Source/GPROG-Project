@@ -60,16 +60,6 @@ public class AxeProjectile extends Projectile {
         this(owner, pos, Math.atan2(dest.y() - pos.y(), dest.x() - pos.x()), speed, lifetime, damage);
     }
 
-    /**
-     * @param owner The entity which spawned this Projectile, the projectile will not collide with owner.
-     * @param pos The position in the world
-     * @param dest The target direction of the axe
-     * @deprecated This is only here for compatibility reasons speed, lifetime, damage should be specified
-     */
-    public AxeProjectile(Entity owner, WorldPos pos, WorldPos dest) {
-        this(owner, pos, dest, 200, 1.6, 3);
-    }
-
     @Override
     public EntityType getType() {
         // We reuse SHOT to avoid touching other systems.

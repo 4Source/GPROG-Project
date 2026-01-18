@@ -54,7 +54,7 @@ public class LifeComponent extends LivingComponent {
     /**
      * Make damage to the entity
      * 
-     * @param halfHeartsDamage The damage in amount of hearts
+     * @param halfHeartsDamage The damage in amount of half hearts
      */
     public void takeDamage(int halfHeartsDamage) {
         if (halfHeartsDamage <= 0)
