@@ -21,9 +21,14 @@ public abstract class ActionComponent extends Component {
 
         this.actionHandlers = factory.apply(this);
 
+        /*
         if (this.actionHandlers.isEmpty()) {
             throw new IllegalArgumentException("At least one action must be bound for a ActionComponent");
         }
+
+         */
+
+
     }
 
     @Override

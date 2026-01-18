@@ -300,7 +300,7 @@ public class GraphicSystem extends JPanel implements DebuggableText {
 
         // Set rotation
         if (!rotation.isZero()) {
-            ViewPos pivot = pos.sub(drawWidth / 2, drawHeight / 2).add(rotationCenter.mul(scale));
+            ViewPos pivot = pos.add(rotationCenter);
             this.graphics.rotate(rotation.radians(), pivot.x(), pivot.y());
         }
 

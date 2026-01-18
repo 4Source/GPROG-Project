@@ -40,11 +40,16 @@ public class CharacterSpriteComponent extends SpriteComponent {
         ArrayList<CharacterPart> partsOrder = new ArrayList<>();
         switch (this.getCharacterDirection()) {
             case DOWN:
+            case DOWN_LEFT:
+            case DOWN_RIGHT:
             case LEFT:
             case RIGHT:
+            case UP_LEFT:
+            case UP_RIGHT:
                 partsOrder.add(CharacterPart.BODY);
                 partsOrder.add(CharacterPart.HANDS);
                 break;
+
             case UP:
                 partsOrder.add(CharacterPart.HANDS);
                 partsOrder.add(CharacterPart.BODY);
@@ -143,6 +148,7 @@ public class CharacterSpriteComponent extends SpriteComponent {
     public CharacterEquipment getCharacterEquipment() {
         return this.state.equipment();
     }
+
 
     public Optional<CharacterAnimationKey> getState(CharacterPart part) {
         HashMap<CharacterAnimationKey, AnimatedSprite> s = this.sprites.get(part);

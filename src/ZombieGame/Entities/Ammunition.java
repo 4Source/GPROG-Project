@@ -4,8 +4,6 @@ import java.awt.Color;
 
 import ZombieGame.Components.PlayerWeaponComponent;
 import ZombieGame.Constants;
-import ZombieGame.HitBoxType;
-import ZombieGame.RectangleHitBox;
 import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Components.GunshotComponent;
 import ZombieGame.Components.StaticSpriteComponent;

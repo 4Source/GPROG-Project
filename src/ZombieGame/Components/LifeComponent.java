@@ -65,7 +65,9 @@ public class LifeComponent extends LivingComponent {
 
         for (SpriteComponent c : this.getEntity().getComponents(SpriteComponent.class)) {
             for (Sprite s : c.getSprites()) {
-                s.setTint(new Color(200, 0, 0, 50));
+                if(s != null){
+                    s.setTint(new Color(200, 0, 0, 50));
+                }
             }
         }
 
@@ -101,7 +103,9 @@ public class LifeComponent extends LivingComponent {
             if (this.damageFlashTimeout <= 0.0) {
                 for (SpriteComponent c : this.getEntity().getComponents(SpriteComponent.class)) {
                     for (Sprite s : c.getSprites()) {
-                        s.setTint(null);
+                        if(s != null){
+                            s.setTint(null);
+                        }
                     }
                 }
             }
