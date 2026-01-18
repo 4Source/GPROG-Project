@@ -12,6 +12,7 @@ import ZombieGame.AIState;
 import ZombieGame.CharacterAction;
 import ZombieGame.Game;
 import ZombieGame.Capabilities.DebuggableGeometry;
+import ZombieGame.Coordinates.Offset;
 import ZombieGame.Entities.AxeProjectile;
 import ZombieGame.Entities.AxeZombie;
 import ZombieGame.Entities.Entity;
@@ -31,6 +32,7 @@ public class AxeAttackComponent extends AttackComponent implements DebuggableGeo
      * @param axeZombie The entity to which the components belongs to
      * @param minThrowDistance The range when the target is to close to perform this attack
      * @param maxThrowDistance The range when the target is within this range the attack could be started
+     * @param offset The offset of the attack range relative to the entity position
      * @param attackCoolDown The cool down time how often an attack could be done
      * @param attackDuration The duration an attack lasts
      * @param attackHitTime The time which should in between the start and the end time of the attack when the {@link #onHit(Entity)} should be called
@@ -38,8 +40,8 @@ public class AxeAttackComponent extends AttackComponent implements DebuggableGeo
      * @param onHit The Callback function which gets executed when the attackHitTime is reached. (When the axe should be spawned)
      * @param onAttackEnd The Callback function which gets executed if an attack ends
      */
-    public AxeAttackComponent(AxeZombie axeZombie, double minThrowDistance, double maxThrowDistance, double attackCoolDown, double attackDuration, double attackHitTime, Consumer<Entity> onAttackStart, Consumer<Entity> onHit, Consumer<Entity> onAttackEnd) {
-        super(axeZombie, maxThrowDistance, attackCoolDown, attackDuration, attackHitTime);
+    public AxeAttackComponent(AxeZombie axeZombie, double minThrowDistance, double maxThrowDistance, Offset offset, double attackCoolDown, double attackDuration, double attackHitTime, Consumer<Entity> onAttackStart, Consumer<Entity> onHit, Consumer<Entity> onAttackEnd) {
+        super(axeZombie, maxThrowDistance, offset, attackCoolDown, attackDuration, attackHitTime);
 
         this.minThrowDistance = minThrowDistance;
         this.onAttackStart = onAttackStart;
@@ -64,7 +66,7 @@ public class AxeAttackComponent extends AttackComponent implements DebuggableGeo
         }
 
         // Target is to close
-        double dist = PhysicsSystem.distance(this.getEntity().getPositionComponent().getWorldPos(), target.getPositionComponent().getWorldPos());
+        double dist = PhysicsSystem.distance(this.getEntity().getPositionComponent().getWorldPos().add(this.offset), target.getPositionComponent().getWorldPos());
         if (dist < this.minThrowDistance) {
             return false;
         }
@@ -82,7 +84,7 @@ public class AxeAttackComponent extends AttackComponent implements DebuggableGeo
 
     @Override
     protected void onHit(Entity target) {
-        Game.world.spawnEntity(new AxeProjectile(this.getEntity(), this.getEntity().getPositionComponent().getWorldPos(), target.getPositionComponent().getWorldPos(), 200, 1.6, 2));
+        Game.world.spawnEntity(new AxeProjectile(this.getEntity(), this.getEntity().getPositionComponent().getWorldPos(), target.getPositionComponent().getWorldPos(), 200, 1.6, 3));
 
         this.onHit.accept(target);
     }
@@ -101,7 +103,7 @@ public class AxeAttackComponent extends AttackComponent implements DebuggableGeo
 
     @Override
     public void drawDebug() {
-        GraphicSystem.getInstance().drawOval(this.getEntity().getPositionComponent().getViewPos(), (int) (this.attackRange * 2), (int) (this.attackRange * 2), new DrawStyle().color(Color.YELLOW));
-        GraphicSystem.getInstance().drawOval(this.getEntity().getPositionComponent().getViewPos(), (int) (this.minThrowDistance * 2), (int) (this.minThrowDistance * 2), new DrawStyle().color(Color.YELLOW));
+        GraphicSystem.getInstance().drawOval(this.getEntity().getPositionComponent().getViewPos().add(this.offset), (int) (this.attackRange * 2), (int) (this.attackRange * 2), new DrawStyle().color(Color.YELLOW));
+        GraphicSystem.getInstance().drawOval(this.getEntity().getPositionComponent().getViewPos().add(this.offset), (int) (this.minThrowDistance * 2), (int) (this.minThrowDistance * 2), new DrawStyle().color(Color.YELLOW));
     }
 }

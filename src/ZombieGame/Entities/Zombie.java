@@ -82,6 +82,7 @@ public abstract class Zombie extends Character {
 			// if entity is zombie, step back
 			if (entityType == EntityType.ZOMBIE) {
 				this.getPositionComponent().resolveCollision(collision.entity());
+				this.getPositionComponent().setState(AIState.STUCK);
 				return;
 			}
 
@@ -102,12 +103,12 @@ public abstract class Zombie extends Character {
 			// if entity is avatar, start attack
 			if (entityType == EntityType.AVATAR) {
 				this.getPositionComponent().resolveCollision(collision.entity());
-				this.getPositionComponent().setState(AIState.ATTACKING);
 			}
 
 			// if entity is zombie, step back
 			if (entityType == EntityType.ZOMBIE) {
 				this.getPositionComponent().resolveCollision(collision.entity());
+				this.getPositionComponent().setState(AIState.STUCK);
 				return;
 			}
 
@@ -122,14 +123,6 @@ public abstract class Zombie extends Character {
 
 	@Override
 	protected void onMovementCollisionEnd(Collision collision) {
-		if (collision.collisionResponse() == CollisionResponse.Block) {
-			EntityType entityType = collision.entity().getType();
-
-			// if entity was avatar continue hunting
-			if (entityType == EntityType.AVATAR) {
-				this.getPositionComponent().setState(AIState.HUNTING);
-			}
-		}
 	}
 
 	protected void onDie() {

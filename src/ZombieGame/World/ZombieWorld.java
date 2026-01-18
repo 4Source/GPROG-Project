@@ -70,15 +70,14 @@ public class ZombieWorld extends World {
 	public void UpdateEntityGeneration(double deltaTime) {
 		this.zombieTime += deltaTime;
 
-		// HACK
-		// if (this.zombieTime > SPAWN_INTERVAL) {
-		// // Select random loaded chunk
-		// Object[] loaded = getLoadedChunks().toArray();
-		// ChunkIndex index = (ChunkIndex) loaded[Math.min(loaded.length - 1, Math.max(0, (int) Math.floor(ThreadLocalRandom.current().nextDouble() * loaded.length)))];
+		if (this.zombieTime > SPAWN_INTERVAL) {
+			// Select random loaded chunk
+			Object[] loaded = getLoadedChunks().toArray();
+			ChunkIndex index = (ChunkIndex) loaded[Math.min(loaded.length - 1, Math.max(0, (int) Math.floor(ThreadLocalRandom.current().nextDouble() * loaded.length)))];
 
-		// // Spawn zombies in it
-		// this.zombieTime -= SPAWN_INTERVAL * Math.max(1, this.generateEntity(index, Math.min(ZOMBIE_BASE_DENSITY * Math.pow((1 + ZOMBIE_GROTH * getWorldTimeSeconds() / 60), CURVE), ZOMBIE_MAX_DENSITY), pos -> spawnZombie(pos)));
-		// }
+			// Spawn zombies in it
+			this.zombieTime -= SPAWN_INTERVAL * Math.max(1, this.generateEntity(index, Math.min(ZOMBIE_BASE_DENSITY * Math.pow((1 + ZOMBIE_GROTH * getWorldTimeSeconds() / 60), CURVE), ZOMBIE_MAX_DENSITY), pos -> spawnZombie(pos)));
+		}
 	}
 
 	private Zombie spawnZombie(WorldPos pos) {
@@ -232,9 +231,8 @@ public class ZombieWorld extends World {
 		this.generateEntity(index, 0.25, pos -> new Ammunition(pos));
 		this.generateEntity(index, 0.2, pos -> new FirstAidKit(pos));
 
-		// HACK
 		// Add Zombies to chunk
-		// this.generateEntity(index, 1.0, pos -> randomZombieType(pos));
+		this.generateEntity(index, 1.0, pos -> randomZombieType(pos));
 
 		Chunk res = new Chunk(this, index, tiles);
 		if (debugGeneration) {

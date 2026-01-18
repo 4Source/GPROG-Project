@@ -22,7 +22,7 @@ public class BabyZombie extends Zombie {
 				92,
 				10,
 				null,
-				e -> new PunchAttackComponent((Zombie) e, 1, 35, 0.95, 0.4, 0.2, t -> ((BabyZombie) e).onHit(t), t -> ((BabyZombie) e).onAttackEnd(t), t -> ((BabyZombie) e).onAttackStart(t)));
+				e -> new PunchAttackComponent((Zombie) e, 1, 35, new Offset(0, 15), 0.95, 0.4, 0.2, t -> ((BabyZombie) e).onHit(t), t -> ((BabyZombie) e).onAttackEnd(t), t -> ((BabyZombie) e).onAttackStart(t)));
 
 		final double animationFrameTime = 0.1;
 		final String base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Small\\Zombie_Small";

@@ -1,10 +1,12 @@
 package ZombieGame.Components;
 
 import ZombieGame.Systems.Physic.PhysicsSystem;
+import ZombieGame.Coordinates.Offset;
 import ZombieGame.Entities.Entity;
 
 public abstract class AttackComponent extends Component {
     protected final double attackRange;
+    protected final Offset offset;
     private final double attackCoolDown;
     private final double attackDuration;
     private final double attackHitTime;
@@ -17,13 +19,15 @@ public abstract class AttackComponent extends Component {
     /**
      * @param entity The entity to which the components belongs to
      * @param attackRange The range when the target is within this range the attack could be started
+     * @param offset The offset of the attack range relative to the entity position
      * @param attackCoolDown The cool down time how often an attack could be done
      * @param attackDuration The duration an attack lasts
      * @param attackHitTime The time which should in between the start and the end time of the attack when the {@link #onHit(Entity)} should be called
      */
-    public AttackComponent(Entity entity, double attackRange, double attackCoolDown, double attackDuration, double attackHitTime) {
+    public AttackComponent(Entity entity, double attackRange, Offset offset, double attackCoolDown, double attackDuration, double attackHitTime) {
         super(entity);
         this.attackRange = attackRange;
+        this.offset = offset;
         this.attackCoolDown = attackCoolDown;
         this.attackDuration = attackDuration;
         this.attackHitTime = attackHitTime;
@@ -65,7 +69,7 @@ public abstract class AttackComponent extends Component {
         }
 
         // Target is not near enough
-        double dist = PhysicsSystem.distance(this.getEntity().getPositionComponent().getWorldPos(), target.getPositionComponent().getWorldPos());
+        double dist = PhysicsSystem.distance(this.getEntity().getPositionComponent().getWorldPos().add(this.offset), target.getPositionComponent().getWorldPos());
         if (dist > this.attackRange) {
             return false;
         }

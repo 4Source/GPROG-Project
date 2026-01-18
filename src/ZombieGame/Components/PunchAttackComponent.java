@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import ZombieGame.AIState;
 import ZombieGame.CharacterAction;
 import ZombieGame.Capabilities.DebuggableGeometry;
+import ZombieGame.Coordinates.Offset;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.Zombie;
 import ZombieGame.Systems.Debug.DebugCategory;
@@ -23,6 +24,7 @@ public class PunchAttackComponent extends AttackComponent implements DebuggableG
      * @param zombie The entity to which the components belongs to
      * @param damage The damage in amount of half hearts which should be applied
      * @param attackRange The range when the target is within this range the attack could be started
+     * @param offset The offset of the attack range relative to the entity position
      * @param attackCoolDown The cool down time how often an attack could be done
      * @param attackDuration The duration an attack lasts
      * @param attackHitTime The time which should in between the start and the end time of the attack when the {@link #onHit(Entity)} should be called
@@ -30,8 +32,8 @@ public class PunchAttackComponent extends AttackComponent implements DebuggableG
      * @param onHit The Callback function which gets executed when the attackHitTime is reached
      * @param onAttackEnd The Callback function which gets executed if an attack ends
      */
-    public PunchAttackComponent(Zombie zombie, int damage, double attackRange, double attackCoolDown, double attackDuration, double attackHitTime, Consumer<Entity> onAttackStart, Consumer<Entity> onHit, Consumer<Entity> onAttackEnd) {
-        super(zombie, attackRange, attackCoolDown, attackDuration, attackHitTime);
+    public PunchAttackComponent(Zombie zombie, int damage, double attackRange, Offset offset, double attackCoolDown, double attackDuration, double attackHitTime, Consumer<Entity> onAttackStart, Consumer<Entity> onHit, Consumer<Entity> onAttackEnd) {
+        super(zombie, attackRange, offset, attackCoolDown, attackDuration, attackHitTime);
 
         this.damage = damage;
         this.onAttackStart = onAttackStart;
@@ -73,6 +75,6 @@ public class PunchAttackComponent extends AttackComponent implements DebuggableG
 
     @Override
     public void drawDebug() {
-        GraphicSystem.getInstance().drawOval(this.getEntity().getPositionComponent().getViewPos(), (int) (this.attackRange * 2), (int) (this.attackRange * 2), new DrawStyle().color(Color.RED));
+        GraphicSystem.getInstance().drawOval(this.getEntity().getPositionComponent().getViewPos().add(this.offset), (int) (this.attackRange * 2), (int) (this.attackRange * 2), new DrawStyle().color(Color.RED));
     }
 }

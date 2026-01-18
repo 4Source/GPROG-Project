@@ -15,6 +15,7 @@ import ZombieGame.Systems.Physic.CircleHitBox;
 import ZombieGame.Systems.Physic.HitBoxType;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
+// BUG: Gets invisible when throwing the axe 
 public class AxeZombie extends Zombie {
 	private boolean hasAxe;
 
@@ -25,8 +26,8 @@ public class AxeZombie extends Zombie {
 				62,
 				12,
 				CharacterEquipment.AXE,
-				e -> new PunchAttackComponent((Zombie) e, 1, 35, 0.9, 0.7, 0.35, t -> ((AxeZombie) e).onPunchAttackStart(t), t -> ((AxeZombie) e).onPunchHit(t), t -> ((AxeZombie) e).onPunchAttackEnd(t)),
-				e -> new AxeAttackComponent((AxeZombie) e, 90, 300, 2.0, 0.9, 0.4, t -> ((AxeZombie) e).onAxeAttackStart(t), t -> ((AxeZombie) e).onAxeHit(t), t -> ((AxeZombie) e).onAxeAttackEnd(t)));
+				e -> new PunchAttackComponent((Zombie) e, 1, 35, new Offset(0, 20), 0.9, 0.7, 0.35, t -> ((AxeZombie) e).onPunchAttackStart(t), t -> ((AxeZombie) e).onPunchHit(t), t -> ((AxeZombie) e).onPunchAttackEnd(t)),
+				e -> new AxeAttackComponent((AxeZombie) e, 90, 300, new Offset(0, 20), 2.0, 0.9, 0.4, t -> ((AxeZombie) e).onAxeAttackStart(t), t -> ((AxeZombie) e).onAxeHit(t), t -> ((AxeZombie) e).onAxeAttackEnd(t)));
 
 		final double animationFrameTime = 0.1;
 		final String base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\Zombie_Axe";
