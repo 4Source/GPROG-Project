@@ -140,7 +140,7 @@ public final class Game {
 
 		HelpText help = new HelpText(
 				// Centered help panel placed under the Play/Quit buttons
-				exitBtn.getPositionComponent().getViewPos().add(0, (int) exitBtn.getUIComponent().getHeight() + 180)
+				exitBtn.getPositionComponent().getViewPos().add(0, (int) exitBtn.getUIComponent().getHeight() + 120)
 		);
 
 		Game.world.addUIElement(help);
