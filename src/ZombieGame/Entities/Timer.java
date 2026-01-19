@@ -2,6 +2,7 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.File;
 
 import ZombieGame.Components.TimerComponent;
 import ZombieGame.Coordinates.ViewPos;
@@ -10,12 +11,29 @@ public class Timer extends TextElement {
     private final TimerComponent timerComponent;
     private final String format;
 
+    private static Font BASE_FONT;
+
+    private static Font getPixelFont(float size) {
+        try {
+            if (BASE_FONT == null) {
+                BASE_FONT = Font.createFont(
+                        Font.TRUETYPE_FONT,
+                        new File("assets/fonts/PressStart2P-Regular.ttf")
+                );
+            }
+            return BASE_FONT.deriveFont(Font.PLAIN, size);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Font("Monospaced", Font.BOLD, (int) size); // Fallback
+        }
+    }
+
     /**
      * @param pos The position in the world
      * @param format A format string how the time shool be displayed
      */
     public Timer(ViewPos pos, String format) {
-        super(pos, new Color(255, 255, 0, 210), new Font("Arial", Font.PLAIN, 24));
+        super(pos, new Color(245, 245, 235, 230), getPixelFont(26f));
         this.timerComponent = add(new TimerComponent(this));
         this.format = format;
     }
