@@ -20,6 +20,7 @@ import ZombieGame.Systems.Debug.DebugCategory;
 import ZombieGame.Systems.Debug.DebugCategoryMask;
 import ZombieGame.Systems.Debug.DebugSystem;
 import ZombieGame.Systems.Input.InputSystem;
+import ZombieGame.Sprites.SpriteManager;
 
 public class GraphicSystem extends JPanel implements DebuggableText {
     private static final GraphicSystem instance = new GraphicSystem();
@@ -88,6 +89,24 @@ public class GraphicSystem extends JPanel implements DebuggableText {
         } else {
             return list.add(drawable);
         }
+    }
+
+    public java.awt.FontMetrics getFontMetrics(java.awt.Font font) {
+        return this.graphics.getFontMetrics(font);
+    }
+
+    // Cached pause-menu help panel background (PNG)
+    private BufferedImage helpPanelImage;
+
+    /**
+     * Returns the help panel background image.
+     * Path is relative to the project root.
+     */
+    public BufferedImage getHelpPanelImage() {
+        if (helpPanelImage == null) {
+            helpPanelImage = SpriteManager.getSprite("assets/help_menu.png");
+        }
+        return helpPanelImage;
     }
 
     /**

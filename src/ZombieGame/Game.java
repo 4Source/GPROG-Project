@@ -13,7 +13,6 @@ import ZombieGame.Coordinates.Offset;
 import ZombieGame.Entities.Button;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Entities.HelpText;
-import ZombieGame.Entities.Timer;
 import ZombieGame.Entities.UIElement;
 import ZombieGame.Sprites.StaticSprite;
 import ZombieGame.Systems.Debug.DebugSystem;
@@ -139,7 +138,10 @@ public final class Game {
 					System.exit(0);
 				});
 
-		HelpText help = new HelpText(Viewport.getBottomLeft().sub(-200, 200));
+		HelpText help = new HelpText(
+				// Centered help panel placed under the Play/Quit buttons
+				exitBtn.getPositionComponent().getViewPos().add(0, (int) exitBtn.getUIComponent().getHeight() + 120)
+		);
 
 		Game.world.addUIElement(help);
 		Game.world.addUIElement(startBtn);
