@@ -66,7 +66,7 @@ public class ZombieWorld extends World {
 		this.addUIElement(new Timer(Viewport.getTopCenter().add(-45, 40)));
 		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -56)));
         this.addUIElement(new AmmunitionUI(Viewport.getBottomLeft().add(40, -100)));
-        this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(70, -90), 0));
+        this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(70, -80), 0));
   }
 
 	public void UpdateEntityGeneration(double deltaTime) {

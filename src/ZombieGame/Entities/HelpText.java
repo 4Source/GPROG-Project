@@ -47,6 +47,7 @@ public class HelpText extends TextElement {
                 "HOW TO PLAY\n\n" +
                         "Move Player:  WASD\n" +
                         "Shoot:  Left Click\n" +
+                        "Pick up:  E\n" +
                         "Pause Game:  Esc\n";
     }
 
