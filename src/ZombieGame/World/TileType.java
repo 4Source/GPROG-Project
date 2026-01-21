@@ -71,7 +71,7 @@ public enum TileType {
     }
 
     private static StaticSprite getSprite(int column, int row) {
-        return new StaticSprite("assets\\PostApocalypse_AssetPack\\Tiles\\Background_Dark-Green_TileSet.png", 24, 17, 3, column, row);
+        return new StaticSprite("assets/PostApocalypse_AssetPack/Tiles/Background_Dark-Green_TileSet.png", 24, 17, 3, column, row);
     }
 
     public static void preLoadSprite() {

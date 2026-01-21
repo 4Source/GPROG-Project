@@ -29,19 +29,19 @@ public class AxeProjectile extends Projectile {
             String spritePath;
             // RIGHT: include ±45°
             if (alpha >= -Math.PI / 4 && alpha <= Math.PI / 4) {
-                spritePath = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\Axe\\Axe_Side_Thrown-Sheet9.png";
+                spritePath = "assets/PostApocalypse_AssetPack/Enemies/Zombie_Axe/Axe/Axe_Side_Thrown-Sheet9.png";
             }
             // DOWN: strictly between 45° and 135°
             else if (alpha > Math.PI / 4 && alpha < 3 * Math.PI / 4) {
-                spritePath = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\Axe\\Axe_Vertical_Thrown-Sheet9.png";
+                spritePath = "assets/PostApocalypse_AssetPack/Enemies/Zombie_Axe/Axe/Axe_Vertical_Thrown-Sheet9.png";
             }
             // UP: strictly between -135° and -45°
             else if (alpha > -3 * Math.PI / 4 && alpha < -Math.PI / 4) {
-                spritePath = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\Axe\\Axe_Vertical_Thrown-Sheet9.png";
+                spritePath = "assets/PostApocalypse_AssetPack/Enemies/Zombie_Axe/Axe/Axe_Vertical_Thrown-Sheet9.png";
             }
             // LEFT: include ±135°
             else {
-                spritePath = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\Axe\\Axe_Side-left_Thrown-Sheet9.png";
+                spritePath = "assets/PostApocalypse_AssetPack/Enemies/Zombie_Axe/Axe/Axe_Side-left_Thrown-Sheet9.png";
             }
 
             return new AnimatedSpriteComponent(e, new LoopingSprite(spritePath, 9, 1, 3.0, 0.09));

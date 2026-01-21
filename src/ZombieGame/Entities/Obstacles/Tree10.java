@@ -14,7 +14,7 @@ public class Tree10 extends Obstacle {
 	 * @param pos The position of the tree
 	 */
 	public Tree10(WorldPos pos) {
-		super(pos, new CircleHitBox(HitBoxType.Block, 12, new Offset(0, 44)), e -> new StaticSpriteComponent(e, new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Nature\\Dark-Green\\Tree_10_Small-oak_Dark-Green.png", 1, 1, 3, 0, 0)));
+		super(pos, new CircleHitBox(HitBoxType.Block, 12, new Offset(0, 44)), e -> new StaticSpriteComponent(e, new StaticSprite("assets/PostApocalypse_AssetPack/Objects/Nature/Dark-Green/Tree_10_Small-oak_Dark-Green.png", 1, 1, 3, 0, 0)));
 	}
 
 	@Override

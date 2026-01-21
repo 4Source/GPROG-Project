@@ -2,7 +2,7 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.File;
+import java.io.InputStream;
 
 import ZombieGame.Components.TimerComponent;
 import ZombieGame.Coordinates.ViewPos;
@@ -16,10 +16,13 @@ public class Timer extends TextElement {
     private static Font getPixelFont(float size) {
         try {
             if (BASE_FONT == null) {
-                BASE_FONT = Font.createFont(
-                        Font.TRUETYPE_FONT,
-                        new File("assets/fonts/PressStart2P-Regular.ttf")
-                );
+                InputStream is = Timer.class.getClassLoader().getResourceAsStream("assets/fonts/PressStart2P-Regular.ttf");
+
+                if (is == null) {
+                    throw new RuntimeException("Font not found");
+                }
+
+                BASE_FONT = Font.createFont(Font.TRUETYPE_FONT, is);
             }
             return BASE_FONT.deriveFont(Font.PLAIN, size);
         } catch (Exception e) {

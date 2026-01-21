@@ -54,18 +54,18 @@ public final class Game {
 		AtomicBoolean started = new AtomicBoolean(false);
 
 		UIElement title = new UIElement(Viewport.getTopCenter().add(new Offset(0, Viewport.getScreenHeight() / 3)),
-				e -> new ImageComponent(e, new StaticSprite("assets\\TheUndeadTitle.png", 1, 1, 1, 0, 0), GraphicLayer.UI)) {
+				e -> new ImageComponent(e, new StaticSprite("assets/TheUndeadTitle.png", 1, 1, 1, 0, 0), GraphicLayer.UI)) {
 		};
 		Button startBtn = new Button(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 4)),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Play_Pressed.png", 1, 1, 3, 0, 0),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Play_Not-Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Play_Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Play_Not-Pressed.png", 1, 1, 3, 0, 0),
 				() -> {
 					started.set(true);
 				});
 		Button exitBtn = new Button(
 				Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 4).sub(0, startBtn.getUIComponent().getHeight() + 10)),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Pressed.png", 1, 1, 3, 0, 0),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Not-Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Quit_Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Quit_Not-Pressed.png", 1, 1, 3, 0, 0),
 				() -> {
 					System.exit(0);
 				});
@@ -126,14 +126,14 @@ public final class Game {
 
 		// Viewport.getTopCenter().add(new Offset(0, Viewport.getScreenHeight() / 3)
 		Button startBtn = new Button(Viewport.getCenter(),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Play_Pressed.png", 1, 1, 3, 0, 0),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Play_Not-Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Play_Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Play_Not-Pressed.png", 1, 1, 3, 0, 0),
 				() -> {
 					continueGame.set(true);
 				});
 		Button exitBtn = new Button(startBtn.getPositionComponent().getViewPos().add(0, (int) (startBtn.getUIComponent().getHeight() + padding)),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Pressed.png", 1, 1, 3, 0, 0),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Not-Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Quit_Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Quit_Not-Pressed.png", 1, 1, 3, 0, 0),
 				() -> {
 					System.exit(0);
 				});
@@ -197,11 +197,11 @@ public final class Game {
 	private void gameOver() {
 		System.out.println("Game over");
 		UIElement gameover = new UIElement(Viewport.getTopCenter().add(new Offset(0, Viewport.getScreenHeight() / 3)),
-				e -> new ImageComponent(e, new StaticSprite("assets\\GameOver.png", 1, 1, 1, 0, 0), GraphicLayer.UI)) {
+				e -> new ImageComponent(e, new StaticSprite("assets/GameOver.png", 1, 1, 1, 0, 0), GraphicLayer.UI)) {
 		};
 		Button exitBtn = new Button(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 4)),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Pressed.png", 1, 1, 3, 0, 0),
-				new StaticSprite("assets\\PostApocalypse_AssetPack\\UI\\Menu\\Main Menu\\Quit_Not-Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Quit_Pressed.png", 1, 1, 3, 0, 0),
+				new StaticSprite("assets/PostApocalypse_AssetPack/UI/Menu/Main Menu/Quit_Not-Pressed.png", 1, 1, 3, 0, 0),
 				() -> {
 					System.exit(0);
 				});

@@ -37,8 +37,8 @@ public class AxeZombie extends Zombie {
 				e -> new AxeAttackComponent((AxeZombie) e, 90, 300, new Offset(0, 20), 2.0, 0.9, 0.4, t -> ((AxeZombie) e).onAxeAttackStart(t), t -> ((AxeZombie) e).onAxeHit(t), t -> ((AxeZombie) e).onAxeAttackEnd(t)));
 
 		final double animationFrameTime = 0.1;
-		final String base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\Zombie_Axe";
-		final String baseNoAxe = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\No-Axe\\Zombie_Axe_No-axe";
+		final String base = "assets/PostApocalypse_AssetPack/Enemies/Zombie_Axe/Zombie_Axe";
+		final String baseNoAxe = "assets/PostApocalypse_AssetPack/Enemies/Zombie_Axe/No-Axe/Zombie_Axe_No-axe";
 		final double scale = 3;
 		this.hasAxe = true;
 

@@ -15,7 +15,7 @@ public class FirstAidKit extends Item {
 	 * @param pos The initial position of the ammunition
 	 */
 	public FirstAidKit(WorldPos pos) {
-		super(pos, new CircleHitBox(HitBoxType.Overlap, 16), Color.ORANGE, e -> new StaticSpriteComponent(e, new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Bandage.png", 1, 1, 3, 0, 0)));
+		super(pos, new CircleHitBox(HitBoxType.Overlap, 16), Color.ORANGE, e -> new StaticSpriteComponent(e, new StaticSprite("assets/PostApocalypse_AssetPack/Objects/Pickable/Bandage.png", 1, 1, 3, 0, 0)));
 	}
 
 	@Override

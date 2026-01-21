@@ -2,6 +2,8 @@ package ZombieGame.Sprites;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.security.InvalidParameterException;
 import java.util.HashMap;
 
@@ -22,17 +24,13 @@ public class SpriteManager {
     public static BufferedImage getSprite(String path) {
         return cache.computeIfAbsent(path, p -> {
             try {
-                File file = new File(path);
-                File parentPath = file.getParentFile();
-                if(parentPath == null) {
-                    throw new InvalidParameterException("No parent path");
+                URL url = SpriteManager.class.getClassLoader().getResource(path);
+
+                if (url == null) {
+                    throw new RuntimeException("Sprite not found");
                 }
 
-                if(!parentPath.exists()) {
-                    throw new InvalidParameterException("Path does not exist");
-                }
-
-                return ImageIO.read(file);
+                return ImageIO.read(url);
             } catch (Exception e) {
                 System.err.println("Failed to load file: " + p);
                 System.err.println(e);

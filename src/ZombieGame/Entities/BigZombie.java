@@ -26,7 +26,7 @@ public class BigZombie extends Zombie {
 				e -> new PunchAttackComponent((Zombie) e, 2, 40, new Offset(0, 15), 0.65, 0.8, 0.4, t -> ((BigZombie) e).onAttackStart(t), t -> ((BigZombie) e).onHit(t), t -> ((BigZombie) e).onAttackEnd(t)));
 
 		final double animationFrameTime = 0.1;
-		final String base = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Big\\Zombie_Big";
+		final String base = "assets/PostApocalypse_AssetPack/Enemies/Zombie_Big/Zombie_Big";
 		final double scale = 3;
 
 		// IDLE

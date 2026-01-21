@@ -2,12 +2,9 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.File;
-import java.util.List;
+import java.io.InputStream;
 
 import ZombieGame.Coordinates.ViewPos;
-import ZombieGame.Systems.Input.Action;
-import ZombieGame.Systems.Input.InputSystem;
 
 /**
  * Help text shown in the pause menu.
@@ -22,10 +19,13 @@ public class HelpText extends TextElement {
     private static Font getHelpFont(float size) {
         try {
             if (HELP_FONT == null) {
-                HELP_FONT = Font.createFont(
-                        Font.TRUETYPE_FONT,
-                        new File("assets/fonts/PixelOperator-Bold.ttf")
-                );
+                InputStream is = HelpText.class.getClassLoader().getResourceAsStream("assets/fonts/PixelOperator-Bold.ttf");
+
+                if (is == null) {
+                    throw new RuntimeException("Font not found");
+                }
+
+                HELP_FONT = Font.createFont(Font.TRUETYPE_FONT, is);
             }
             return HELP_FONT.deriveFont(Font.PLAIN, size);
         } catch (Exception e) {

@@ -21,16 +21,16 @@ public abstract class Equipment extends Item {
 
             switch (equipment) {
                 case BAT -> {
-                    path = "assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Bat.png";
+                    path = "assets/PostApocalypse_AssetPack/Objects/Pickable/Bat.png";
                 }
                 case GUN -> {
-                    path = "assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Gun.png";
+                    path = "assets/PostApocalypse_AssetPack/Objects/Pickable/Gun.png";
                 }
                 case PISTOL -> {
-                    path = "assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Pistol.png";
+                    path = "assets/PostApocalypse_AssetPack/Objects/Pickable/Pistol.png";
                 }
                 case SHOTGUN -> {
-                    path = "assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Shotgun.png";
+                    path = "assets/PostApocalypse_AssetPack/Objects/Pickable/Shotgun.png";
                 }
                 default -> throw new IllegalStateException();
             }
