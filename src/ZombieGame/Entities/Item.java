@@ -30,7 +30,7 @@ public abstract class Item extends Entity {
     public <T extends VisualComponent> Item(WorldPos pos, HitBox hitBox, Color color, Function<Entity, T> visualFactory) {
         super(e -> new WorldPositionComponent(e, pos));
         this.visualComponent = this.add(visualFactory.apply(this));
-        this.physicsComponent = this.add(new StaticPhysicsComponent(this, hitBox, PhysicsCollisionLayer.ITEM, new PhysicsCollisionMask(PhysicsCollisionLayer.PLAYER)));
+        this.physicsComponent = this.add(new StaticPhysicsComponent(this, hitBox, PhysicsCollisionLayer.ITEM, new PhysicsCollisionMask(PhysicsCollisionLayer.BODY)));
         this.livingComponent = this.add(new LivingComponent(this));
     }
 

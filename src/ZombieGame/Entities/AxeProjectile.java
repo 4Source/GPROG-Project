@@ -24,7 +24,7 @@ public class AxeProjectile extends Projectile {
      * @param damage The damage it makes in half-hearts (1 = 1/2 Heart, 2 = 1 Heart)
      */
     public AxeProjectile(Entity owner, WorldPos pos, double alpha, double speed, double lifetime, int damage) {
-        super(owner, pos, alpha, speed, lifetime, damage, new CircleHitBox(HitBoxType.Block, 10), new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.PLAYER_CHARACTER), e -> {
+        super(owner, pos, alpha, speed, lifetime, damage, new CircleHitBox(HitBoxType.Block, 10), new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.HURTBOX), e -> {
             // Pick a fitting thrown-axe animation depending on the flight direction.
             String spritePath;
             // RIGHT: include ±45°
@@ -58,16 +58,6 @@ public class AxeProjectile extends Projectile {
      */
     public AxeProjectile(Entity owner, WorldPos pos, WorldPos dest, double speed, double lifetime, int damage) {
         this(owner, pos, Math.atan2(dest.y() - pos.y(), dest.x() - pos.x()), speed, lifetime, damage);
-    }
-
-    /**
-     * @param owner The entity which spawned this Projectile, the projectile will not collide with owner.
-     * @param pos The position in the world
-     * @param dest The target direction of the axe
-     * @deprecated This is only here for compatibility reasons speed, lifetime, damage should be specified
-     */
-    public AxeProjectile(Entity owner, WorldPos pos, WorldPos dest) {
-        this(owner, pos, dest, 200, 1.6, 3);
     }
 
     @Override

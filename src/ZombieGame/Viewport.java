@@ -6,7 +6,7 @@ import ZombieGame.Coordinates.WorldPos;
 
 public final class Viewport {
     private static int screenWidth = 0, screenHeight = 0;
-    public static final int SCROLL_BOUNDS = 300;
+    public static int SCROLL_BOUNDS = 800;
 
     private WorldPos worldPart;
 
@@ -115,5 +115,6 @@ public final class Viewport {
 
     public static void setScreenHeight(int screenHeight) {
         Viewport.screenHeight = screenHeight;
+        Viewport.SCROLL_BOUNDS = screenHeight/3;
     }
 }

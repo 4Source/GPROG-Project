@@ -9,7 +9,6 @@ import ZombieGame.Game;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.Zombie;
-import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public class AIMovementComponent extends TargetMovementComponent {
     protected AIState state;
@@ -37,11 +36,6 @@ public class AIMovementComponent extends TargetMovementComponent {
 
     @Override
     public void update(double deltaTime) {
-        // During attack animations, movement should pause and we must not override the
-        // character action back to MOVE/IDLE.
-        if (this.getEntity().getVisualComponent().getCharacterAction() == CharacterAction.ATTACK) {
-            return;
-        }
 
         Optional<Avatar> opt = Game.world.getEntity(Avatar.class);
         if (opt.isEmpty()) {
@@ -50,9 +44,15 @@ public class AIMovementComponent extends TargetMovementComponent {
         }
         Avatar avatar = opt.get();
 
+        this.getEntity().getPrimaryAttackComponent().setTarget(avatar);
+        AttackComponent c = this.getEntity().getSecondaryAttackComponent();
+        if (c != null) {
+            c.setTarget(avatar);
+        }
 
         switch (this.state) {
             case HUNTING:
+                // Update the destination to avatars current position
                 this.setDestination(avatar);
 
                 super.update(deltaTime);
@@ -78,7 +78,8 @@ public class AIMovementComponent extends TargetMovementComponent {
                 // try step in this direction
                 super.update(deltaTime);
                 break;
-            case ATTACKING: 
+            case ATTACKING:
+                this.hasDestination = false;
                 break;
             default:
                 System.err.println("Unknown state: " + this.state);
@@ -116,14 +117,6 @@ public class AIMovementComponent extends TargetMovementComponent {
 
     public void setState(AIState state) {
         this.state = state;
-    }
-
-    /**
-     * Stop moving immediately (clears the current destination).
-     * Useful during attack animations where movement should pause.
-     */
-    public void stopMoving() {
-        this.hasDestination = false;
     }
 
     @Override

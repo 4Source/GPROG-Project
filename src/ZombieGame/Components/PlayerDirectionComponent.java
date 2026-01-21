@@ -9,14 +9,12 @@ import ZombieGame.Systems.Input.InputSystem;
 
 import java.util.EnumMap;
 
+public class PlayerDirectionComponent extends ActionComponent {
 
-public class PlayerDirection extends ActionComponent{
-
-    public PlayerDirection(Entity entity) {
+    public PlayerDirectionComponent(Entity entity) {
         super(entity, self -> {
 
-            EnumMap<Action, ActionHandler> map =
-                    new EnumMap<>(Action.class);
+            EnumMap<Action, ActionHandler> map = new EnumMap<>(Action.class);
 
             return map;
         });
@@ -50,7 +48,6 @@ public class PlayerDirection extends ActionComponent{
         return CharacterDirection.LEFT;
     }
 
-
     private void updatePlayerDirection() {
         Avatar player = getEntity();
         InputSystem input = InputSystem.getInstance();
@@ -60,19 +57,8 @@ public class PlayerDirection extends ActionComponent{
         double angle = Math.atan2(m.y(), m.x());
 
         CharacterDirection playerDir = getDirFromAngle(angle);
-        CharacterAction currentAction = player.getVisualComponent().getCharacterAction();
-        CharacterEquipment currentEquipment = player.getVisualComponent().getCharacterEquipment();
-        CharacterAttackState attackState = player.getVisualComponent().getCharacterAttackState();
 
         player.getVisualComponent().changeState(playerDir);
-
-        /*
-        player.getVisualComponent().changeState(
-                CharacterPart.HANDS,
-                new CharacterAnimationKey(currentAction, playerDir, currentEquipment, attackState)
-        );
-
-         */
     }
 
     @Override

@@ -180,46 +180,6 @@ public class CharacterSpriteComponent extends SpriteComponent {
         }
 
         return Optional.empty();
-
-        /*
-
-        if (s.containsKey(this.state)) {
-            return Optional.of(this.state);
-        }
-
-        CharacterAnimationKey newState;
-        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), this.state.direction(), null,null))) {
-            return Optional.of(newState);
-        }
-
-        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), null, this.state.equipment(), null))) {
-            return Optional.of(newState);
-        }
-
-        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), null, null, null))) {
-            return Optional.of(newState);
-        }
-
-        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), this.state.equipment(), null))) {
-            return Optional.of(newState);
-        }
-
-        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), null, null))) {
-            return Optional.of(newState);
-        }
-
-        if (s.containsKey(newState = new CharacterAnimationKey(null, null, this.state.equipment(), null))) {
-            return Optional.of(newState);
-        }
-
-        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), this.state.equipment(), this.state.attackState()))) {
-            return Optional.of(newState);
-        }
-
-
-        return Optional.empty();
-
-         */
     }
 
     public void addSprite(CharacterPart part, CharacterAnimationKey state, AnimatedSprite sprite) {
