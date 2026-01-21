@@ -24,7 +24,7 @@ public class AxeProjectile extends Projectile {
      * @param damage The damage it makes in half-hearts (1 = 1/2 Heart, 2 = 1 Heart)
      */
     public AxeProjectile(Entity owner, WorldPos pos, double alpha, double speed, double lifetime, int damage) {
-        super(owner, pos, alpha, speed, lifetime, damage, new CircleHitBox(HitBoxType.Block, 10), new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.PLAYER_CHARACTER), e -> {
+        super(owner, pos, alpha, speed, lifetime, damage, new CircleHitBox(HitBoxType.Block, 10), new PhysicsCollisionMask(PhysicsCollisionLayer.OBSTACLES, PhysicsCollisionLayer.HURTBOX), e -> {
             // Pick a fitting thrown-axe animation depending on the flight direction.
             String spritePath;
             // RIGHT: include ±45°

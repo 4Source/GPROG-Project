@@ -38,25 +38,6 @@ public abstract class AttackComponent extends Component {
         this.attacking = false;
     }
 
-    // /** Try to start an attack against a target. */
-    // public void tryStartAttack(Avatar target) {
-    // long now = System.currentTimeMillis();
-    // if (attacking) {
-    // return;
-    // }
-
-    // this.lastAttackMillis = now;
-    // this.attacking = true;
-    // this.damageApplied = false;
-    // this.attackTimer = 0;
-    // this.target = target;
-
-    // // Pause movement and play attack animation.
-    // this.getEntity().getPositionComponent().setState(AIState.ATTACKING);
-    // this.getEntity().getPositionComponent().stopMoving();
-    // this.getEntity().getVisualComponent().changeState(CharacterAction.ATTACK);
-    // }
-
     public boolean canAttack(Entity target) {
         // Is already performing an attack
         if (attacking) {
@@ -91,6 +72,7 @@ public abstract class AttackComponent extends Component {
         this.attackTimer = 0;
         this.onHitCalled = false;
         this.onAttackEnd(this.target);
+        this.target = null;
     }
 
     protected abstract void onAttackStart(Entity target);

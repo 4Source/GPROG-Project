@@ -19,6 +19,7 @@ public class BabyZombie extends Zombie {
 		super(start,
 				new CircleHitBox(HitBoxType.Block, 10, new Offset(0, 15)),
 				new RectangleHitBox(HitBoxType.Block, 22, 28),
+				new CircleHitBox(HitBoxType.Overlap, 14, new Offset(0, 15)),
 				92,
 				10,
 				null,

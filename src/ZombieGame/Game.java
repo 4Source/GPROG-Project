@@ -364,9 +364,3 @@ public final class Game {
 		// TileType.testTileClusters();
 	}
 }
-
-// BUG: #3 After 2 time hit by a zombie the zombie freezes
-
-// BUG: #4 BABY Zombies can bug into player
-
-// TODO: Use different collision Layers see temp commit in #27

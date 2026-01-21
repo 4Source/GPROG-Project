@@ -25,24 +25,34 @@ import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 public abstract class Zombie extends Character {
 	private final AttackComponent primaryAttackComponent;
 	private final AttackComponent secondaryAttackComponent;
+	private final DynamicPhysicsComponent primaryAttackPhysicsComponent;
 
 	/**
 	 * @param visualFactory A Factory method to create the component
 	 */
-	public Zombie(WorldPos start, HitBox movementHitBox, HitBox damageHitBox, double movementSpeed, int maxHealth, CharacterEquipment equipment, Function<Entity, AttackComponent> primaryAttackFactory, Function<Entity, AttackComponent> secondaryAttackFactory) {
+	public Zombie(WorldPos start, HitBox movementHitBox, HitBox damageHitBox, HitBox primaryAttackHitBox, double movementSpeed, int maxHealth, CharacterEquipment equipment, Function<Entity, AttackComponent> primaryAttackFactory, Function<Entity, AttackComponent> secondaryAttackFactory) {
 		super(
 				e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, equipment, null)),
 				movementHitBox,
-				e -> new DynamicPhysicsComponent(e, damageHitBox, PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
+				e -> new DynamicPhysicsComponent(e, damageHitBox, PhysicsCollisionLayer.HURTBOX, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE),
+						collision -> {
+							((Zombie) e).onPrimaryAttackCollisionStart(collision);
+						},
+						collision -> {
+							((Zombie) e).onPrimaryAttackCollisionStay(collision);
+						}, collision -> {
+							((Zombie) e).onPrimaryAttackCollisionEnd(collision);
+						}),
 				e -> new AIMovementComponent((Zombie) e, start, 0, movementSpeed),
 				e -> new LifeComponent(e, maxHealth, () -> ((Zombie) e).onDie()));
 
 		this.primaryAttackComponent = this.add(primaryAttackFactory.apply(this));
 		this.secondaryAttackComponent = this.add(secondaryAttackFactory.apply(this));
+		this.primaryAttackPhysicsComponent = this.add(new DynamicPhysicsComponent(this, primaryAttackHitBox, PhysicsCollisionLayer.SENSOR, new PhysicsCollisionMask(PhysicsCollisionLayer.BODY)));
 	}
 
-	public Zombie(WorldPos start, HitBox movementHitBox, HitBox damageHitBox, double movementSpeed, int maxHealth, CharacterEquipment equipment, Function<Entity, AttackComponent> primaryAttackFactory) {
-		this(start, movementHitBox, damageHitBox, movementSpeed, maxHealth, equipment, primaryAttackFactory, e -> null);
+	public Zombie(WorldPos start, HitBox movementHitBox, HitBox damageHitBox, HitBox primaryAttackHitBox, double movementSpeed, int maxHealth, CharacterEquipment equipment, Function<Entity, AttackComponent> primaryAttackFactory) {
+		this(start, movementHitBox, damageHitBox, primaryAttackHitBox, movementSpeed, maxHealth, equipment, primaryAttackFactory, e -> null);
 	}
 
 	@Override
@@ -53,6 +63,10 @@ public abstract class Zombie extends Character {
 	@Override
 	public AIMovementComponent getPositionComponent() {
 		return (AIMovementComponent) super.getPositionComponent();
+	}
+
+	public DynamicPhysicsComponent getPrimaryAttackPhysicsComponent() {
+		return this.primaryAttackPhysicsComponent;
 	}
 
 	public AttackComponent getPrimaryAttackComponent() {
@@ -123,6 +137,31 @@ public abstract class Zombie extends Character {
 
 	@Override
 	protected void onMovementCollisionEnd(Collision collision) {
+	}
+
+	protected void onPrimaryAttackCollisionStart(Collision collision) {
+		if (collision.collisionResponse() == CollisionResponse.Overlap) {
+			EntityType entityType = collision.entity().getType();
+
+			// if entity is avatar, start attack
+			if (entityType == EntityType.AVATAR) {
+				this.getPrimaryAttackComponent().setTarget(collision.entity());
+			}
+		}
+	}
+
+	protected void onPrimaryAttackCollisionStay(Collision collision) {
+		if (collision.collisionResponse() == CollisionResponse.Overlap) {
+			EntityType entityType = collision.entity().getType();
+
+			// if entity is avatar, start attack
+			if (entityType == EntityType.AVATAR) {
+				this.getPrimaryAttackComponent().setTarget(collision.entity());
+			}
+		}
+	}
+
+	protected void onPrimaryAttackCollisionEnd(Collision collision) {
 	}
 
 	protected void onDie() {

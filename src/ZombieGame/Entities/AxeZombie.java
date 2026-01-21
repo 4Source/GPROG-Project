@@ -5,24 +5,32 @@ import ZombieGame.CharacterAnimationKey;
 import ZombieGame.CharacterDirection;
 import ZombieGame.CharacterEquipment;
 import ZombieGame.CharacterPart;
+import ZombieGame.EntityType;
 import ZombieGame.Components.AxeAttackComponent;
+import ZombieGame.Components.DynamicPhysicsComponent;
 import ZombieGame.Components.PunchAttackComponent;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.LoopingSprite;
 import ZombieGame.Sprites.OneShotSprite;
 import ZombieGame.Systems.Physic.CircleHitBox;
+import ZombieGame.Systems.Physic.Collision;
+import ZombieGame.Systems.Physic.CollisionResponse;
 import ZombieGame.Systems.Physic.HitBoxType;
+import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
+import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
 // BUG: Gets invisible when throwing the axe 
 public class AxeZombie extends Zombie {
 	private boolean hasAxe;
+	private final DynamicPhysicsComponent secondaryAttackPhysicsComponent;
 
 	public AxeZombie(WorldPos start) {
 		super(start,
 				new CircleHitBox(HitBoxType.Block, 14, new Offset(0, 20)),
 				new RectangleHitBox(HitBoxType.Block, 22, 35),
+				new CircleHitBox(HitBoxType.Overlap, 18, new Offset(0, 20)),
 				62,
 				12,
 				CharacterEquipment.AXE,
@@ -34,6 +42,8 @@ public class AxeZombie extends Zombie {
 		final String baseNoAxe = "assets\\PostApocalypse_AssetPack\\Enemies\\Zombie_Axe\\No-Axe\\Zombie_Axe_No-axe";
 		final double scale = 3;
 		this.hasAxe = true;
+
+		this.secondaryAttackPhysicsComponent = this.add(new DynamicPhysicsComponent(this, new CircleHitBox(HitBoxType.Overlap, 300, new Offset(0, 20)), PhysicsCollisionLayer.SENSOR, new PhysicsCollisionMask(PhysicsCollisionLayer.BODY)));
 
 		// IDLE WITH AXE
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
@@ -139,6 +149,10 @@ public class AxeZombie extends Zombie {
 		return (AxeAttackComponent) super.getSecondaryAttackComponent();
 	}
 
+	public DynamicPhysicsComponent getSecondaryAttackPhysicsComponent() {
+		return this.secondaryAttackPhysicsComponent;
+	}
+
 	public boolean hasAxe() {
 		return this.hasAxe;
 	}
@@ -155,6 +169,31 @@ public class AxeZombie extends Zombie {
 			return true;
 		}
 		return false;
+	}
+
+	protected void onSecondaryAttackCollisionStart(Collision collision) {
+		if (collision.collisionResponse() == CollisionResponse.Overlap) {
+			EntityType entityType = collision.entity().getType();
+
+			// if entity is avatar, start attack
+			if (entityType == EntityType.AVATAR) {
+				this.getPrimaryAttackComponent().setTarget(collision.entity());
+			}
+		}
+	}
+
+	protected void onSecondaryAttackCollisionStay(Collision collision) {
+		if (collision.collisionResponse() == CollisionResponse.Overlap) {
+			EntityType entityType = collision.entity().getType();
+
+			// if entity is avatar, start attack
+			if (entityType == EntityType.AVATAR) {
+				this.getPrimaryAttackComponent().setTarget(collision.entity());
+			}
+		}
+	}
+
+	protected void onSecondaryAttackCollisionEnd(Collision collision) {
 	}
 
 	public void onPunchAttackStart(Entity target) {

@@ -31,8 +31,8 @@ public abstract class Character extends Entity {
         this.movementPhysicsComponent = this.add(new DynamicPhysicsComponent(
                 this,
                 hitBox,
-                PhysicsCollisionLayer.PLAYER_CHARACTER,
-                new PhysicsCollisionMask(PhysicsCollisionLayer.CHARACTER, PhysicsCollisionLayer.OBSTACLES),
+                PhysicsCollisionLayer.BODY,
+                new PhysicsCollisionMask(PhysicsCollisionLayer.BODY, PhysicsCollisionLayer.OBSTACLES),
                 collision -> onMovementCollisionStart(collision),
                 collision -> onMovementCollisionStay(collision),
                 collision -> onMovementCollisionEnd(collision)));

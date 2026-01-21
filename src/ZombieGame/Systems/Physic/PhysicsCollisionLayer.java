@@ -6,29 +6,21 @@ public enum PhysicsCollisionLayer {
      */
     OBSTACLES(1 << 0),
     /**
-     * Creatures which could be players or zombies
+     * Bodies which could collide during movement
      */
-    CHARACTER(1 << 1),
+    BODY(1 << 1),
     /**
-     * The Player
+     * Can Take damage
      */
-    PLAYER(1 << 2),
-    /**
-     * The Player, will also be registered as CHARACTER
-     */
-    PLAYER_CHARACTER((1 << 2) | (1 << 1)),
-    /**
-     * A Zombie
-     */
-    ZOMBIE(1 << 3),
-    /**
-     * A Zombie, will also be registered as CHARACTER
-     */
-    ZOMBIE_CHARACTER((1 << 3) | (1 << 1)),
+    HURTBOX(1 << 2),
     /**
      * Projectiles like: bullets, throwables, ...
      */
-    PROJECTILE(1 << 4), // bullets
+    PROJECTILE(1 << 3),
+    /**
+     * vision, triggers, attack ranges
+     */
+    SENSOR(1 << 4),
     /**
      * Items which could be collected like: guns, ammo, ...
      */

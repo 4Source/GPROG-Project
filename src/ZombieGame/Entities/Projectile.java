@@ -17,7 +17,6 @@ import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 import ZombieGame.Systems.Physic.PhysicsSystem;
 
 public abstract class Projectile extends Entity {
-    // TODO: Variation of LifeComponent which tracks traveled distance and destroy it self after distance
     private final LifetimeComponent lifetimeComponent;
     private final DynamicPhysicsComponent physicsComponent;
     private final VisualComponent visualComponent;
