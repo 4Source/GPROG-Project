@@ -38,7 +38,7 @@ public class Zombie extends Character {
 	 * Spawns a zombie with a specific type (BIG / SMALL / AXE).
 	 */
 	public Zombie(WorldPos start, ZombieType type) {
-		super(e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null)),
+		super(e -> new CharacterSpriteComponent(e, new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null, null)),
 				bodyCircleHitBoxFor(type),
 				e -> new DynamicPhysicsComponent(e, physicsRectHitBoxFor(type), PhysicsCollisionLayer.ZOMBIE_CHARACTER, new PhysicsCollisionMask(PhysicsCollisionLayer.PROJECTILE)),
 				e -> new AIMovementComponent((Zombie) e, start, 0, movementSpeedFor(type)),
@@ -267,16 +267,16 @@ public class Zombie extends Character {
 
 		// IDLE
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null, null),
 				new LoopingSprite(base + prefix + "_Down_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, null, null),
 				new LoopingSprite(base + prefix + "_Side_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, null, null),
 				new LoopingSprite(base + prefix + "_Side-left_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, null, null),
 				new LoopingSprite(base + prefix + "_Up_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 
 		// MOVE
@@ -289,30 +289,30 @@ public class Zombie extends Character {
 		}
 
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, null, null),
 				new LoopingSprite(downWalkFile, moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, null, null),
 				new LoopingSprite(base + prefix + "_Side_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, null, null),
 				new LoopingSprite(base + prefix + "_Side-left_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, null, null),
 				new LoopingSprite(base + prefix + "_Up_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 
 		// ATTACK (One-shot) - "First Attack" sheets
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, null, null),
 				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, null, null),
 				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, null, null),
 				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, null, null),
 				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 	}
 
@@ -334,44 +334,44 @@ public class Zombie extends Character {
 
 		// IDLE
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.DOWN, null, null),
 				new LoopingSprite(base + prefix + "_Down_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.RIGHT, null, null),
 				new LoopingSprite(base + prefix + "_Side_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.LEFT, null, null),
 				new LoopingSprite(base + prefix + "_Side-left_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, null),
+				new CharacterAnimationKey(CharacterAction.IDLE, CharacterDirection.UP, null, null),
 				new LoopingSprite(base + prefix + "_Up_Idle-Sheet6.png", 6, 1, scale, animationFrameTime));
 
 		// MOVE
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.DOWN, null, null),
 				new LoopingSprite(base + prefix + "_Down_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.RIGHT, null, null),
 				new LoopingSprite(base + prefix + "_Side_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.LEFT, null, null),
 				new LoopingSprite(base + prefix + "_Side-left_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, null),
+				new CharacterAnimationKey(CharacterAction.MOVE, CharacterDirection.UP, null, null),
 				new LoopingSprite(base + prefix + "_Up_Walk-Sheet" + moveFrames + ".png", moveFrames, 1, scale, animationFrameTime));
 
 		// ATTACK
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.DOWN, null, null),
 				new OneShotSprite(base + prefix + "_Down_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.RIGHT, null, null),
 				new OneShotSprite(base + prefix + "_Side_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.LEFT, null, null),
 				new OneShotSprite(base + prefix + "_Side-left_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, null),
+				new CharacterAnimationKey(CharacterAction.ATTACK, CharacterDirection.UP, null, null),
 				new OneShotSprite(base + prefix + "_Up_First-Attack-Sheet" + attackFrames + ".png", attackFrames, 1, scale, animationFrameTime, () -> onAttackEnd()));
 	}
 

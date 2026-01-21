@@ -26,6 +26,11 @@ replay_pid*
 # VSCode
 .vscode
 
+# IntelliJ
+.idea
+GPROG-Project.iml
+
+
 # Java Flight Recorder
 profile.jfr
 assets/PostApocalypse_AssetPack/

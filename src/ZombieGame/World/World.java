@@ -226,7 +226,7 @@ public abstract class World implements DebuggableText {
 
 	/**
 	 * Returns all entities which are contained inside the chunks
-	 * 
+	 *
 	 * @param <T> A Class which extends the Component Class
 	 * @param index At least one chunk index to look for entities
 	 * @param more More chunks indices to look for entities
@@ -640,7 +640,7 @@ public abstract class World implements DebuggableText {
 
 	/**
 	 * Generates number of entities based on the size of the chunks and density
-	 * 
+	 *
 	 * @param <T> A Type of Entity
 	 * @param index The index of the chunk where the entities should be spawned
 	 * @param density The density determines how many entities should be spawned in average for a chunk size of 8 scales with chunk size
@@ -785,7 +785,7 @@ public abstract class World implements DebuggableText {
 
 	/**
 	 * Register the chunk to the generated chunks
-	 * 
+	 *
 	 * @param chunk The chunk to register
 	 * @return {@code true} if the registration was successful or if it was already registered
 	 */

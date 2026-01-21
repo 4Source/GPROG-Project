@@ -1,5 +1,5 @@
 package ZombieGame;
 
 public enum CharacterPart {
-    BODY, HANDS
+    BODY, HANDS, MUZZLE
 }

@@ -2,7 +2,8 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 
-import ZombieGame.Components.GunshotComponent;
+import ZombieGame.CharacterEquipment;
+import ZombieGame.Components.PlayerWeaponComponent;
 import ZombieGame.Components.StaticSpriteComponent;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.StaticSprite;
@@ -29,9 +30,16 @@ public class Ammunition extends Item {
 
 	@Override
 	public void pickUp(Entity entity) {
+		if(entity.getComponents(PlayerWeaponComponent.class).getFirst().getEntity().getVisualComponent().getCharacterEquipment() == CharacterEquipment.BAT){return;}
 		super.pickUp(entity);
-		for (GunshotComponent c : entity.getComponents(GunshotComponent.class)) {
-			c.restockAmmunition(20);
+		for (PlayerWeaponComponent c : entity.getComponents(PlayerWeaponComponent.class)) {
+			switch(c.getEntity().getVisualComponent().getCharacterEquipment()){
+				case PISTOL -> c.restockAmmunition(15);
+				case GUN -> c.restockAmmunition(20);
+				case SHOTGUN -> c.restockAmmunition(8);
+				default -> c.restockAmmunition(20);
+			}
+
 		}
 	}
 }

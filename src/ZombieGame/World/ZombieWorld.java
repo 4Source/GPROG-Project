@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import ZombieGame.Entities.Avatar;
 import ZombieGame.Entities.FirstAidKit;
+import ZombieGame.Entities.*;
 import ZombieGame.Viewport;
 import ZombieGame.ZombieType;
 import ZombieGame.Algorithms.GaussianBlur;
@@ -37,7 +38,13 @@ public class ZombieWorld extends World {
 		super();
 		// add the Avatar
 		this.spawnEntity(new Avatar(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 3)).toWorldPos(this)));
-		this.update(0);
+        this.spawnEntity(new Bat(new WorldPos(50, 50)));
+        this.spawnEntity(new Gun(new WorldPos(50, 100)));
+        this.spawnEntity(new Shotgun(new WorldPos(50, 150)));
+        this.spawnEntity(new Pistol(new WorldPos(50, 200)));
+        this.spawnEntity(new Zombie(new WorldPos(400, 50), ZombieType.BIG));
+
+        this.update(0);
 
 		// Pregenerate chunks
 		final int PREGENERATE_CHUNK_X = 8;
@@ -58,8 +65,9 @@ public class ZombieWorld extends World {
 		this.addUIElement(new ZombieKillCounter(Viewport.getTopLeft().add(20, 40)));
 		this.addUIElement(new Timer(Viewport.getTopCenter().add(-45, 40)));
 		this.addUIElement(new HeartUI(Viewport.getBottomLeft().add(20, -56)));
-		this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(20, -68), 0));
-	}
+        this.addUIElement(new AmmunitionUI(Viewport.getBottomLeft().add(40, -100)));
+        this.addUIElement(new AmmunitionCounter(Viewport.getBottomLeft().add(70, -80), 0));
+  }
 
 	public void UpdateEntityGeneration(double deltaTime) {
 		this.zombieTime += deltaTime;
@@ -70,7 +78,7 @@ public class ZombieWorld extends World {
 			ChunkIndex index = (ChunkIndex) loaded[Math.min(loaded.length - 1, Math.max(0, (int) Math.floor(ThreadLocalRandom.current().nextDouble() * loaded.length)))];
 
 			// Spawn zombies in it
-			this.zombieTime -= SPAWN_INTERVAL * Math.max(1, this.generateEntity(index, Math.min(ZOMBIE_BASE_DENSITY * Math.pow((1 + ZOMBIE_GROTH * getWorldTimeSeconds() / 60), CURVE), ZOMBIE_MAX_DENSITY), pos -> spawnZombie(pos)));
+			//this.zombieTime -= SPAWN_INTERVAL * Math.max(1, this.generateEntity(index, Math.min(ZOMBIE_BASE_DENSITY * Math.pow((1 + ZOMBIE_GROTH * getWorldTimeSeconds() / 60), CURVE), ZOMBIE_MAX_DENSITY), pos -> spawnZombie(pos)));
 		}
 	}
 
@@ -228,7 +236,7 @@ public class ZombieWorld extends World {
 		this.generateEntity(index, 0.2, pos -> new FirstAidKit(pos));
 
 		// Add Zombies to chunk
-		this.generateEntity(index, 1.0, pos -> new Zombie(pos, randomZombieType()));
+		//this.generateEntity(index, 1.0, pos -> new Zombie(pos, randomZombieType()));
 
 		Chunk res = new Chunk(this, index, tiles);
 		if (debugGeneration) {
