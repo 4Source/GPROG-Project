@@ -9,11 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import ZombieGame.CharacterAction;
-import ZombieGame.CharacterAnimationKey;
-import ZombieGame.CharacterDirection;
-import ZombieGame.CharacterEquipment;
-import ZombieGame.CharacterPart;
+import ZombieGame.*;
 import ZombieGame.Coordinates.ViewPos;
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.AnimatedSprite;
@@ -47,10 +43,12 @@ public class CharacterSpriteComponent extends SpriteComponent {
             case UP_LEFT:
             case UP_RIGHT:
                 partsOrder.add(CharacterPart.BODY);
+                partsOrder.add(CharacterPart.MUZZLE);
                 partsOrder.add(CharacterPart.HANDS);
                 break;
 
             case UP:
+                partsOrder.add(CharacterPart.MUZZLE);
                 partsOrder.add(CharacterPart.HANDS);
                 partsOrder.add(CharacterPart.BODY);
                 break;
@@ -62,7 +60,8 @@ public class CharacterSpriteComponent extends SpriteComponent {
         for (CharacterPart p : partsOrder) {
             Optional<CharacterAnimationKey> s = this.getState(p);
             if (s.isPresent()) {
-                Sprite sprite = this.sprites.getOrDefault(p, new HashMap<>()).get(s.get());
+                CharacterAnimationKey matchedKey = s.get();
+                Sprite sprite = this.sprites.get(p).get(matchedKey);
 
                 if (sprite == null) {
                     int size = MissingTexture.getSize();
@@ -100,6 +99,9 @@ public class CharacterSpriteComponent extends SpriteComponent {
         if (this.state.equipment() != state.equipment()) {
             changed = true;
         }
+        if (this.state.attackState() != state.attackState()) {
+            changed = true;
+        }
 
         this.state = state;
 
@@ -116,15 +118,19 @@ public class CharacterSpriteComponent extends SpriteComponent {
     }
 
     public void changeState(CharacterAction action) {
-        this.changeState(new CharacterAnimationKey(action, this.state.direction(), this.state.equipment()));
+        this.changeState(new CharacterAnimationKey(action, this.state.direction(), this.state.equipment(), this.state.attackState()));
     }
 
     public void changeState(CharacterDirection direction) {
-        this.changeState(new CharacterAnimationKey(this.state.action(), direction, this.state.equipment()));
+        this.changeState(new CharacterAnimationKey(this.state.action(), direction, this.state.equipment(), this.state.attackState()));
     }
 
     public void changeState(CharacterEquipment equipment) {
-        this.changeState(new CharacterAnimationKey(this.state.action(), this.state.direction(), equipment));
+        this.changeState(new CharacterAnimationKey(this.state.action(), this.state.direction(), equipment, this.state.attackState()));
+    }
+
+    public void changeState(CharacterAttackState attackState) {
+        this.changeState(new CharacterAnimationKey(this.state.action(), this.state.direction(), this.state.equipment(), attackState));
     }
 
     public void changeState(CharacterPart part, CharacterAnimationKey state) {
@@ -149,6 +155,10 @@ public class CharacterSpriteComponent extends SpriteComponent {
         return this.state.equipment();
     }
 
+    public CharacterAttackState getCharacterAttackState() {
+        return this.state.attackState();
+    }
+
 
     public Optional<CharacterAnimationKey> getState(CharacterPart part) {
         HashMap<CharacterAnimationKey, AnimatedSprite> s = this.sprites.get(part);
@@ -156,36 +166,60 @@ public class CharacterSpriteComponent extends SpriteComponent {
             return Optional.empty();
         }
 
+        // Match
+        if (s.containsKey(state)) {
+            return Optional.of(state);
+        }
+
+
+        // wildcard match
+        for (CharacterAnimationKey key : s.keySet()) {
+            if (key.matches(state)) {
+                return Optional.of(key);
+            }
+        }
+
+        return Optional.empty();
+
+        /*
+
         if (s.containsKey(this.state)) {
             return Optional.of(this.state);
         }
 
         CharacterAnimationKey newState;
-        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), this.state.direction(), null))) {
+        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), this.state.direction(), null,null))) {
             return Optional.of(newState);
         }
 
-        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), null, this.state.equipment()))) {
+        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), null, this.state.equipment(), null))) {
             return Optional.of(newState);
         }
 
-        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), null, null))) {
+        if (s.containsKey(newState = new CharacterAnimationKey(this.state.action(), null, null, null))) {
             return Optional.of(newState);
         }
 
-        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), this.state.equipment()))) {
+        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), this.state.equipment(), null))) {
             return Optional.of(newState);
         }
 
-        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), null))) {
+        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), null, null))) {
             return Optional.of(newState);
         }
 
-        if (s.containsKey(newState = new CharacterAnimationKey(null, null, this.state.equipment()))) {
+        if (s.containsKey(newState = new CharacterAnimationKey(null, null, this.state.equipment(), null))) {
             return Optional.of(newState);
         }
+
+        if (s.containsKey(newState = new CharacterAnimationKey(null, this.state.direction(), this.state.equipment(), this.state.attackState()))) {
+            return Optional.of(newState);
+        }
+
 
         return Optional.empty();
+
+         */
     }
 
     public void addSprite(CharacterPart part, CharacterAnimationKey state, AnimatedSprite sprite) {

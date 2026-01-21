@@ -11,10 +11,9 @@ import java.util.Optional;
 
 public class PlayerWeaponComponent extends ActionComponent{
 
-    private double timeSinceLastShot;
+    private double timeSinceLastAttack;
     private CharacterEquipment characterEquipment;
     private EquipmentStats equipmentStats;
-
 
     public PlayerWeaponComponent(Entity entity) {
         super(entity, self -> {
@@ -23,36 +22,35 @@ public class PlayerWeaponComponent extends ActionComponent{
             map.put(Action.SHOOT, new ActionHandler.Down(dt -> {
                 Avatar player = (Avatar) self.getEntity();
                 if(player.getVisualComponent().getCharacterEquipment()!=CharacterEquipment.HANDS){
-                    player.getWeaponComponent().onShoot(dt);
+                    player.getWeaponComponent().onAttack(dt);
                 }
             }));
 
             return map;
         });
 
-        this.timeSinceLastShot = 0;
+        this.timeSinceLastAttack = 0;
     }
 
     public void setEquipment(CharacterEquipment equipment, EquipmentStats equipmentStats) {
         this.characterEquipment = equipment;
         this.equipmentStats = equipmentStats;
-        this.timeSinceLastShot = equipmentStats.getFireRate();
+        this.timeSinceLastAttack = equipmentStats.getFireRate();
     }
 
     public EquipmentStats getEquipmentStats() {
         return equipmentStats;
     }
 
-    public void onShoot(double deltaTime) {
+    public void onAttack(double deltaTime) {
+
         if (equipmentStats.getAmmunition() <= 0) { return; }
 
-        if (timeSinceLastShot < equipmentStats.getFireRate()) { return;} {
+        if (timeSinceLastAttack < equipmentStats.getFireRate()) { return;} {
 
-            Avatar player = getEntity();
+            this.getEntity().getVisualComponent().changeState(CharacterAttackState.SHOOT);
 
-            this.getEntity().getVisualComponent().changeState(CharacterAction.ATTACK);
-
-            timeSinceLastShot = 0;
+            timeSinceLastAttack = 0;
             equipmentStats.shoot();
 
             InputSystem input = InputSystem.getInstance();
@@ -87,7 +85,8 @@ public class PlayerWeaponComponent extends ActionComponent{
                 Gunshot shot = new Gunshot(
                         this.getEntity(),
                         shooterPos,
-                        target
+                        target,
+                        equipmentStats.getShellStats()
                 );
 
                 Game.world.spawnEntity(shot);
@@ -103,7 +102,12 @@ public class PlayerWeaponComponent extends ActionComponent{
     public void update(double deltaTime) {
         super.update(deltaTime);
 
-        timeSinceLastShot += deltaTime;
+        timeSinceLastAttack += deltaTime;
+
+        //time for shoot animation
+        if(timeSinceLastAttack > 0.1) {
+            this.getEntity().getVisualComponent().changeState(CharacterAttackState.NO_ATTACK);
+        }
 
         if(equipmentStats != null) {
             Optional<AmmunitionCounter> opt = Game.world.getUIElement(AmmunitionCounter.class);
@@ -112,6 +116,7 @@ public class PlayerWeaponComponent extends ActionComponent{
                 ammunitionUI.setNumber(equipmentStats.getAmmunition());
             }
         }
+
     }
 
     @Override

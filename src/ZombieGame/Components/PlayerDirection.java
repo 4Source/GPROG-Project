@@ -62,11 +62,17 @@ public class PlayerDirection extends ActionComponent{
         CharacterDirection playerDir = getDirFromAngle(angle);
         CharacterAction currentAction = player.getVisualComponent().getCharacterAction();
         CharacterEquipment currentEquipment = player.getVisualComponent().getCharacterEquipment();
+        CharacterAttackState attackState = player.getVisualComponent().getCharacterAttackState();
 
+        player.getVisualComponent().changeState(playerDir);
+
+        /*
         player.getVisualComponent().changeState(
                 CharacterPart.HANDS,
-                new CharacterAnimationKey(currentAction, playerDir, currentEquipment)
+                new CharacterAnimationKey(currentAction, playerDir, currentEquipment, attackState)
         );
+
+         */
     }
 
     @Override

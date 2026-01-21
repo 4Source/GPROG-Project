@@ -1,9 +1,7 @@
 package ZombieGame.Entities;
 
 import ZombieGame.CharacterEquipment;
-import ZombieGame.Components.LifetimeComponent;
 import ZombieGame.Components.StaticSpriteComponent;
-import ZombieGame.Constants;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Game;
 import ZombieGame.Sprites.StaticSprite;

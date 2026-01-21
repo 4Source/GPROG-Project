@@ -15,4 +15,6 @@ public sealed interface ActionHandler permits ActionHandler.Down, ActionHandler.
      */
     record Pressed(Consumer<Double> handler) implements ActionHandler {
     }
+
+
 }

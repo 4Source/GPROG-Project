@@ -2,6 +2,7 @@ package ZombieGame.Entities;
 
 import java.awt.Color;
 
+import ZombieGame.Components.ShellStats;
 import ZombieGame.EntityType;
 import ZombieGame.Components.CircleComponent;
 import ZombieGame.Coordinates.WorldPos;
@@ -28,12 +29,10 @@ public class Gunshot extends Projectile {
 	 * @param owner The entity which spawned this Projectile, the projectile will not collide with owner.
 	 * @param pos The position in the world
 	 * @param dest The target direction of the gunshot
-	 * @param speed The speed how fast to move
-	 * @param lifetime The duration the component live before being destroyed
-	 * @param damage The damage it makes in half-hearts (1 = 1/2 Heart, 2 = 1 Heart)
+	 * @param shellStats includes, speed, range, damage:
 	 */
-	public Gunshot(Entity owner, WorldPos pos, WorldPos dest, double speed, double lifetime, int damage) {
-		this(owner, pos, Math.atan2(dest.y() - pos.y(), dest.x() - pos.x()), speed, lifetime, damage);
+	public Gunshot(Entity owner, WorldPos pos, WorldPos dest, ShellStats shellStats) {
+		this(owner, pos, Math.atan2(dest.y() - pos.y(), dest.x() - pos.x()), shellStats.getSpeed(), shellStats.getRange() / shellStats.getSpeed(), shellStats.getDamage());
 	}
 
 	/**

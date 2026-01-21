@@ -59,7 +59,7 @@ public class AmmunitionUI extends UIElement{
                     case GUN -> iconToDraw = hasAmmo ? gunFull : gunEmpty;
                     case PISTOL -> iconToDraw = hasAmmo ? pistolFull : pistolEmpty;
                     case SHOTGUN -> iconToDraw = hasAmmo ? shotgunFull : shotgunEmpty;
-                    default -> iconToDraw = bat;
+                    default -> {return;}
                 }
 
                 // Sprite zeichnen
