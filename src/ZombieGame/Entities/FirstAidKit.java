@@ -6,8 +6,8 @@ import ZombieGame.Components.LifeComponent;
 import ZombieGame.Components.StaticSpriteComponent;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Sprites.StaticSprite;
+import ZombieGame.Systems.Physic.CircleHitBox;
 import ZombieGame.Systems.Physic.HitBoxType;
-import ZombieGame.Systems.Physic.RectangleHitBox;
 
 public class FirstAidKit extends Item {
 
@@ -15,7 +15,7 @@ public class FirstAidKit extends Item {
 	 * @param pos The initial position of the ammunition
 	 */
 	public FirstAidKit(WorldPos pos) {
-		super(pos, new RectangleHitBox(HitBoxType.Overlap, 16, 21), Color.ORANGE, e -> new StaticSpriteComponent(e, new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Bandage.png", 1, 1, 3, 0, 0)));
+		super(pos, new CircleHitBox(HitBoxType.Overlap, 16), Color.ORANGE, e -> new StaticSpriteComponent(e, new StaticSprite("assets\\PostApocalypse_AssetPack\\Objects\\Pickable\\Bandage.png", 1, 1, 3, 0, 0)));
 	}
 
 	@Override

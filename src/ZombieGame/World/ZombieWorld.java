@@ -31,7 +31,7 @@ public class ZombieWorld extends World {
 	private double zombieTime = 0;
 	private boolean debugGeneration = false;
 	public final double SPAWN_INTERVAL = 1.0; // secondes
-	private final double ZOMBIE_BASE_DENSITY = 2.0;
+	private final double ZOMBIE_BASE_DENSITY = 4.0;
 	private final double ZOMBIE_MAX_DENSITY = 20.0;
 	private final double ZOMBIE_GROTH = 0.08;
 	private final double CURVE = 1.8;
@@ -40,6 +40,10 @@ public class ZombieWorld extends World {
 		super();
 		// add the Avatar
 		this.spawnEntity(new Avatar(Viewport.getBottomCenter().sub(new Offset(0, Viewport.getScreenHeight() / 3)).toWorldPos(this)));
+		
+		// Spawn starter weapon next to Avatar
+		this.spawnEntity(new Pistol(Viewport.getBottomCenter().sub(new Offset(0, (Viewport.getScreenHeight() / 3) - 50)).toWorldPos(this)));
+
 		// HACK:
 		this.spawnEntity(new AxeZombie(new WorldPos(100, 100)));
 		this.update(0);
@@ -229,7 +233,10 @@ public class ZombieWorld extends World {
 
 		// Add loot
 		this.generateEntity(index, 0.25, pos -> new Ammunition(pos));
-		this.generateEntity(index, 0.2, pos -> new FirstAidKit(pos));
+		this.generateEntity(index, 0.15, pos -> new FirstAidKit(pos));
+		this.generateEntity(index, 0.15, pos -> new Gun(pos));
+		this.generateEntity(index, 0.15, pos -> new Shotgun(pos));
+		this.generateEntity(index, 0.2, pos -> new Pistol(pos));
 
 		// Add Zombies to chunk
 		this.generateEntity(index, 1.0, pos -> randomZombieType(pos));

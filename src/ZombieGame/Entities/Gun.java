@@ -8,7 +8,7 @@ import ZombieGame.Systems.Physic.RectangleHitBox;
 public class Gun extends Equipment {
 
     public Gun(WorldPos pos, EquipmentStats equipmentStats) {
-        super(pos, CharacterEquipment.GUN, equipmentStats, new RectangleHitBox(HitBoxType.Overlap, 21, 16));
+        super(pos, CharacterEquipment.GUN, equipmentStats, new RectangleHitBox(HitBoxType.Overlap, 40, 20));
     }
 
     public Gun(WorldPos pos) {
