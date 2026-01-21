@@ -21,7 +21,6 @@ import ZombieGame.Systems.Physic.PhysicsCollisionLayer;
 import ZombieGame.Systems.Physic.PhysicsCollisionMask;
 import ZombieGame.Systems.Physic.RectangleHitBox;
 
-// BUG: Gets invisible when throwing the axe 
 public class AxeZombie extends Zombie {
 	private boolean hasAxe;
 	private final DynamicPhysicsComponent secondaryAttackPhysicsComponent;
@@ -130,17 +129,17 @@ public class AxeZombie extends Zombie {
 				new OneShotSprite(baseNoAxe + "_Up_First-Attack-Sheet7.png", 7, 1, scale, animationFrameTime, () -> onAttackEnd()));
 
 		// SPECIAL ATTACK WITH AXE
-		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.DOWN, CharacterEquipment.AXE, null),
+		this.getVisualComponent().addSprite(CharacterPart.BODY, 
+				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.DOWN, null, null),
 				new OneShotSprite(base + "_Down_Second-Attack-Sheet9.png", 9, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.RIGHT, CharacterEquipment.AXE, null),
+				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.RIGHT, null, null),
 				new OneShotSprite(base + "_Side_Second-Attack-Sheet9.png", 9, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.LEFT, CharacterEquipment.AXE, null),
+				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.LEFT, null, null),
 				new OneShotSprite(base + "_Side-left_Second-Attack-Sheet9.png", 9, 1, scale, animationFrameTime, () -> onAttackEnd()));
 		this.getVisualComponent().addSprite(CharacterPart.BODY,
-				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.UP, CharacterEquipment.AXE, null),
+				new CharacterAnimationKey(CharacterAction.SPECIAL_ATTACK, CharacterDirection.UP, null, null),
 				new OneShotSprite(base + "_Up_Second-Attack-Sheet9.png", 9, 1, scale, animationFrameTime, () -> onAttackEnd()));
 	}
 
