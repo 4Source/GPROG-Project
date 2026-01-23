@@ -99,7 +99,7 @@ public class PlayerMovementComponent extends MovementComponent implements Debugg
 
     @Override
     public DebugCategoryMask getCategoryMask() {
-        return new DebugCategoryMask(DebugCategory.WORLD);
+        return new DebugCategoryMask(DebugCategory.AI);
     }
 
     @Override
