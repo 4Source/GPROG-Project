@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import ZombieGame.CharacterAction;
-import ZombieGame.CharacterDirection;
 import ZombieGame.Game;
 import ZombieGame.Viewport;
 import ZombieGame.Capabilities.DebuggableGeometry;
@@ -35,6 +34,10 @@ public class PlayerMovementComponent extends MovementComponent implements Debugg
 
     @Override
     public void update(double deltaTime) {
+        // Default: no movement this frame (important for collision logic).
+        this.lastStepDelta = new WorldPos(0, 0);
+        this.movedThisFrame = false;
+
         InputSystem input = InputSystem.getInstance();
         boolean moved = false;
         double dx = 0;

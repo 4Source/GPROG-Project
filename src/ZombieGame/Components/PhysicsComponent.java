@@ -4,6 +4,7 @@ import ZombieGame.Capabilities.DebuggableGeometry;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.EntityType;
 import ZombieGame.Systems.Debug.DebugCategory;
 import ZombieGame.Systems.Debug.DebugCategoryMask;
 import ZombieGame.Systems.Physic.CircleHitBox;

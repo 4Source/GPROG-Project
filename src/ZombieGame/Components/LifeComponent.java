@@ -1,6 +1,12 @@
 package ZombieGame.Components;
 
 import java.awt.Color;
+import java.util.concurrent.ThreadLocalRandom;
+
+import ZombieGame.Game;
+import ZombieGame.EntityType;
+import ZombieGame.Coordinates.WorldPos;
+import ZombieGame.Entities.BloodSplat;
 
 import ZombieGame.Entities.Entity;
 import ZombieGame.Sprites.Sprite;
@@ -71,6 +77,22 @@ public class LifeComponent extends LivingComponent {
             }
         }
 
+
+
+        // Spawn a short blood effect for zombies
+        if (Game.world != null && this.getEntity().getType() == EntityType.ZOMBIE) {
+            WorldPos p = this.getEntity().getPositionComponent().getWorldPos();
+            int drops = Math.min(6, 2 + halfHeartsDamage * 2);
+
+            for (int i = 0; i < drops; i++) {
+                double ox = ThreadLocalRandom.current().nextDouble(-10, 10);
+                double oy = ThreadLocalRandom.current().nextDouble(-10, 10);
+                int r = ThreadLocalRandom.current().nextInt(2, 5);
+                double lt = ThreadLocalRandom.current().nextDouble(0.2, 0.55);
+
+                Game.world.spawnEntity(new BloodSplat(p.add(ox, oy), lt, r, new Color(180, 0, 0, 180)));
+            }
+        }
         if (this.life <= 0) {
             this.life = 0;
             this.kill();

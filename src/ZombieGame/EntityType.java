@@ -1,5 +1,5 @@
 package ZombieGame;
 
 public enum EntityType {
-    AVATAR, TEXT, TREE, ZOMBIE, SHOT, ITEM, UI
+    AVATAR, TEXT, TREE, ZOMBIE, SHOT, ITEM, UI, EFFECT
 }

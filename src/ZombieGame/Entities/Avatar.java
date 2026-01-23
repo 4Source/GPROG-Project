@@ -246,9 +246,27 @@ public class Avatar extends Character {
 
 	@Override
 	protected void onMovementCollisionStart(Collision collision) {
-		// if Object is a tree, move back one step
+		// Solid collision (trees, zombies, etc.)
 		if (collision.collisionResponse() == CollisionResponse.Block) {
-			this.getPositionComponent().resolveCollision(collision.entity());
+			EntityType otherType = collision.entity().getType();
+
+			// Only resolve if we actually attempted to move this frame.
+			if (this.getPositionComponent().hasMoved()) {
+				// Keep our own body out of the other collider
+				this.getPositionComponent().resolveCollision(collision.entity());
+
+				// If we ran into a zombie, we should be able to shove it.
+				if (otherType == EntityType.ZOMBIE && collision.entity() instanceof Character ch) {
+					WorldPos step = this.getPositionComponent().getLastStepDelta();
+					double len = step.length();
+					if (len > 1e-6) {
+						WorldPos dir = step.div(len);
+						// Push strength: based on our intended step, with a small minimum.
+						double max = Math.max(10.0, Math.min(30.0, len * 1.2));
+						ch.getPositionComponent().pushOutOf(this, dir.mul(max));
+					}
+				}
+			}
 		}
 
 		// pick up Items
@@ -263,10 +281,28 @@ public class Avatar extends Character {
 
 	@Override
 	protected void onMovementCollisionStay(Collision collision) {
-		// if Object is a tree, move back one step
+		// Solid collision (trees, zombies, etc.)
 		if (collision.collisionResponse() == CollisionResponse.Block) {
-			this.getPositionComponent().resolveCollision(collision.entity());
+			EntityType otherType = collision.entity().getType();
+
+			// Avatar only resolves if it actually moved this frame.
+			// This prevents getting "pushed" into a zombie when the zombie walks into a standing avatar.
+			if (this.getPositionComponent().hasMoved()) {
+				this.getPositionComponent().resolveCollision(collision.entity());
+
+				// Maintain shove while holding W into a zombie.
+				if (otherType == EntityType.ZOMBIE && collision.entity() instanceof Character ch) {
+					WorldPos step = this.getPositionComponent().getLastStepDelta();
+					double len = step.length();
+					if (len > 1e-6) {
+						WorldPos dir = step.div(len);
+						double max = Math.max(10.0, Math.min(30.0, len * 1.2));
+						ch.getPositionComponent().pushOutOf(this, dir.mul(max));
+					}
+				}
+			}
 		}
+
 		// pick up Items
 		else if (collision.collisionResponse() == CollisionResponse.Overlap) {
 			if (collision.entity().getType() == EntityType.ITEM) {
