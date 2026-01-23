@@ -225,20 +225,20 @@ public class Chunk implements Drawable, DebuggableGeometry {
             }
         }
 
-        for (int y = 0; y < tilesCountY(); y++) {
-            TileType[] tilesRows = this.tiles[y];
-            for (int x = 0; x < tilesCountX(); x++) {
-                TileType tile = tilesRows[x];
-                String label;
-                label = "" + tile.toString().charAt(0);
-                Color c = tile == TileType.DIRT ? Color.RED : Color.GREEN;
+        // for (int y = 0; y < tilesCountY(); y++) {
+        //     TileType[] tilesRows = this.tiles[y];
+        //     for (int x = 0; x < tilesCountX(); x++) {
+        //         TileType tile = tilesRows[x];
+        //         String label;
+        //         label = "" + tile.toString().charAt(0);
+        //         Color c = tile == TileType.DIRT ? Color.RED : Color.GREEN;
 
-                int fontSize = (int) (this.tileDrawHeight * 0.6);
-                Offset offset = new Offset(x * 1.5 * this.tileDrawWidth, y * 1.5 * this.tileDrawHeight).add(this.tileDrawWidth * -0.2, this.tileDrawHeight * 0.2);
+        //         int fontSize = (int) (this.tileDrawHeight * 0.6);
+        //         Offset offset = new Offset(x * 1.5 * this.tileDrawWidth, y * 1.5 * this.tileDrawHeight).add(this.tileDrawWidth * -0.2, this.tileDrawHeight * 0.2);
 
-                GraphicSystem.getInstance().drawString(label, viewPos.add(offset), new DrawStyle().font(new Font("ARIAL", Font.BOLD, fontSize)).color(c));
-            }
-        }
+        //         GraphicSystem.getInstance().drawString(label, viewPos.add(offset), new DrawStyle().font(new Font("ARIAL", Font.BOLD, fontSize)).color(c));
+        //     }
+        // }
     }
 
     @Override
