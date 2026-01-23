@@ -87,16 +87,21 @@ public abstract class Zombie extends Character {
 		if (collision.collisionResponse() == CollisionResponse.Block) {
 			EntityType entityType = collision.entity().getType();
 
-			// if entity is avatar, start attack
+
+
+			// Avatar should never overlap the zombie. We resolve OUR movement (rollback) when we walk into the avatar.
+			// Attack state is driven by the attack component, not by body collision.
 			if (entityType == EntityType.AVATAR) {
-				this.getPositionComponent().resolveCollision(collision.entity());
-				this.getPositionComponent().setState(AIState.ATTACKING);
+				if (this.getPositionComponent().hasMoved()) {
+					this.getPositionComponent().resolveCollision(collision.entity());
+				}
+				return;
 			}
 
-			// if entity is zombie, step back
+			// Zombie vs Zombie: do NOT enter STUCK (it gets re-triggered every frame and causes freezes).
+			// Instead, separate the two bodies so they can keep moving and pushing each other.
 			if (entityType == EntityType.ZOMBIE) {
-				this.getPositionComponent().resolveCollision(collision.entity());
-				this.getPositionComponent().setState(AIState.STUCK);
+				separateFromDynamicBody(collision.entity());
 				return;
 			}
 
@@ -107,6 +112,7 @@ public abstract class Zombie extends Character {
 				return;
 			}
 		}
+
 	}
 
 	@Override
@@ -114,25 +120,28 @@ public abstract class Zombie extends Character {
 		if (collision.collisionResponse() == CollisionResponse.Block) {
 			EntityType entityType = collision.entity().getType();
 
-			// if entity is avatar, start attack
-			if (entityType == EntityType.AVATAR) {
-				this.getPositionComponent().resolveCollision(collision.entity());
-			}
 
-			// if entity is zombie, step back
-			if (entityType == EntityType.ZOMBIE) {
-				this.getPositionComponent().resolveCollision(collision.entity());
-				this.getPositionComponent().setState(AIState.STUCK);
+			// Avatar body collision: keep bodies separated, but do not change AI state here.
+			if (entityType == EntityType.AVATAR) {
+				if (this.getPositionComponent().hasMoved()) {
+					this.getPositionComponent().resolveCollision(collision.entity());
+				}
 				return;
 			}
 
-			// if entity is a tree, move back one step
+			// Zombie vs Zombie: keep separating (no STUCK loop).
+			if (entityType == EntityType.ZOMBIE) {
+				separateFromDynamicBody(collision.entity());
+				return;
+			}
+
+			// Tree collision: do NOT repeatedly set STUCK on STAY (that prevents clearing).
 			if (entityType == EntityType.TREE) {
 				this.getPositionComponent().resolveCollision(collision.entity());
-				this.getPositionComponent().setState(AIState.STUCK);
 				return;
 			}
 		}
+
 	}
 
 	@Override
@@ -173,6 +182,40 @@ public abstract class Zombie extends Character {
 			ZombieKillCounter counter = optZ.get();
 			counter.increment();
 		}
+	}
+
+	/**
+	 * Separates this zombie from another dynamic body (typically another zombie) so that both can keep moving.
+	 * The separation is bounded to avoid tunneling through trees/walls.
+	 */
+	private void separateFromDynamicBody(Entity other) {
+		if (!(other instanceof Character ch)) {
+			// Fallback: just roll back our own movement.
+			if (this.getPositionComponent().hasMoved()) {
+				this.getPositionComponent().resolveCollision(other);
+			}
+			return;
+		}
+
+		// Process each pair only once to avoid double-separation jitter.
+		if (this.hashCode() > other.hashCode()) {
+			return;
+		}
+
+		WorldPos pA = this.getPositionComponent().getWorldPos();
+		WorldPos pB = ch.getPositionComponent().getWorldPos();
+		WorldPos d = pB.sub(pA);
+		double len = d.length();
+		if (len < 1e-6) {
+			d = new WorldPos(1, 0);
+			len = 1;
+		}
+		WorldPos dir = d.div(len);
+
+		// Try to separate both bodies a little (bounded). Each push computes the minimal displacement needed.
+		WorldPos maxStep = dir.mul(18);
+		ch.getPositionComponent().pushOutOf(this, maxStep);
+		this.getPositionComponent().pushOutOf(other, maxStep.mul(-1));
 	}
 
 	protected void onAttackEnd() {

@@ -42,6 +42,10 @@ public class TargetMovementComponent extends MovementComponent implements Debugg
 
     @Override
     public void update(double deltaTime) {
+        // Default: no movement this frame (important for collision logic).
+        this.lastStepDelta = new WorldPos(0, 0);
+        this.movedThisFrame = false;
+
         // move if object has a destination
         if (this.hasDestination) {
             // stop if destination is reached

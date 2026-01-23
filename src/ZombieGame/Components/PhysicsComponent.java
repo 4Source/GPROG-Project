@@ -4,6 +4,7 @@ import ZombieGame.Capabilities.DebuggableGeometry;
 import ZombieGame.Coordinates.Offset;
 import ZombieGame.Coordinates.WorldPos;
 import ZombieGame.Entities.Entity;
+import ZombieGame.EntityType;
 import ZombieGame.Systems.Debug.DebugCategory;
 import ZombieGame.Systems.Debug.DebugCategoryMask;
 import ZombieGame.Systems.Physic.CircleHitBox;
@@ -32,7 +33,22 @@ public abstract class PhysicsComponent extends Component implements DebuggableGe
         this.mask = mask.bit;
     }
 
+    
     /**
+     * Zombies should not physically block each other. Otherwise they quickly create
+     * "traffic jams" and get stuck in STUCK/CLEARING loops when they collide.
+     *
+     * We still want zombie-vs-player and zombie-vs-obstacle to be blocking, so we
+     * only relax the response for BODY-vs-BODY collisions where both entities are zombies.
+     */
+    private boolean isZombieBodyBody(PhysicsComponent other) {
+        return this.getEntity().getType() == EntityType.ZOMBIE
+                && other.getEntity().getType() == EntityType.ZOMBIE
+                && this.layer == PhysicsCollisionLayer.BODY.bit
+                && other.layer == PhysicsCollisionLayer.BODY.bit;
+    }
+
+/**
      * Checks if the HitBox collides with the HitBox of the other Physics Component.
      * 
      * @param other The other Physics component to check against
@@ -59,7 +75,11 @@ public abstract class PhysicsComponent extends Component implements DebuggableGe
             WorldPos d2 = this.getEntity().getPositionComponent().getWorldPos().add(this.hitBox.getOffset()).sub(other.getEntity().getPositionComponent().getWorldPos().add(other.hitBox.getOffset())).pow2();
 
             if (d2.x() + d2.y() < dist * dist) {
-                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                CollisionResponse resp = CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                if (resp == CollisionResponse.Block && isZombieBodyBody(other)) {
+                    return CollisionResponse.Overlap;
+                }
+                return resp;
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof RectangleHitBox) {
@@ -68,7 +88,11 @@ public abstract class PhysicsComponent extends Component implements DebuggableGe
 
             if (thisPos.x() < otherPos.x() + ((RectangleHitBox) other.hitBox).getWidth() && thisPos.x() + ((RectangleHitBox) this.hitBox).getWidth() > otherPos.x() &&
                     thisPos.y() < otherPos.y() + ((RectangleHitBox) other.hitBox).getHeight() && thisPos.y() + ((RectangleHitBox) this.hitBox).getHeight() > otherPos.y()) {
-                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                CollisionResponse resp = CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                if (resp == CollisionResponse.Block && isZombieBodyBody(other)) {
+                    return CollisionResponse.Overlap;
+                }
+                return resp;
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof RectangleHitBox && other.hitBox instanceof CircleHitBox) {
@@ -82,7 +106,11 @@ public abstract class PhysicsComponent extends Component implements DebuggableGe
             WorldPos d2 = c.sub(closes).pow2();
 
             if ((d2.x() + d2.y()) <= r * r) {
-                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                CollisionResponse resp = CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                if (resp == CollisionResponse.Block && isZombieBodyBody(other)) {
+                    return CollisionResponse.Overlap;
+                }
+                return resp;
             }
             return CollisionResponse.None;
         } else if (this.hitBox instanceof CircleHitBox && other.hitBox instanceof RectangleHitBox) {
@@ -96,7 +124,11 @@ public abstract class PhysicsComponent extends Component implements DebuggableGe
             WorldPos d2 = c.sub(closes).pow2();
 
             if ((d2.x() + d2.y()) <= r * r) {
-                return CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                CollisionResponse resp = CollisionResponse.CollisionMatrix(this.hitBox, other.hitBox);
+                if (resp == CollisionResponse.Block && isZombieBodyBody(other)) {
+                    return CollisionResponse.Overlap;
+                }
+                return resp;
             }
             return CollisionResponse.None;
         }

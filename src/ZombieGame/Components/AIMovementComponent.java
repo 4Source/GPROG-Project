@@ -37,6 +37,10 @@ public class AIMovementComponent extends TargetMovementComponent {
     @Override
     public void update(double deltaTime) {
 
+        // Default: no movement this frame until we actually call super.update().
+        this.lastStepDelta = new WorldPos(0, 0);
+        this.movedThisFrame = false;
+
         Optional<Avatar> opt = Game.world.getEntity(Avatar.class);
         if (opt.isEmpty()) {
             System.err.println("No avatar found");

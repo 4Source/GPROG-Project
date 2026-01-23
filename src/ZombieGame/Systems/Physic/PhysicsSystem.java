@@ -291,7 +291,7 @@ public class PhysicsSystem implements DebuggableText {
 		}
 
 		for (CollisionResponse response : entriesForComponent.values()) {
-			if (response != CollisionResponse.None) {
+			if (response == CollisionResponse.Block) {
 				result.set(true);
 				break;
 			}
@@ -337,7 +337,7 @@ public class PhysicsSystem implements DebuggableText {
 		}
 
 		CollisionResponse response = component.checkCollision(otherComponent);
-		if (response != CollisionResponse.None) {
+		if (response == CollisionResponse.Block) {
 			result.set(true);
 		}
 
@@ -385,13 +385,50 @@ public class PhysicsSystem implements DebuggableText {
 			}
 
 			CollisionResponse response = component.checkCollision(otherComponent);
-			if (response != CollisionResponse.None) {
+			if (response == CollisionResponse.Block) {
 				result.set(true);
 				break;
 			}
 		}
 
 		return result.get();
+	}
+
+	/**
+	 * Checks whether a registered entity would have a blocking collision with any other registered entity,
+	 * excluding collisions against {@code except}.
+	 * <p>
+	 * This is intentionally independent from the current collision buffer and uses direct hitbox checks.
+	 * It is primarily used for "push" interactions where an entity is displaced outside its own update().
+	 */
+	public boolean hasBlockingCollisionExcept(Entity entity, Entity except) {
+		for (PhysicsComponent component : entity.getComponents(PhysicsComponent.class)) {
+			if (hasBlockingCollisionExcept(component, entity, except)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean hasBlockingCollisionExcept(PhysicsComponent component, Entity owner, Entity except) {
+		for (PhysicsComponent otherComponent : this.registeredComponents) {
+			// skip self
+			if (otherComponent.equals(component)) {
+				continue;
+			}
+			Entity otherEntity = otherComponent.getEntity();
+			if (otherEntity.equals(owner)) {
+				continue;
+			}
+			if (except != null && otherEntity.equals(except)) {
+				continue;
+			}
+			CollisionResponse response = component.checkCollision(otherComponent);
+			if (response == CollisionResponse.Block) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
