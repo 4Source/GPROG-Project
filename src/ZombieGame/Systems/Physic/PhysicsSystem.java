@@ -291,7 +291,7 @@ public class PhysicsSystem implements DebuggableText {
 		}
 
 		for (CollisionResponse response : entriesForComponent.values()) {
-			if (response == CollisionResponse.Block) {
+			if (response != CollisionResponse.None) {
 				result.set(true);
 				break;
 			}
